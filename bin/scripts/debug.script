@@ -1,0 +1,34 @@
+procedure runDebug1() ;
+begin
+  game.setFlag('stage2') ;
+  game.setFlag('get_spell_fire') ;
+  game.goScene('scene1',795,374,0.1,4) ; 
+end ;
+
+procedure runDebug2() ;
+{var i:Integer ;
+begin
+  game.setActiveObjectTransp('clover_profile',100) ;
+  game.addPassiveObject('clover','clover.png',268,255,1) ;
+}
+var i,p:Integer ;
+begin  
+  p:=250 ;
+  for i:=1 to 18 do begin
+	if (i<=6)or(i>=12) then p:=p-8 else p:=p-16 ;
+	game.setActiveObjectY('pony',p) ;		
+	game.wait(100) ;
+  end ;	
+  game.setActiveObjectFileName('pony','pony_a.png@8@4') ;  
+
+end ;
+
+procedure runDebug3() ;
+begin
+{  game.goScene('scene3',5,450,0.0,1) ; }
+   game.goScene('scene5',5,420,-0.3,1) ;  
+
+{   game.addActiveObject('pony','pony.png','pony_ico.png','$Pony',450,250,
+     'ProcCallbackInfo','ProcCallBackSpell',3) ;  	}
+
+end ;

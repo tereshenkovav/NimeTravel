@@ -1,0 +1,12 @@
+procedure genSpells() ;
+begin
+
+  game.genSpell(SPELL_LEVITATE,3,2,false) ;
+  game.genSpell(SPELL_FIRE,3,3,true) ;
+
+{
+  game.genSpell(SPELL_TEST,3,4,true) ;
+  game.setSpell(SPELL_LEVITATE,[1,0,0]) ;
+  game.setSpell(SPELL_FIRE,[1,2,1]) ;
+}
+end ;

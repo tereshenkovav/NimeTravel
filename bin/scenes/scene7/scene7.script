@@ -1,0 +1,31 @@
+procedure InitScene() ;
+begin
+  game.setBackground('back.png') ;
+  
+  game.addWayPoint(0,100,450,0.0,False) ;
+  game.addWayPoint(1,200,450,0.0,False) ;
+  game.addWayPoint(2,300,450,0.0,False) ;
+  game.addWayPoint(3,400,450,0.0,False) ;
+  game.addWayPoint(4,500,450,0.0,False) ;
+  game.addWayPoint(5,600,450,0.0,False) ;
+  game.addWayPoint(6,700,450,0.0,False) ;
+  game.addWayLink([0,1,2,3,4,5,6]) ;  
+  game.setText('$FinalText') ;
+end ;
+
+procedure EnterScene() ;
+begin
+  
+end ;
+
+procedure ProcCallBackInfo(code:string) ;
+begin
+end ;
+
+procedure ProcCallBackSpell(code:string; spellcode:Integer; reverse:Boolean) ;
+begin
+end ;
+
+procedure ProcCallBackWay(idx:Integer) ;
+begin
+end ;

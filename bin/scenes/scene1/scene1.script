@@ -1,0 +1,148 @@
+procedure InitScene() ;
+begin
+  game.setBackground('back.png') ;
+  game.addWayPoint(0,188,378,0.2,False) ;
+  game.addWayPoint(1,323,395,0.1,False) ;
+  game.addWayPoint(2,415,432,0.0,False) ;
+  game.addWayPoint(3,555,382,0.1,False) ;
+  game.addWayPoint(4,673,343,0.2,False) ;
+  game.addWayPoint(5,795,374,0.1,True) ;
+  game.addWayLink([0,1,2,3,4,5]) ;
+  game.addActiveObject('bush','bush.png','bush_ico.png','$Bush',0,360,
+    'ProcCallbackInfo','ProcCallBackSpell',0) ;
+  game.addActiveObject('grave1','grave1.png','grave_ico.png','$Grave',155,238,
+    'ProcCallbackInfo','ProcCallBackSpell',0) ;
+  game.addActiveObject('grave_clover','grave_clover.png','grave_clover_ico.png','$Grave_clover',245,248,
+    'ProcCallbackInfo','ProcCallBackSpell',0) ;
+  game.addActiveObject('grave3','grave3.png','grave_ico.png','$Grave',320,238,
+    'ProcCallbackInfo','ProcCallBackSpell',0) ;
+  game.addPassiveObject('clover_profile','clover_profile.png',268,255,1) ; 
+  game.addPassiveObject('tree','tree.png',400,252,-1) ; 
+end ;
+
+procedure EnterScene() ;
+begin  
+
+end ;
+
+procedure execClover() ;
+var i:Integer ;
+begin
+  game.setMusic('music_main.ogg') ;
+
+  for i:=1 to 10 do begin
+    game.setActiveObjectTransp('clover_profile',i*10) ;
+    game.wait(100) ;
+  end ;  	  
+  game.addPassiveObject('clover','clover.png',268,255,1) ;
+  for i:=1 to 10 do begin
+    game.setActiveObjectTransp('clover',100-i*10) ;
+	game.wait(100) ;
+  end ;  
+  
+  setWaitedTextColored('$Clover dialog 1',COLOR_PONY_CLOVER,2000) ;
+  game.lookPlayerRight() ; 
+  setWaitedText('$Clover dialog 2',2000) ;
+  setWaitedTextColored('$Clover dialog 3',COLOR_PONY_CLOVER,2000) ;
+  setWaitedText('$Clover dialog 4',2000) ;
+  setWaitedTextColored('$Clover dialog 5',COLOR_PONY_CLOVER,2000) ;
+  setWaitedText('$Clover dialog 6',2000) ;
+  setWaitedTextColored('$Clover dialog 7',COLOR_PONY_CLOVER,2000) ;
+    
+  for i:=10 downto 1 do begin
+    game.setActiveObjectTransp('clover',100-i*10) ;
+	game.wait(100) ;
+  end ;  
+  game.delActiveObject('clover') ;
+  for i:=9 downto 0 do begin
+    game.setActiveObjectTransp('clover_profile',i*10) ;
+    game.wait(100) ;
+  end ;  
+  
+  game.setAllowedMarkerCount(3) ;  
+  setWaitedText('$Clover dialog 8',2000) ;
+  
+  game.setFlag('clover_executed') ;
+end ;
+
+procedure doBurnBush() ;
+begin
+  game.setMusic('music_fire.ogg') ;
+  game.addPassiveObject('fire1','fire_a.png@30@20',60,410,1) ;
+  game.wait(2000) ;
+  game.addPassiveObject('fire2','fire_a.png@30@20',10,370,1) ;
+  game.addPassiveObject('fire3','fire_a.png@30@20',107,420,1) ;
+  game.wait(2000) ;
+  game.addPassiveObject('fire4','fire_a.png@30@20',120,380,1) ;
+  game.addPassiveObject('fire5','fire_a.png@30@20',54,364,1) ;
+  game.addPassiveObject('fire6','fire_a.png@30@20',4,422,1) ;
+  game.wait(2000) ;
+  game.setActiveObjectFileName('bush','bush_gray.png') ;
+  game.wait(2000) ;
+  game.delActiveObject('fire1') ;
+  game.delActiveObject('fire2') ;
+  game.delActiveObject('fire3') ;
+  game.delActiveObject('fire4') ;
+  game.delActiveObject('fire5') ;
+  game.delActiveObject('fire6') ;
+  game.delActiveObject('bush') ;
+  game.addPassiveObject('bush_ost','bush_ost.png',0,360,1) ;
+  game.setMusic('music_main.ogg') ;
+end ;
+
+procedure ProcCallBackInfo(code:string) ;
+begin
+  if code='bush' then begin
+    if game.isFlagSet('stage2') and (not game.isFlagSet('clover_executed')) then begin
+	  setWaitedText('$If i can go to forest',2000) ;
+	  execClover() ;  
+	end
+	else
+      setWaitedText('$Bush info',2000) ;
+  end ;
+  if code='grave_clover' then begin
+	if game.isFlagSet('stage2') and (not game.isFlagSet('clover_executed')) then begin
+	  setWaitedText('$I need help',2000) ;
+	  execClover() ;
+	end 
+	else begin
+	  game.goPicture('graveview.png','$Clover grave memory') ;
+	  if game.isFlagSet('clover_executed') then
+	    setWaitedText('$About clover grave after view',2000) 
+	  else
+        setWaitedText('$About clover grave',2000) ;    
+	end ;
+  end ;  
+  if code='grave1' then setWaitedText('$Grave 1 info',2000) ;    
+  if code='grave3' then setWaitedText('$Grave 3 info',2000) ;    
+end ;
+
+procedure ProcCallBackSpell(code:string; spellcode:Integer; reverse:Boolean) ;
+begin
+  if (code='bush')and(spellcode=SPELL_FIRE) then begin
+    doBurnBush() ;
+	game.addWayPoint(6,92,422,0.1,False) ;
+	game.addWayPoint(7,5,444,0.0,True) ;
+	game.addWayLink([0,6,7]) ;
+    setWaitedText('$Way now free',2000) ;
+  end 
+  else 
+    setWaitedText('$Do not work',2000) ;
+end ;
+
+procedure ProcCallBackWay(idx:Integer) ;
+begin
+  if idx=5 then begin 
+    if game.isFlagSet('stage2') then begin
+       game.lookPlayerLeft() ; 
+       setWaitedText('$Must hide',2000) ;
+    end
+	else
+	  game.goScene('scene2',5,450,0.0,1) ; 
+  end ;
+  
+  if idx=7 then begin 
+    game.goScene('scene7',795,450,0.0,6) ;
+  end ;
+    
+end ;

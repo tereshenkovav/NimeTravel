@@ -1,0 +1,119 @@
+procedure InitScene() ;
+begin
+  game.setBackground('back.png') ;
+  game.setMusic('music_main.ogg') ;
+  game.addWayPoint(0,20,420,-0.3,True) ;  
+  game.addWayPoint(1,160,420,-0.3,False) ;
+  game.addWayPoint(2,250,420,-0.3,False) ;
+  game.addWayPoint(3,320,420,-0.3,False) ;
+  game.addWayPoint(4,470,420,-0.3,False) ;
+  game.addWayPoint(5,590,420,-0.3,False) ;
+  game.addWayLink([0,1,2,3,4,5]) ;
+  game.setPlayerWayIdx(5) ;
+  game.setAllowedMarkerCount(2) ;  
+  game.addActiveObject('book','book.png','book_ico.png','$Books',117,206,
+    'ProcCallbackInfo','ProcCallBackSpell',2) ; 
+  game.addPassiveObject('back_z0','back_z0.png',0,96,-1) ;  
+  game.lookPlayerLeft() ;
+end ;
+
+procedure EnterScene() ;
+begin
+  if game.isFlagSet('get_spell_fire') and game.isFlagSet('get_spell_levitate') then begin
+    game.setMusic('music_alert.ogg') ;
+    game.setFlag('block_way_out') ;
+    game.setFlag('stage2') ;
+    game.delWayPoint(4) ;	
+    game.delWayPoint(5) ;	
+    game.addActiveObject('pony','pony.png','pony_ico.png','$Pony',450,250,
+      'ProcCallbackInfo','ProcCallBackSpell',3) ;  	
+  end ; 
+end ;
+
+procedure ProcIntro() ;
+begin
+  game.goPicture('story1.png','') ;
+  game.goPicture('story2.png','') ;
+  game.goPicture('story3.png','') ;
+  game.clearFlag('OnlyIntro') ;
+end ;
+
+procedure guardUp() ;
+var i,p:Integer ;
+begin  
+  p:=250 ;
+  for i:=1 to 18 do begin
+        if i=2 then game.setActiveObjectFileName('pony','pony_no_shadow.png') ;  
+  
+	if (i<=6)or(i>=12) then p:=p-8 else p:=p-16 ;
+	game.setActiveObjectY('pony',p) ;		
+	game.wait(100) ;
+  end ;	
+  game.setActiveObjectFileName('pony','pony_a.png@8@4') ;  
+end ;	 
+
+procedure ProcCallBackInfo(code:string) ;
+begin
+  if code='book' then 
+    setWaitedText('$Book dialog 1',2000) 
+  else
+  if code='pony' then begin
+    if game.isFlagSet('block_way_out') then begin
+
+    if game.isFlagSet('guard_dialog') then begin
+      setWaitedText('$Pony dialog secondary 1',2000) ;
+      setWaitedTextColored('$Pony dialog secondary 2',COLOR_PONY_GUARD1,2000) ;
+    end
+    else begin
+	  setWaitedTextColored('$Pony dialog 1',COLOR_PONY_GUARD1,2000) ;
+      setWaitedText('$Pony dialog 2',2000) ;
+      setWaitedTextColored('$Pony dialog 3',COLOR_PONY_GUARD1,2000) ;
+      setWaitedText('$Pony dialog 4',2000) ;
+      setWaitedTextColored('$Pony dialog 5',COLOR_PONY_GUARD2,2000) ;
+      game.setFlag('guard_dialog') ;
+    end ;
+
+    end
+    else begin
+      setWaitedText('$No need speak to guard',2000) ;
+    end ;
+  end ;
+end ;
+
+procedure ProcCallBackSpell(code:string; spellcode:Integer; reverse:Boolean) ;
+begin
+  if (code='pony')and(spellcode=SPELL_LEVITATE) then begin    
+    if reverse then begin
+	  if not game.isFlagSet('block_way_out') then 
+	    setWaitedText('$No need lower guard',2000) 	  
+      else	  
+	    setWaitedText('$Do not work',2000) ;
+	end
+	else begin
+	  if game.isFlagSet('block_way_out') then begin
+	    guardUp() ;
+	    game.clearFlag('block_way_out') ;
+	    setWaitedText('$Guard up OK 1',2000) ;        
+		setWaitedTextColored('$Guard up OK 2',COLOR_PONY_GUARD1,2000) ;        
+		setWaitedText('$Guard up OK 3',2000) ;        
+	  end 
+      else	  
+	    setWaitedText('$Do not work',2000) ;
+	end ;  
+  end  
+  else 
+    setWaitedText('$Do not work',2000) ;
+end ;
+
+procedure ProcCallBackWay(idx:Integer) ;
+begin
+  if idx=0 then begin 
+    if game.isFlagSet('block_way_out') then begin
+       game.lookPlayerRight() ;
+       setWaitedTextColored('$Cannot out',COLOR_PONY_GUARD1,2000) ;
+    end
+	else 
+	  game.goScene('scene2',450,340,0.35,3) ;  
+  end ;
+	
+end ;

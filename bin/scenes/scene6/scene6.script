@@ -1,0 +1,45 @@
+procedure InitScene() ;
+begin
+  game.setBackground('back.png') ;
+  game.addWayPoint(0,10,420,-0.3,True) ;  
+  game.addWayPoint(1,160,420,-0.3,False) ;
+  game.addWayPoint(2,280,420,-0.3,False) ;
+  game.addWayPoint(3,370,420,-0.3,False) ;
+  game.addWayLink([0,1,2,3]) ;
+  game.addActiveObject('fire','fire_a.png@30@20','fire_ico.png','$Fire',650,301,
+    'ProcCallbackInfo','ProcCallBackSpell',3) ;  
+  game.addActiveObject('pony','pony.png','pony_ico.png','$Pony',490,230,
+    'ProcCallbackInfo','ProcCallBackSpell',3) ;  
+  game.addPassiveObject('back_z0','back_z0.png',0,115,-1) ; 
+end ;
+
+procedure EnterScene() ;
+begin
+  game.setMusic('music_fire.ogg') ;
+end ;
+
+procedure ProcCallBackInfo(code:string) ;
+begin
+  if code='pony' then 
+    setWaitedText('$Pony dialog 1',2000) 
+  else
+  if code='fire' then begin
+    game.setFlag('get_spell_fire') ;
+    game.playSpell(SPELL_FIRE,False) ;
+	setWaitedText('$Fire dialog 1',2000) ;
+    setWaitedText('$Fire dialog 2',2000) ;
+  end ;  
+end ;
+
+procedure ProcCallBackSpell(code:string; spellcode:Integer; reverse:Boolean) ;
+begin
+  if code='pony' then 
+    setWaitedText('$Not good idea',2000) 
+  else 
+    setWaitedText('$Do not work',2000) ;
+end ;
+
+procedure ProcCallBackWay(idx:Integer) ;
+begin
+  if idx=0 then game.goScene('scene3',750,390,0.1,6) ;  
+end ;

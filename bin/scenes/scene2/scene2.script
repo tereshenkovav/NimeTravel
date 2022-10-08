@@ -1,0 +1,52 @@
+procedure InitScene() ;
+begin
+  game.setBackground('back.png') ;
+  game.addWayPoint(0,5,450,0.0,True) ;
+  game.addWayPoint(1,137,450,0.0,False) ;
+  game.addWayPoint(2,235,450,0.0,False) ;
+  game.addWayPoint(3,302,380,0.15,False) ;
+  game.addWayPoint(4,400,340,0.35,True) ;
+  game.addWayPoint(5,400,450,0.0,False) ;
+  game.addWayPoint(6,500,450,0.0,False) ;
+  game.addWayPoint(7,663,450,0.0,False) ;
+  game.addWayPoint(8,795,450,0.0,True) ;
+  game.addWayLink([0,1,2]) ;
+  game.addWayLink([2,3,4]) ;
+  game.addWayLink([3,5]) ;
+  game.addWayLink([2,5,6,7,8]) ;
+  game.addPassiveObject('house_z','house_z.png',381,209,0.17) ;
+end ;
+
+procedure EnterScene() ;
+begin
+
+end ;
+
+procedure ProcCallBackInfo(code:string) ;
+begin
+end ;
+
+procedure ProcCallBackSpell(code:string; spellcode:Integer; reverse:Boolean) ;
+begin
+end ;
+
+procedure ProcCallBackWay(idx:Integer) ;
+begin
+  if idx=0 then game.goScene('scene1',795,374,0.1,4) ;
+  if idx=4 then begin
+    if game.isFlagSet('stage2') then begin
+       game.lookPlayerLeft() ; 
+       setWaitedText('$No back home',2000)  ;
+     end
+	else
+	  game.goScene('scene4',5,420,-0.3,1) ;
+  end ;
+  if idx=8 then begin
+    if game.isFlagSet('stage2') then begin
+       game.lookPlayerLeft() ; 
+       setWaitedText('$Must hide',2000) ; 
+     end
+	else
+	  game.goScene('scene3',5,450,0.0,1) ;  	
+  end ;
+end ;

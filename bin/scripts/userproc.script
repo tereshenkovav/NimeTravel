@@ -1,0 +1,13 @@
+procedure setWaitedText(str:string; sec:Integer); 
+begin
+  game.setText(str) ;
+  game.wait(1000+250*Length(str)) ;
+  game.clearText() ;
+end ;
+
+procedure setWaitedTextColored(str:string; color:Integer; sec:Integer); 
+begin
+  game.setTextColored(str,color) ;
+  game.wait(1000+250*Length(str)) ;
+  game.clearText() ;
+end ;

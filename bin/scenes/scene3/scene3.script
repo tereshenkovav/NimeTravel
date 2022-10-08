@@ -1,0 +1,37 @@
+procedure InitScene() ;
+begin
+  game.setBackground('back.png') ;
+  game.addWayPoint(0,5,450,0.0,True) ;
+  game.addWayPoint(1,137,450,0.0,False) ;
+  game.addWayPoint(2,250,450,0.0,False) ;
+  game.addWayPoint(3,400,400,0.1,False) ;
+  game.addWayPoint(4,400,352,0.2,True) ;
+  game.addWayPoint(5,500,430,0.15,False) ;
+  game.addWayPoint(6,580,430,0.15,False) ;
+  game.addWayPoint(7,700,390,0.2,True) ;
+  game.addWayLink([0,1,2,3]) ;
+  game.addWayLink([3,5,6,7]) ;
+  game.addWayLink([3,4]) ;
+  game.addWayLink([2,5]) ;
+  game.addPassiveObject('house_z','house_z.png',629,263,-1) ;
+end ;
+
+procedure EnterScene() ;
+begin
+  game.setMusic('music_main.ogg') ;
+end ;
+
+procedure ProcCallBackInfo(code:string) ;
+begin
+end ;
+
+procedure ProcCallBackSpell(code:string; spellcode:Integer; reverse:Boolean) ;
+begin
+end ;
+
+procedure ProcCallBackWay(idx:Integer) ;
+begin
+  if idx=0 then game.goScene('scene2',795,450,0.0,7) ;  
+  if idx=4 then game.goScene('scene5',5,420,-0.3,1) ;  
+  if idx=7 then game.goScene('scene6',5,420,-0.3,1) ;  
+end ;

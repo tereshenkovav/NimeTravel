@@ -1,0 +1,96 @@
+procedure InitScene() ;
+begin
+  game.setBackground('back.png') ;
+  game.addWayPoint(0,10,420,-0.3,True) ;  
+  game.addWayPoint(1,160,420,-0.3,False) ;
+  game.addWayPoint(2,310,420,-0.3,False) ;
+  game.addWayPoint(3,410,420,-0.3,False) ;
+  game.addWayLink([0,1,2,3]) ;
+  game.addActiveObject('colb','colb.png','colb_ico.png','$Colb',410,260,
+    'ProcCallbackInfo','ProcCallBackSpell',2) ;  
+  game.addActiveObject('pony','pony.png','pony_ico.png','$Pony',541,210,
+    'ProcCallbackInfo','ProcCallBackSpell',3) ;  
+  game.addPassiveObject('back_z0','back_z0.png',0,147,-1) ; 
+end ;
+
+procedure EnterScene() ;
+begin
+
+end ;
+
+procedure colbUp() ;
+var i,p:Integer ;
+begin
+  game.setFlag('Colb_up') ;    
+  p:=260 ;
+  for i:=1 to 18 do begin
+	if (i<=6)or(i>=12) then p:=p-2 else p:=p-4 ;
+	game.setActiveObjectY('colb',p) ;		
+	game.wait(100) ;
+  end ;
+  game.setActiveObjectFileName('colb','colb_a.png@8@4') ;
+end ;	  
+
+procedure colbDown() ;
+var i,p:Integer ;
+begin
+  game.setActiveObjectFileName('colb','colb.png') ;  
+  game.clearFlag('Colb_up') ;	  
+  p:=260-48 ;
+  for i:=1 to 18 do begin
+    if (i<=6)or(i>=12) then p:=p+2 else p:=p+4 ;
+	game.setActiveObjectY('colb',p) ;		
+	game.wait(100) ;
+  end ;	  
+end ;	  
+	
+procedure ProcCallBackInfo(code:string) ;
+begin
+  if code='pony' then begin
+    if game.isFlagSet('dialog_pony_scene5') then begin
+      setWaitedText('$Pony dialog secondary 1',2000) ;
+      setWaitedTextColored('$Pony dialog secondary 2',COLOR_PONY_SCIENCE,2000) ;
+    end
+    else begin
+      setWaitedText('$Pony dialog 1',2000) ;
+      setWaitedTextColored('$Pony dialog 2',COLOR_PONY_SCIENCE,2000) ;
+      setWaitedText('$Pony dialog 3',2000) ;
+      game.setFlag('dialog_pony_scene5') ;
+    end ;
+  end ;  
+  if code='colb' then begin
+    if not game.isFlagSet('Colb_up') then begin
+	  game.setFlag('get_spell_levitate') ;
+	  game.playSpell(SPELL_LEVITATE,False) ;	  
+	  colbUp() ;
+	  setWaitedText('$Colb dialog upper',2000) ;      
+	end 
+    else begin
+	  game.playSpell(SPELL_LEVITATE,True) ;
+	  colbDown() ;
+	  setWaitedText('$Colb dialog lower',2000) ;
+    end ;			
+  end ;  
+end ;
+
+procedure ProcCallBackSpell(code:string; spellcode:Integer; reverse:Boolean) ;
+begin
+  if (code='colb')and(spellcode=SPELL_LEVITATE) then begin
+    if reverse then begin  
+	  if game.isFlagSet('Colb_up') then colbDown() else setWaitedText('$Colb down already',2000) ;
+	end 
+    else begin
+	  if game.isFlagSet('Colb_up') then setWaitedText('$Colb up already',2000) else colbUp() ;
+    end ;	
+  end 
+  else
+  if code='pony' then 
+    setWaitedText('$Not good idea',2000) 
+  else 
+    setWaitedText('$Do not work',2000) ;
+end ;
+
+procedure ProcCallBackWay(idx:Integer) ;
+begin
+  if idx=0 then game.goScene('scene3',400,345,0.2,3) ;  
+end ;

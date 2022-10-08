@@ -1,0 +1,32 @@
+procedure InitScene() ;
+begin
+  game.setBackground('back.png') ;
+  game.addWayPoint(0,5,450,0.0) ;
+  game.addWayPoint(1,137,450,0.0) ;
+  game.addWayPoint(2,235,432,0.0) ;
+  game.addWayPoint(3,302,400,0.1) ;
+  game.addWayPoint(4,400,365,0.2) ;
+  game.addWayPoint(5,400,450,0.0) ;
+  game.addWayPoint(6,500,450,0.0) ;
+  game.addWayPoint(7,700,450,0.0) ;
+  game.addWayPoint(8,795,450,0.0) ;
+  game.addWayLink([0,1,2]) ;
+  game.addWayLink([2,3,4]) ;
+  game.addWayLink([3,5]) ;
+  game.addWayLink([2,5,6,7,8]) ;
+  game.addActiveObject('grave','grave3.png','grave_ico.png','$Grave',320,238,
+    'ProcCallbackInfo','ProcCallBackSpell',0) ;
+  game.addPassiveObject('fire','fire_a.png@30@20',400,300) ;
+end ;
+
+procedure ProcCallBackInfo(code:string) ;
+begin
+end ;
+
+procedure ProcCallBackSpell(code:string; spellcode:Integer) ;
+begin
+end ;
+
+procedure ProcCallBackWay(idx:Integer) ;
+begin
+end ;
