@@ -1,7 +1,7 @@
 move ..\..\bin\NimeTravelDelphi.exe ..\..\bin\NimeTravel.exe
 "C:\Program Files (x86)\NSIS\makensis.exe" NimeTravel.nsi
 
-set ZipName=NimeTravel-prologue-1.0.0.2-Win32
+set ZipName=NimeTravel-prologue-1.0.0-Win32
 
 mkdir M:\%ZipName%
 mkdir M:\%ZipName%\fonts

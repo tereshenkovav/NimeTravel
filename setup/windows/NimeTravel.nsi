@@ -19,9 +19,9 @@ ReserveFile "runapp.ini"
 
 ; Результирующий файл
 !ifdef updatemode
-OutFile "M:\NimeTravel-prologue-1.0.0.2-Win32-update.exe"
+OutFile "M:\NimeTravel-prologue-1.0.0-Win32-update.exe"
 !else
-OutFile "M:\NimeTravel-prologue-1.0.0.2-Win32.exe"
+OutFile "M:\NimeTravel-prologue-1.0.0-Win32.exe"
 !endif
 
 var is_update
@@ -137,7 +137,7 @@ Section "Игра Путешествие Нимэ (пролог)"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NimeTravel" \
                  "Publisher"  "Терешенков А.В."
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NimeTravel" \
-                 "DisplayVersion"  "1.0.0.2"
+                 "DisplayVersion"  "1.0.0"
 
   SetOutPath $INSTDIR
   CreateDirectory "$SMPROGRAMS\Путешествие Нимэ"
