@@ -17,15 +17,17 @@ mkdir $appdir/usr
 mkdir $appdir/usr/bin
 mkdir $appdir/usr/lib
 
-cp /usr/lib/x86_64-linux-gnu/libsfml* $appdir/usr/lib
-cp /usr/lib/x86_64-linux-gnu/libcsfml* $appdir/usr/lib
-cp /usr/lib/x86_64-linux-gnu/libvorbis* $appdir/usr/lib
-cp /usr/lib/x86_64-linux-gnu/libasound.so* $appdir/usr/lib
-cp /usr/lib/x86_64-linux-gnu/libbsd.so* $appdir/usr/lib
-cp /usr/lib/x86_64-linux-gnu/libfreetype.so* $appdir/usr/lib
-cp /usr/lib/x86_64-linux-gnu/libjpeg.so* $appdir/usr/lib
-cp /usr/lib/x86_64-linux-gnu/libopenal.so* $appdir/usr/lib
-cp /usr/lib/x86_64-linux-gnu/libsndio.so* $appdir/usr/lib
+cp /usr/lib64/libsfml* $appdir/usr/lib
+cp /usr/local/lib/libcsfml* $appdir/usr/lib
+cp /usr/lib64/libvorbis* $appdir/usr/lib
+cp /usr/lib64/libasound.so* $appdir/usr/lib
+cp /usr/lib64/libfreetype.so* $appdir/usr/lib
+cp /usr/lib64/libjpeg.so* $appdir/usr/lib
+cp /usr/lib64/libopenal.so* $appdir/usr/lib
+cp /usr/lib64/libatomic.so* $appdir/usr/lib
+cp /usr/lib64/libGLU.so* $appdir/usr/lib
+cp /usr/lib64/libharfbuzz.so* $appdir/usr/lib
+cp /usr/lib64/libpng16.so* $appdir/usr/lib
 
 cp ../../bin/NimeTravelFPC $appdir/usr/bin/NimeTravel
 cp -r ../../bin/fonts $appdir/usr/bin
