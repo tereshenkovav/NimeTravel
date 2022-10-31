@@ -31,6 +31,7 @@ type
     function getButtonY(i:Integer):Integer ;
     function isMouseOver(i:Integer):Boolean ;
     procedure rebuildItems() ;
+    procedure loadItemsText() ;
   public
     constructor Create(Awindow:TSfmlRenderWindow; sublayerfile:string;
       Aoptions:TOptions; Afirst_item:string; Ashifty:Integer=0) ;
@@ -45,6 +46,9 @@ type
 implementation
 uses sfmlutils,
   SfmlWindow ;
+
+const
+  LANG_ITEM = 'lang' ;
 
 { TMainMenu }
 
@@ -66,9 +70,9 @@ begin
   text:=TSfmlText.Create;
   text.&String:='';
   text.Font:=Font.Handle;
-  text.CharacterSize:=26;
+  text.CharacterSize:=24;
   menu_texts:=TStringList.Create ;
-  menu_texts.LoadFromFile('text'+PATH_SEP+'menu.dat');
+  loadItemsText() ;
   buttonw:=SfmlTextureGetSize(button.Texture).X ;
   buttonh:=SfmlTextureGetSize(button.Texture).Y ;
   items:=TStringList.Create ;
@@ -127,6 +131,11 @@ begin
                 rebuildItems() ;
                 break ;
               end;
+              if items[i]=LANG_ITEM then begin
+                options.switchLang() ;
+                loadItemsText() ;
+                break ;
+              end ;
               if items[i]='help' then helpmode:=True ;
               
               if items[i]='exit' then begin
@@ -145,7 +154,7 @@ end;
 
 function TMainMenu.getButtonY(i: Integer): Integer;
 begin
-  Result:=160+i*45-buttonh div 2 +shifty ;
+  Result:=154+i*40-buttonh div 2 +shifty ;
 end;
 
 function TMainMenu.getExitCode: string;
@@ -164,10 +173,16 @@ begin
     (lastmy>getButtonY(i))and(lastmy<getButtonY(i)+buttonh) ;
 end;
 
+procedure TMainMenu.loadItemsText;
+begin
+  menu_texts.LoadFromFile('text'+PATH_SEP+'menu.dat.'+options.getLang());
+end;
+
 procedure TMainMenu.rebuildItems;
 begin
   items.Clear ;
   items.Add(first_item) ;
+  items.Add(LANG_ITEM) ;
   if options.isMusicOn then items.Add('music_on') else items.Add('music_off') ;
   if options.isSoundOn then items.Add('sound_on') else items.Add('sound_off') ;
   items.Add('help') ;
@@ -200,7 +215,7 @@ begin
       text.Style:=0 ;
     end;
     text.UnicodeString:=UTF8Decode(menu_texts.Values[items[i]]) ;
-    text.Position := SfmlVector2f(WINDOW_W/2-text.LocalBounds.Width/2,160+i*45-15+shifty);
+    text.Position := SfmlVector2f(WINDOW_W/2-text.LocalBounds.Width/2,getButtonY(i));
     window.Draw(text) ;
   end;
 end;

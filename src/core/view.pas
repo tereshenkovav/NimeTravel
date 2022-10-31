@@ -82,6 +82,7 @@ type
     procedure tryStartMarker(i:Integer) ;
     function getZScale():Single ;
     procedure setUpMusicAndSoundVolumes() ;
+    procedure loadTexts() ;
     procedure FrameFunc(dt:Single) ;
     procedure RenderFunc() ;
   public
@@ -215,10 +216,11 @@ begin
   clock:=TSfmlClock.Create() ;
 
   Texts:=TStringList.Create ;
-  Texts.LoadFromFile('text'+PATH_SEP+'strings.dat');
+  loadTexts() ;
 
   gamemenu:=TMainMenu.Create(window,'images'+PATH_SEP+'gray.png',options,'continue') ;
   options.setProcSetMusicAndSound(setUpMusicAndSoundVolumes) ;
+  options.addProcSetLanguage(loadTexts) ;
   setUpMusicAndSoundVolumes() ;
 
   tmpFlagIntro:=True ;
@@ -341,6 +343,11 @@ begin
     Result:=TSfmlAnimation.Create(tmp[0],StrToInt(tmp[1]),StrToInt(tmp[2])) ;
     TSfmlAnimation(Result).Play() ;
   end;
+end;
+
+procedure TView.loadTexts;
+begin
+  Texts.LoadFromFile('text'+PATH_SEP+'strings.dat.'+options.getLang());
 end;
 
 procedure TView.tryStartMarker(i:Integer) ;

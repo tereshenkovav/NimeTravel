@@ -1,7 +1,7 @@
 unit commonclasses ;
 
 interface
-uses helpers ;
+uses helpers, Classes ;
 
 type
   TWayPoint = record
@@ -34,18 +34,27 @@ type
   end;
 
   TProcSetMusicAndSound = procedure of object ;
+  TProcSetLanguage = procedure of object ;
 
   TOptions = class
   private
     music:Boolean ;
     sound:Boolean ;
+    lang:string ;
+    langsall:TStringList ;
     procsetmusicandsound:TProcSetMusicAndSound ;
+    arrprocsetlanguage:array[0..15] of TProcSetLanguage ;
+    countprocsetlanguage:Integer ;
   public
     function isMusicOn():Boolean ;
     function isSoundOn():Boolean ;
+    function getLang():string ;
     procedure switchMusic() ;
     procedure switchSound() ;
     procedure setProcSetMusicAndSound(proc:TProcSetMusicAndSound) ;
+    procedure setLang(Alang:string) ;
+    procedure switchLang() ;
+    procedure addProcSetLanguage(proc:TProcSetLanguage) ;
     constructor Create() ;
     destructor Destroy ; override ;
   end;
@@ -58,6 +67,7 @@ function isLinked(links:TUniList<TWayLink>;idx1,idx2:Integer):Boolean ;
 const
   WINDOW_W = 800 ;
   WINDOW_H = 600 ;
+  DEFAULT_LANG = 'ru' ;
 
 implementation
 uses Math, SysUtils ;
@@ -174,16 +184,42 @@ end;
 
 { TOptions }
 
+procedure TOptions.addProcSetLanguage(proc: TProcSetLanguage);
+begin
+  arrprocsetlanguage[countprocsetlanguage]:=proc ;
+  Inc(countprocsetlanguage) ;
+end;
+
 constructor TOptions.Create;
 begin
+  countprocsetlanguage:=0 ;
   music:=True ;
   sound:=True ;
+
+  langsall:=TStringList.Create() ;
+  langsall.LoadFromFile('text'+PATH_SEP+'languages') ;
+
+  setLang(DEFAULT_LANG) ;
+  if FileExists('text'+PATH_SEP+'default') then
+    with TStringList.Create() do begin
+      LoadFromFile('text'+PATH_SEP+'default') ;
+      if Count>0 then
+        setLang(Trim(Strings[0])) ;
+      Free ;
+    end;
+
   procsetmusicandsound:=nil ;
 end;
 
 destructor TOptions.Destroy;
 begin
+  langsall.Free ;
   inherited Destroy;
+end;
+
+function TOptions.getLang: string;
+begin
+  Result:=lang ;
 end;
 
 function TOptions.isSoundOn: Boolean;
@@ -196,9 +232,24 @@ begin
   Result:=music ;
 end;
 
+procedure TOptions.setLang(Alang: string);
+var i:Integer ;
+begin
+  if langsall.IndexOf(Alang)=-1 then lang:=DEFAULT_LANG else lang:=Alang ;
+  for i := 0 to countprocsetlanguage-1 do
+    arrprocsetlanguage[i]() ;
+end;
+
 procedure TOptions.setProcSetMusicAndSound(proc: TProcSetMusicAndSound);
 begin
   procsetmusicandsound:=proc ;
+end;
+
+procedure TOptions.switchLang;
+var idx:Integer ;
+begin
+  idx:=langsall.IndexOf(lang)+1 ;
+  setLang(langsall[idx mod langsall.Count]) ;
 end;
 
 procedure TOptions.switchMusic;

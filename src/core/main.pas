@@ -14,12 +14,13 @@ type
     options:TOptions ;
     procedure RunMenu();
     procedure setUpMusicAndSoundVolumes() ;
+    procedure setWindowTitle();
   public
     procedure Run() ;
   end;
 
 implementation
-uses SysUtils, Math, Classes,
+uses SysUtils, StrUtils, Types, Math, Classes,
   SfmlSystem,
   view, logic, helpers, sfmlutils ;
 
@@ -53,21 +54,35 @@ begin
   if Music<>nil then Music.Volume:=IfThen(options.isMusicOn(),100,0) ;
 end;
 
+procedure TMain.setWindowTitle;
+begin
+  with TStringList.Create do begin
+    LoadFromFile('text'+PATH_SEP+'common.dat.'+Self.options.getLang());
+    Window.SetTitle(UTF8Decode(Values['caption'])) ;
+    Free ;
+  end;
+end;
+
 procedure TMain.Run() ;
 var vobj:TView ;
     lobj:TLogic ;
     Mode: TSfmlVideoMode;
     Icon:TSfmlImage ;
     caption:string ;
+    i:Integer ;
+    tmp:TStringDynArray  ;
 const INTRO_MUSIC = 'music_main.ogg' ;
 begin
   ChDir(ExtractFilePath(ParamStr(0))) ;
   Randomize() ;
 
-  with TStringList.Create do begin
-    LoadFromFile('text'+PATH_SEP+'common.dat');
-    caption:=Values['caption'] ;
-    Free ;
+  options:=TOptions.Create ;
+  for i := 1 to ParamCount do begin
+    tmp:=SplitString(ParamStr(i),'=') ;
+    if Length(tmp)=2 then
+      if tmp[0]='--lang' then
+        options.setLang(tmp[1]) ;
+    SetLength(tmp,0) ;
   end;
 
   Mode.Width := WINDOW_W;
@@ -77,11 +92,13 @@ begin
   if not SfmlVideoModeIsValid(Mode) then
     raise Exception.Create('Invalid video mode');
   {$endif}
-  Window := TSfmlRenderWindow.Create(Mode, UTF8Decode(caption),
+  Window := TSfmlRenderWindow.Create(Mode, UTF8Decode('Window'),
     [sfResize, sfClose], nil);
   Window.SetVerticalSyncEnabled(True);
   Window.setFramerateLimit(60);
   Window.SetMouseCursorVisible(False);
+
+  setWindowTitle() ;
 
   Icon:=TSfmlImage.Create('images'+PATH_SEP+'icon.png') ;
   Window.SetIcon(Icon.Size.X,Icon.Size.Y,Icon.getPixelsPtr());
@@ -89,8 +106,8 @@ begin
   Cursor:=loadSprite('images'+PATH_SEP+'cursor.png');
   Cursor.Origin:=SfmlVector2f(0,10) ;
 
-  options:=TOptions.Create ;
   options.setProcSetMusicAndSound(setUpMusicAndSoundVolumes) ;
+  options.addProcSetLanguage(setWindowTitle) ;
   mainmenu:=TMainMenu.Create(window,'images'+PATH_SEP+'intro.png',options,'newgame',+110) ;
 
   Music:=TSFMLMusic.Create('music'+PATH_SEP+INTRO_MUSIC) ;
