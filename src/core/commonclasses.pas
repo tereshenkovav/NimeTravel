@@ -49,6 +49,7 @@ type
     function isMusicOn():Boolean ;
     function isSoundOn():Boolean ;
     function getLang():string ;
+    function getLangsAll():TStringList ;
     procedure switchMusic() ;
     procedure switchSound() ;
     procedure setProcSetMusicAndSound(proc:TProcSetMusicAndSound) ;
@@ -220,6 +221,11 @@ end;
 function TOptions.getLang: string;
 begin
   Result:=lang ;
+end;
+
+function TOptions.getLangsAll: TStringList;
+begin
+  Result:=langsall ;
 end;
 
 function TOptions.isSoundOn: Boolean;

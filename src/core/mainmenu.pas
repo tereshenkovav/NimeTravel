@@ -12,6 +12,7 @@ type
     back: TSfmlSprite ;
     sublayer: TSfmlSprite ;
     button: TSfmlSprite ;
+    icons:TUniDictionary<string,TSfmlSprite> ;
     font:TSfmlFont ;
     text:TSfmlText ;
     active:Boolean ;
@@ -54,6 +55,7 @@ const
 
 constructor TMainMenu.Create(Awindow: TSfmlRenderWindow; sublayerfile:string;
   Aoptions:TOptions; Afirst_item:string; Ashifty:Integer);
+var lang:string ;
 begin
   window:=Awindow ;
   options:=Aoptions ;
@@ -66,6 +68,9 @@ begin
   sublayer:=LoadSprite(sublayerfile) ;
   sublayer.Position:=SfmlVector2f(0,0) ;
   button:=LoadSprite('images'+PATH_SEP+'button.png') ;
+  icons:=TUniDictionary<string,TSfmlSprite>.Create ;
+  for lang in options.getLangsAll() do
+    icons.Add(lang,LoadSprite('images'+PATH_SEP+'lang.'+lang+'.png')) ;
   font:=TSfmlFont.Create('fonts'+PATH_SEP+'arial.ttf');
   text:=TSfmlText.Create;
   text.&String:='';
@@ -85,6 +90,7 @@ begin
   back.Free ;
   sublayer.Free ;
   button.Free ;
+  icons.Free ;
   font.Free ;
   menu_texts.Free ;
   inherited Destroy ;
@@ -192,6 +198,7 @@ end;
 procedure TMainMenu.Render;
 var
   i: Integer;
+  shiftlang:Integer ;
 begin
   window.Draw(sublayer) ;
 
@@ -203,6 +210,7 @@ begin
   window.Draw(back) ;
 
   for i := 0 to items.Count-1 do begin
+    shiftlang:=0 ;
     button.Position:=SfmlVector2f(getButtonX(i),getButtonY(i)) ;
     if isMouseOver(i) then begin
       button.Color:=createSFMLColor($FFFFFF) ;
@@ -215,8 +223,17 @@ begin
       text.Style:=0 ;
     end;
     text.UnicodeString:=UTF8Decode(menu_texts.Values[items[i]]) ;
-    text.Position := SfmlVector2f(WINDOW_W/2-text.LocalBounds.Width/2,getButtonY(i));
+
+    if items[i]=LANG_ITEM then shiftlang:=27+10 ;
+
+    text.Position := SfmlVector2f(WINDOW_W/2-(text.LocalBounds.Width+shiftlang)/2,getButtonY(i));
     window.Draw(text) ;
+
+    if items[i]=LANG_ITEM then begin
+      icons[options.getLang()].Position:=SfmlVector2f(
+        text.Position.X+text.LocalBounds.Width+10,getButtonY(i)+5) ;
+      window.Draw(icons[options.getLang()]) ;
+    end;
   end;
 end;
 
