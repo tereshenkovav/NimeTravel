@@ -247,6 +247,8 @@ end;
 procedure TOptions.setLang(Alang: string);
 var i:Integer ;
 begin
+  if lang=Alang then Exit ;
+
   if langsall.IndexOf(Alang)=-1 then lang:=DEFAULT_LANG else lang:=Alang ;
   for i := 0 to listprocsetlanguage.Count-1 do
     listprocsetlanguage[i]() ;
