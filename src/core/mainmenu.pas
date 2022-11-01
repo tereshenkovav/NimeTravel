@@ -65,8 +65,12 @@ begin
   back.Position:=SfmlVector2f(WINDOW_W/2,(WINDOW_H-100)/2+shifty) ;
   help_back:=LoadSprite('images'+PATH_SEP+'help_back.png') ;
   help_back.Position:=SfmlVector2f(0,0) ;
-  sublayer:=LoadSprite(sublayerfile) ;
-  sublayer.Position:=SfmlVector2f(0,0) ;
+  if sublayerfile<>'' then begin
+    sublayer:=LoadSprite(sublayerfile) ;
+    sublayer.Position:=SfmlVector2f(0,0) ;
+  end
+  else
+    sublayer:=nil ;
   button:=LoadSprite('images'+PATH_SEP+'button.png') ;
   icons:=TUniDictionary<string,TSfmlSprite>.Create ;
   for lang in options.getLangsAll() do
@@ -88,7 +92,7 @@ end;
 destructor TMainMenu.Destroy;
 begin
   back.Free ;
-  sublayer.Free ;
+  if sublayer<>nil then sublayer.Free ;
   button.Free ;
   icons.Free ;
   font.Free ;
@@ -143,7 +147,7 @@ begin
                 break ;
               end ;
               if items[i]='help' then helpmode:=True ;
-              
+
               if items[i]='exit' then begin
                 exit_code:='exit' ;
                 window.Close() ;
@@ -200,7 +204,7 @@ var
   i: Integer;
   shiftlang:Integer ;
 begin
-  window.Draw(sublayer) ;
+  if sublayer<>nil then window.Draw(sublayer) ;
 
   if helpmode then begin
     window.Draw(help_back) ;

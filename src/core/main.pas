@@ -12,9 +12,12 @@ type
     Cursor:TSfmlSprite ;
     Music:TSfmlMusic ;
     options:TOptions ;
+    back:TSfmlSprite ;
+    logo:TSfmlSprite ;
     procedure RunMenu();
     procedure setUpMusicAndSoundVolumes() ;
     procedure setWindowTitle();
+    procedure setLogo();
   public
     procedure Run() ;
   end;
@@ -43,10 +46,18 @@ begin
     lasttime:=newtime ;
 
     Window.Clear(SfmlBlack);
+    Window.Draw(back) ;
+    Window.Draw(logo) ;
     mainmenu.Render() ;
     Window.Draw(Cursor) ;
     Window.Display;
   end;
+end;
+
+procedure TMain.setLogo;
+begin
+  logo:=LoadSprite('images'+PATH_SEP+'logo.'+options.getLang()+'.png') ;
+  logo.Position:=SfmlVector2f(0,0) ;
 end;
 
 procedure TMain.setUpMusicAndSoundVolumes;
@@ -99,6 +110,7 @@ begin
   Window.SetMouseCursorVisible(False);
 
   setWindowTitle() ;
+  setLogo() ;
 
   Icon:=TSfmlImage.Create('images'+PATH_SEP+'icon.png') ;
   Window.SetIcon(Icon.Size.X,Icon.Size.Y,Icon.getPixelsPtr());
@@ -108,7 +120,11 @@ begin
 
   options.setProcSetMusicAndSound(setUpMusicAndSoundVolumes) ;
   options.addProcSetLanguage(setWindowTitle) ;
-  mainmenu:=TMainMenu.Create(window,'images'+PATH_SEP+'intro.png',options,'newgame',+110) ;
+  options.addProcSetLanguage(setLogo) ;
+  mainmenu:=TMainMenu.Create(window,'',options,'newgame',+110) ;
+
+  back:=LoadSprite('images'+PATH_SEP+'intro.png') ;
+  back.Position:=SfmlVector2f(0,0) ;
 
   Music:=TSFMLMusic.Create('music'+PATH_SEP+INTRO_MUSIC) ;
   Music.Loop:=True ;
