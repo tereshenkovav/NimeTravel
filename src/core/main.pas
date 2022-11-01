@@ -136,6 +136,8 @@ begin
     Exit ;
   end;
 
+  options.delProcSetLanguage(setLogo) ;
+
   lobj:=TLogic.Create();
   vobj:=TView.Create(lobj,window,options) ;
   vobj.insertMusic(music,INTRO_MUSIC) ;

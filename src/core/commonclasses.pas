@@ -43,8 +43,7 @@ type
     lang:string ;
     langsall:TStringList ;
     procsetmusicandsound:TProcSetMusicAndSound ;
-    arrprocsetlanguage:array[0..15] of TProcSetLanguage ;
-    countprocsetlanguage:Integer ;
+    listprocsetlanguage:TUniList<TProcSetLanguage> ;
   public
     function isMusicOn():Boolean ;
     function isSoundOn():Boolean ;
@@ -56,6 +55,7 @@ type
     procedure setLang(Alang:string) ;
     procedure switchLang() ;
     procedure addProcSetLanguage(proc:TProcSetLanguage) ;
+    procedure delProcSetLanguage(proc:TProcSetLanguage) ;
     constructor Create() ;
     destructor Destroy ; override ;
   end;
@@ -187,13 +187,13 @@ end;
 
 procedure TOptions.addProcSetLanguage(proc: TProcSetLanguage);
 begin
-  arrprocsetlanguage[countprocsetlanguage]:=proc ;
-  Inc(countprocsetlanguage) ;
+  if not listprocsetlanguage.Contains(proc) then
+    listprocsetlanguage.Add(proc) ;
 end;
 
 constructor TOptions.Create;
 begin
-  countprocsetlanguage:=0 ;
+  listprocsetlanguage:=TUniList<TProcSetLanguage>.Create() ;
   music:=True ;
   sound:=True ;
 
@@ -212,9 +212,15 @@ begin
   procsetmusicandsound:=nil ;
 end;
 
+procedure TOptions.delProcSetLanguage(proc: TProcSetLanguage);
+begin
+  listprocsetlanguage.Remove(proc) ;
+end;
+
 destructor TOptions.Destroy;
 begin
   langsall.Free ;
+  listprocsetlanguage.Free ;
   inherited Destroy;
 end;
 
@@ -242,8 +248,8 @@ procedure TOptions.setLang(Alang: string);
 var i:Integer ;
 begin
   if langsall.IndexOf(Alang)=-1 then lang:=DEFAULT_LANG else lang:=Alang ;
-  for i := 0 to countprocsetlanguage-1 do
-    arrprocsetlanguage[i]() ;
+  for i := 0 to listprocsetlanguage.Count-1 do
+    listprocsetlanguage[i]() ;
 end;
 
 procedure TOptions.setProcSetMusicAndSound(proc: TProcSetMusicAndSound);
