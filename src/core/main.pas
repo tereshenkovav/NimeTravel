@@ -25,7 +25,7 @@ type
 implementation
 uses SysUtils, StrUtils, Types, Math, Classes,
   SfmlSystem,
-  view, logic, helpers, sfmlutils ;
+  view, viewstatic, logic, helpers, sfmlutils ;
 
 procedure TMain.RunMenu();
 var lasttime,newtime:Single ;
@@ -76,6 +76,7 @@ end;
 
 procedure TMain.Run() ;
 var vobj:TView ;
+    vsobj:TViewStatic ;
     lobj:TLogic ;
     Mode: TSfmlVideoMode;
     Icon:TSfmlImage ;
@@ -137,6 +138,17 @@ begin
   end;
 
   options.delProcSetLanguage(setLogo) ;
+
+  vsobj:=TViewStatic.Create(window) ;
+  with TStringList.Create do begin
+    LoadFromFile('text'+PATH_SEP+'common.dat.'+Self.options.getLang());
+    vsobj.AddTask(Values['intro1'].Replace('\n',#10),48) ;
+    vsobj.AddTask(Values['intro2'].Replace('\n',#10),32) ;
+    vsobj.AddTask(Values['intro3'].Replace('\n',#10),32) ;
+    Free ;
+  end;
+  vsobj.Run() ;
+  vsobj.Free ;
 
   lobj:=TLogic.Create();
   vobj:=TView.Create(lobj,window,options) ;

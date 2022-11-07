@@ -36,9 +36,6 @@ type
     DebugAllowed:Boolean ;
     gamemenu:TMainMenu ;
     options:TOptions ;
-
-    tmpFlagIntro:Boolean ;
-
     lobj:TLogic ;
     Texts:TStringList ;
     overobject:TGameObject ;
@@ -223,8 +220,6 @@ begin
   options.addProcSetLanguage(loadTexts) ;
   setUpMusicAndSoundVolumes() ;
 
-  tmpFlagIntro:=True ;
-
   Music:=nil ;
   tekmusicfile:='' ;
 
@@ -237,9 +232,6 @@ begin
   isgo:=False ;
 
   lobj.Start() ;
-
-  lobj.setFlag('OnlyIntro');
-  lobj.executeUserProc('ProcIntro');
 
   lasttime:=clock.ElapsedTime.AsSeconds() ;
   while Window.IsOpen do
@@ -393,7 +385,7 @@ begin
   if lobj.getBackground()<>'' then
     viewspritesz1.Add(retAndPosSprite(getSpriteStatic(PREFIX_BACKGROUND,lobj.getBackground()),0,0,0)) ;
 
-  if (not lobj.isPictureMode()) and (not lobj.isFlagSet('OnlyIntro')) then begin
+  if not lobj.isPictureMode() then begin
     zsortedobjects:=TUniList<TGameObject>.Create() ;
     zsortedobjects.AddRange(lobj.getActiveObjects());
     zsortedobjects.Sort(compareZ) ;
@@ -595,14 +587,8 @@ begin
   mx:=Window.MousePosition.X ;
   my:=Window.MousePosition.Y ;
 
-  if lobj.isPictureMode() and (lobj.getBackground<>'back.png') then tmpFlagIntro:=False ;
-
-  if tmpFlagIntro then Exit ;
-
   for spr in viewspritesz1 do
     Window.Draw(spr);
-
-  if lobj.isFlagSet('OnlyIntro') then Exit ;
 
   if not lobj.isPictureMode then begin
     zscale := getZScale() ;

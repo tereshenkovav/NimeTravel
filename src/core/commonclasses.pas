@@ -60,6 +60,12 @@ type
     destructor Destroy ; override ;
   end;
 
+  TStaticTask = record
+    text:string ;
+    textsize:Integer ;
+    constructor Create(Atext:string; Atextsize:Integer) ;
+  end;
+
   TSkipClick = (scPartial,scFull) ;
   TLookState = (lsLeft,lsRight,lsNone) ;
 
@@ -276,6 +282,14 @@ procedure TOptions.switchSound;
 begin
   sound:=not sound ;
   if Assigned(procsetmusicandsound) then procsetmusicandsound() ;
+end;
+
+{ TStaticTask }
+
+constructor TStaticTask.Create(Atext: string; Atextsize: Integer);
+begin
+  text:=Atext ;
+  textsize:=Atextsize ;
 end;
 
 end.

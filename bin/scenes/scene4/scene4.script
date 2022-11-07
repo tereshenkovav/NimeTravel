@@ -30,14 +30,6 @@ begin
   end ; 
 end ;
 
-procedure ProcIntro() ;
-begin
-  game.goPicture('story1.png','') ;
-  game.goPicture('story2.png','') ;
-  game.goPicture('story3.png','') ;
-  game.clearFlag('OnlyIntro') ;
-end ;
-
 procedure guardUp() ;
 var i,p:Integer ;
 begin  

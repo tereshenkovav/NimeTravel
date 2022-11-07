@@ -14,7 +14,8 @@ uses
   commonproc in 'core\commonproc.pas',
   scriptexecutor in 'core\scriptexecutor.pas',
   waysearch in 'core\waysearch.pas',
-  mainmenu in 'core\mainmenu.pas';
+  mainmenu in 'core\mainmenu.pas',
+  viewstatic in 'core\viewstatic.pas';
 
 begin
   with TMain.Create() do begin
