@@ -57,7 +57,7 @@ end;
 procedure TMain.setLogo;
 begin
   logo:=LoadSprite('images'+PATH_SEP+'logo.'+options.getLang()+'.png') ;
-  logo.Position:=SfmlVector2f(0,0) ;
+  logo.Position:=SfmlVector2f(0,30) ;
 end;
 
 procedure TMain.setUpMusicAndSoundVolumes;

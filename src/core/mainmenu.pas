@@ -28,6 +28,8 @@ type
     first_item:string ;
     exit_code:string ;
     shifty:Integer ;
+    texthelptitle:TSfmlText ;
+    texthelp:TSfmlText ;
     function getButtonX(i:Integer):Integer ;
     function getButtonY(i:Integer):Integer ;
     function isMouseOver(i:Integer):Boolean ;
@@ -46,7 +48,7 @@ type
 
 implementation
 uses sfmlutils,
-  SfmlWindow ;
+  SfmlWindow, SysUtils ;
 
 const
   LANG_ITEM = 'lang' ;
@@ -80,6 +82,16 @@ begin
   text.&String:='';
   text.Font:=Font.Handle;
   text.CharacterSize:=24;
+  texthelptitle:=TSfmlText.Create;
+  texthelptitle.&String:='';
+  texthelptitle.Font:=Font.Handle;
+  texthelptitle.CharacterSize:=28;
+  texthelptitle.Color:=createSFMLColor($493100) ;
+  texthelp:=TSfmlText.Create;
+  texthelp.&String:='';
+  texthelp.Font:=Font.Handle;
+  texthelp.CharacterSize:=20;
+  texthelp.Color:=createSFMLColor($493100) ;
   menu_texts:=TStringList.Create ;
   loadItemsText() ;
   buttonw:=SfmlTextureGetSize(button.Texture).X ;
@@ -186,6 +198,12 @@ end;
 procedure TMainMenu.loadItemsText;
 begin
   menu_texts.LoadFromFile('text'+PATH_SEP+'menu.dat.'+options.getLang());
+  with TStringList.Create do begin
+    LoadFromFile('text'+PATH_SEP+'common.dat.'+Self.options.getLang());
+    texthelptitle.UnicodeString:=UTF8Decode(Values['help_caption']) ;
+    texthelp.UnicodeString:=UTF8Decode(Values['help'].Replace('\n',#10)) ;
+    Free ;
+  end;
 end;
 
 procedure TMainMenu.rebuildItems;
@@ -208,6 +226,10 @@ begin
 
   if helpmode then begin
     window.Draw(help_back) ;
+    texthelptitle.Position := SfmlVector2f(WINDOW_W/2-texthelptitle.LocalBounds.Width/2,60);
+    window.Draw(texthelptitle) ;
+    texthelp.Position := SfmlVector2f(WINDOW_W/2-texthelp.LocalBounds.Width/2,100);
+    window.Draw(texthelp) ;
     Exit ;
   end;
 
