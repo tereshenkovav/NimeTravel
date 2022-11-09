@@ -64,6 +64,7 @@ type
     text:string ;
     textsize:Integer ;
     constructor Create(Atext:string; Atextsize:Integer) ;
+    class operator Equal(a: TStaticTask; b: TStaticTask): Boolean;
   end;
 
   TSkipClick = (scPartial,scFull) ;
@@ -193,7 +194,7 @@ end;
 
 procedure TOptions.addProcSetLanguage(proc: TProcSetLanguage);
 begin
-  if not listprocsetlanguage.Contains(proc) then
+  if not listprocsetlanguage.IndexOf(proc)=-1 then
     listprocsetlanguage.Add(proc) ;
 end;
 
@@ -290,6 +291,11 @@ constructor TStaticTask.Create(Atext: string; Atextsize: Integer);
 begin
   text:=Atext ;
   textsize:=Atextsize ;
+end;
+
+class operator TStaticTask.Equal(a, b: TStaticTask): Boolean;
+begin
+  Result:=(a.text=b.text)and(a.textsize=b.textsize) ;
 end;
 
 end.

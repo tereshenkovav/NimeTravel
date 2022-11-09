@@ -90,7 +90,7 @@ begin
 
   options:=TOptions.Create ;
   for i := 1 to ParamCount do begin
-    tmp:=SplitString(ParamStr(i),'=') ;
+    tmp:=ParamStr(i).Split(['=']) ;
     if Length(tmp)=2 then
       if tmp[0]='--lang' then
         options.setLang(tmp[1]) ;
