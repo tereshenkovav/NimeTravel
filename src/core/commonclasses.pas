@@ -194,7 +194,7 @@ end;
 
 procedure TOptions.addProcSetLanguage(proc: TProcSetLanguage);
 begin
-  if not listprocsetlanguage.IndexOf(proc)=-1 then
+  if listprocsetlanguage.IndexOf(proc)=-1 then
     listprocsetlanguage.Add(proc) ;
 end;
 
