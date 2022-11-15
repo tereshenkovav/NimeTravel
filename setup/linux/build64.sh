@@ -28,6 +28,8 @@ cp /usr/lib64/libatomic.so* $appdir/usr/lib
 cp /usr/lib64/libGLU.so* $appdir/usr/lib
 cp /usr/lib64/libharfbuzz.so* $appdir/usr/lib
 cp /usr/lib64/libpng16.so* $appdir/usr/lib
+cp /usr/lib64/libogg.so* $appdir/usr/lib
+cp /usr/lib64/libFLAC.so* $appdir/usr/lib
 
 cp ../../bin/NimeTravelFPC $appdir/usr/bin/NimeTravel
 cp -r ../../bin/fonts $appdir/usr/bin
