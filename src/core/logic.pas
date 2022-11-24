@@ -77,14 +77,13 @@ type
     procedure SendExit() ;
     function isPictureMode():Boolean ;
     procedure sendSkipClick(skipclick:TSkipClick) ;
-    function getIconKeyName(iconname:string):string ;
-    function getDialogKeyName(dialogname:string):string ;
     function isGameObjectExist(obj:TGameObject):Boolean ; overload ;
     function isGameObjectExist(code:string):Boolean ; overload ;
     function findGameObject(code:string):TGameObject ;
     function isLinkExist(way1,way2:Integer):Boolean ;
     function isWayOut(idx:Integer):Boolean ;
     function getActiveScenePath():string ;
+    function getActiveScene():string ;
     function getAllowerMarkerCount():Integer ;
     function isInScript():Boolean ;
     // Методы, публикуемые в скрипте
@@ -284,6 +283,11 @@ begin
   spells.Add(spellcode,spell);
 end;
 
+function TLogic.getActiveScene: string;
+begin
+  Result:=activescene ;
+end;
+
 function TLogic.getActiveScenePath: string;
 begin
   Result:='scenes'+PATH_SEP+activescene+PATH_SEP ;
@@ -324,11 +328,6 @@ begin
   Result:=heroz ;
 end;
 
-function TLogic.getIconKeyName(iconname: string): string;
-begin
-  Result:=activescene+'_'+iconname.Substring(1) ;
-end;
-
 function TLogic.getMusic: string;
 begin
   Result:=musicfile ;
@@ -337,11 +336,6 @@ end;
 function TLogic.getDialogColor: Cardinal;
 begin
   Result:=dialogcolor ;
-end;
-
-function TLogic.getDialogKeyName(dialogname: string): string;
-begin
-  Result:=activescene+'_'+dialogname.Substring(1) ;
 end;
 
 function TLogic.getWayLink(i: Integer): TWayLink;

@@ -75,7 +75,7 @@ type
     procedure goTargetIdx(idx:Integer) ;
     procedure drawObjIcoAndText(obj:TGameObject);
     procedure drawObjIco(obj:TGameObject);
-    function getTextOrKey(key:string):string ;
+    function getTextOrKey(textname:string):string ;
     procedure tryStartMarker(i:Integer) ;
     function getZScale():Single ;
     procedure setUpMusicAndSoundVolumes() ;
@@ -612,7 +612,7 @@ begin
 
   if lobj.getDialogText()<>'' then begin
     TextDialog.Color:=createSFMLColor(lobj.getDialogColor()) ;
-    drawText(TextDialog,getTextOrKey(lobj.getDialogKeyName(lobj.getDialogText()))) ;
+    drawText(TextDialog,getTextOrKey(lobj.getDialogText())) ;
   end;
 
   if lobj.isPictureMode() then Exit ;
@@ -701,12 +701,18 @@ begin
      Result.Origin:=SfmlVector2f(SfmlTextureGetSize(Result.Texture).X/2,0) ;
 end;
 
-function TView.getTextOrKey(key: string): string;
-var tmp:TArray<string> ;
+function TView.getTextOrKey(textname:string): string;
+var key:string ;
 begin
-  if Texts.IndexOfName(key)<>-1 then Result:=Texts.Values[key].Replace('\n',#10) else begin
-    tmp:=key.Split(['_']) ;
-    Result:='K: '+tmp[Length(tmp)-1] ;
+  key:=lobj.getActiveScene()+'_'+textname.Substring(1) ;
+  if Texts.IndexOfName(key)<>-1 then
+    Result:=Texts.Values[key].Replace('\n',#10)
+  else begin
+    key:='global_'+textname.Substring(1) ;
+    if Texts.IndexOfName(key)<>-1 then
+      Result:=Texts.Values[key].Replace('\n',#10)
+    else
+      Result:='Key: '+textname ;
   end;
 end;
 
@@ -749,9 +755,9 @@ end ;
 procedure TView.drawObjIcoAndText(obj:TGameObject);
 begin
   drawObjIco(obj) ;
-  TextInfo.UnicodeString:=UTF8Decode(getTextOrKey(lobj.getIconKeyName(obj.caption))) ;
+  TextInfo.UnicodeString:=UTF8Decode(getTextOrKey(obj.caption)) ;
   TextInfo.Position := SfmlVector2f(720-TextInfo.LocalBounds.Width/2,570);
-  drawText(TextInfo,getTextOrKey(lobj.getIconKeyName(obj.caption))) ;
+  drawText(TextInfo,getTextOrKey(obj.caption)) ;
 end ;
 
 end.
