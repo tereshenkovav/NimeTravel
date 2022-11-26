@@ -42,4 +42,9 @@ cp -r ../../bin/text $appdir/usr/bin
 
 chmod 777 appimagetool-x86_64.AppImage
 export ARCH=x86_64
-./appimagetool-x86_64.AppImage $appdir
+
+echo en > $appdir/usr/bin/text/default
+./appimagetool-x86_64.AppImage $appdir /tmp/NimeTravel-prologue-EN-1.0.0-x86_64.AppImage
+
+echo ru > $appdir/usr/bin/text/default
+./appimagetool-x86_64.AppImage $appdir /tmp/NimeTravel-prologue-RU-1.0.0-x86_64.AppImage
