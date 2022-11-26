@@ -5,7 +5,7 @@ exit
 
 :mainproc
 
-set ZipName=NimeTravel-prologue-%2-1.0.0-Win32
+set ZipName=NimeTravel-prologue-%2-1.1.0-Win32
 
 mkdir M:\%ZipName%
 mkdir M:\%ZipName%\fonts

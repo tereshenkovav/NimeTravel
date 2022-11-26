@@ -20,9 +20,9 @@ ReserveFile /plugin InstallOptions.dll
 ReserveFile "runapp_${GAMELANG}.ini"
 
 !ifdef updatemode
-  OutFile "M:\NimeTravel-prologue-1.0.0-Win32-update.exe"
+  OutFile "M:\NimeTravel-prologue-1.1.0-Win32-update.exe"
 !else
-  OutFile "M:\NimeTravel-prologue-${UPPERLANG}-1.0.0-Win32.exe"
+  OutFile "M:\NimeTravel-prologue-${UPPERLANG}-1.1.0-Win32.exe"
 !endif
 
 var is_update
@@ -138,7 +138,7 @@ Section "$(GamePrologName)"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NimeTravel" \
                  "Publisher"  "$(PublisherName)"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NimeTravel" \
-                 "DisplayVersion"  "1.0.0"
+                 "DisplayVersion"  "1.1.0"
 
   SetOutPath $INSTDIR
   CreateDirectory "$SMPROGRAMS\$(GameName)"
