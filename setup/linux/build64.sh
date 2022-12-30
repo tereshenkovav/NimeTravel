@@ -6,7 +6,6 @@ rm -rf $appdir
 
 mkdir $appdir
 cp appruns/AppRun-x86_64 $appdir/AppRun
-chmod 777 $appdir/AppRun
 cp ../../graphics/main.png $appdir/NimeTravel.png
 pushd $appdir
 ln -s NimeTravel.png .DirIcon
@@ -40,7 +39,6 @@ cp -r ../../bin/sounds $appdir/usr/bin
 cp -r ../../bin/music $appdir/usr/bin
 cp -r ../../bin/text $appdir/usr/bin
 
-chmod 777 appimagetool-x86_64.AppImage
 export ARCH=x86_64
 
 echo en > $appdir/usr/bin/text/default
