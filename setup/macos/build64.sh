@@ -5,7 +5,7 @@ mkdir $appdir/Contents/MacOS
 mkdir $appdir/Contents/Frameworks
 mkdir $appdir/Contents/Resources
 
-cp Info.plsit $appdir/Contents
+cp Info.plist $appdir/Contents
 cp Pkginfo $appdir/Contents
 
 cp NimeTravel.icns $appdir/Contents/Resources
@@ -31,8 +31,9 @@ cp -r /Library/Frameworks/vorbisenc.framework $appdir/Contents/Frameworks
 cp -r /Library/Frameworks/vorbisfile.framework $appdir/Contents/Frameworks
 
 cd /tmp 
-echo en > $appdir/text/default
+
+echo en > $appdir/Contents/MacOS/text/default
 zip -r NimeTravel-prologue-EN-1.1.0-MacOS.app.zip NimeTravel.app
 
-echo ru > $appdir/text/default
+echo ru > $appdir/Contents/MacOS/text/default
 zip -r NimeTravel-prologue-RU-1.1.0-MacOS.app.zip NimeTravel.app
