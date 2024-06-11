@@ -19,16 +19,16 @@ cp -r ../../bin/sounds $appdir/Contents/MacOS
 cp -r ../../bin/music $appdir/Contents/MacOS
 cp -r ../../bin/text $appdir/Contents/MacOS
 
-cp /usr/local/lib/libcsfml*.dylib $appdir/Contents/Frameworks
-cp /usr/local/lib/libsfml*.dylib $appdir/Contents/Frameworks
+cp -R /usr/local/lib/libcsfml*.dylib $appdir/Contents/Frameworks
+cp -R /usr/local/lib/libsfml*.dylib $appdir/Contents/Frameworks
 
-cp -r /Library/Frameworks/FLAC.framework $appdir/Contents/Frameworks
-cp -r /Library/Frameworks/freetype.framework $appdir/Contents/Frameworks
-cp -r /Library/Frameworks/ogg.framework $appdir/Contents/Frameworks
-cp -r /Library/Frameworks/OpenAL.framework $appdir/Contents/Frameworks
-cp -r /Library/Frameworks/vorbis.framework $appdir/Contents/Frameworks
-cp -r /Library/Frameworks/vorbisenc.framework $appdir/Contents/Frameworks
-cp -r /Library/Frameworks/vorbisfile.framework $appdir/Contents/Frameworks
+cp -R /Library/Frameworks/FLAC.framework $appdir/Contents/Frameworks
+cp -R /Library/Frameworks/freetype.framework $appdir/Contents/Frameworks
+cp -R /Library/Frameworks/ogg.framework $appdir/Contents/Frameworks
+cp -R /Library/Frameworks/OpenAL.framework $appdir/Contents/Frameworks
+cp -R /Library/Frameworks/vorbis.framework $appdir/Contents/Frameworks
+cp -R /Library/Frameworks/vorbisenc.framework $appdir/Contents/Frameworks
+cp -R /Library/Frameworks/vorbisfile.framework $appdir/Contents/Frameworks
 
 cd /tmp 
 
