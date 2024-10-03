@@ -371,7 +371,7 @@ var mx,my:Integer ;
     way_id:Integer ;
     spr:TSfmlSprite ;
     zsortedobjects:TUniList<TGameObject> ;
-    dtleft,ddt:Single ;
+    dtleft,ddt,speedupk:Single ;
 begin
   if isInDebugView() then
     dt:=dt*0.2;
@@ -510,11 +510,12 @@ begin
   HeroAction.Position:=HeroWait.Position ;
 
   if (isgo) then begin
+    speedupk:=IfThen(SfmlKeyboardIsKeyPressed(sfKeyLShift),3.0,1.0) ;
     dtleft:=dt ;
     ddt:=dt*0.01 ;
     // Уменьшение кванта времени
     while dtleft>0 do begin
-      lobj.moveHeroXYZ(vx*ddt,vy*ddt,vz*ddt) ;
+      lobj.moveHeroXYZ(vx*speedupk*ddt,vy*speedupk*ddt,vz*speedupk*ddt) ;
       if isReachTarget() then begin
         lobj.setHeroZ(targetz) ;
         if waystack.Count>0 then begin
