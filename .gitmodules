@@ -1,0 +1,3 @@
+[submodule "PascalGameEngine"]
+	path = PascalGameEngine
+	url = git@github.com:tereshenkovav/PascalGameEngine.git

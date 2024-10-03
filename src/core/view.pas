@@ -4,17 +4,16 @@ interface
 
 uses
   Classes, SysUtils,
-  SfmlGraphics,SfmlSystem,SfmlWindow,SfmlAudio,
+  SfmlGraphics,SfmlSystem,SfmlWindow,SfmlAudio, Scene,
   Logic,GameObject,Helpers, WayRenderer, SfmlAnimation, MainMenu, CommonClasses ;
 
 type
 
   { TView }
 
-  TView = class
+  TView = class(TScene)
   private
     // sfml objects
-    Window: TSfmlRenderWindow;
     HeroWait: TSfmlSprite;
     HeroAction: TSfmlSprite;
     HeroWalk: TSfmlAnimation;
@@ -65,8 +64,6 @@ type
     function loadSpriteOrAnimation(filename:string):TSfmlSprite ;
     function getSprite(prefix:string; ao:TGameObject):TSfmlSprite ;
     function getSpriteStatic(prefix:string; filename:string):TSfmlSprite ;
-    procedure drawText(text: TSfmlText; str:string);
-    procedure drawSprite(spr:TSfmlSprite; x,y:Single) ;
     function retAndPosSprite(spr:TSfmlSprite; x,y:Integer; transp:Integer):TSfmlSprite ;
     function isReachTarget():Boolean ;
     function isInDebugView():Boolean ;
@@ -80,13 +77,13 @@ type
     function getZScale():Single ;
     procedure setUpMusicAndSoundVolumes() ;
     procedure loadTexts() ;
-    procedure FrameFunc(dt:Single) ;
-    procedure RenderFunc() ;
   public
-    constructor Create(obj:TLogic; Awindow:TSfmlRenderWindow; Aoptions:TOptions) ;
+    constructor Create(obj:TLogic; Aoptions:TOptions) ;
     procedure insertMusic(Amusic:TSfmlMusic; Afile:string) ;
-    procedure Run() ;
-    destructor Destroy() ; override ;
+    function Init():Boolean ; override ;
+    procedure UnInit() ; override ;
+    procedure RenderFunc() ; override ;
+    function FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ; override ;
   end;
 
 implementation
@@ -104,13 +101,15 @@ const
 
 { TView }
 
-constructor TView.Create(obj:TLogic; Awindow:TSfmlRenderWindow; Aoptions:TOptions);
-var i:Integer ;
+constructor TView.Create(obj:TLogic; Aoptions:TOptions);
 begin
   lobj:=obj ;
-  window:=Awindow ;
   options:=Aoptions ;
+end ;
 
+function TView.Init():Boolean ;
+var i:Integer ;
+begin
   sprites:=TUniDictionary<string,TSfmlSprite>.Create() ;
   viewsprites:=TUniList<TSfmlSprite>.Create() ;
   viewspritesz1:=TUniList<TSfmlSprite>.Create() ;
@@ -159,18 +158,9 @@ begin
   Magic.Add(TSfmlSound.Create(TSfmlSoundBuffer.Create('sounds'+PATH_SEP+'magic.ogg')));
   Magic.Add(TSfmlSound.Create(TSfmlSoundBuffer.Create('sounds'+PATH_SEP+'magic.ogg')));
 
-  TextInfo := TSfmlText.Create;
-  TextInfo.&String := '';
-  TextInfo.Font := Font.Handle;
-  TextInfo.CharacterSize := 18;
-  TextInfo.Color := SfmlWhite;
-
-  TextDialog := TSfmlText.Create;
-  TextDialog.&String := '';
-  TextDialog.Font := Font.Handle;
-  TextDialog.CharacterSize := 20;
-  TextDialog.Color := SfmlWhite ;
-  TextDialog.Position := SfmlVector2f(250,505);
+  TextInfo:=createText(Font,'',18,SfmlWhite) ;
+  TextDialog:=createText(Font,'',20,SfmlWhite) ;
+  TextDialog.Position:=SfmlVector2f(250,505);
 
   Marker:=TSfmlAnimation.Create('images'+PATH_SEP+'marker.png',30,34,16,20) ;
   Marker.Origin:=SfmlVector2f(15,17) ;
@@ -215,7 +205,6 @@ begin
   Texts:=TStringList.Create ;
   loadTexts() ;
 
-  gamemenu:=TMainMenu.Create(window,'images'+PATH_SEP+'gray.png',options,'continue') ;
   options.setProcSetMusicAndSound(setUpMusicAndSoundVolumes) ;
   options.addProcSetLanguage(loadTexts) ;
   setUpMusicAndSoundVolumes() ;
@@ -223,31 +212,10 @@ begin
   Music:=nil ;
   tekmusicfile:='' ;
 
-  DebugAllowed:=FileExists('developer') ;
-end;
-
-procedure TView.Run();
-var lasttime,newtime:Single ;
-begin
   isgo:=False ;
-
   lobj.Start() ;
 
-  lasttime:=clock.ElapsedTime.AsSeconds() ;
-  while Window.IsOpen do
-  begin
-    newtime:=clock.ElapsedTime.asSeconds() ;
-    lobj.BeginWork();
-    FrameFunc(newtime-lasttime) ;
-    lobj.EndWork();
-    lasttime:=newtime ;
-
-    Window.Clear(SfmlBlack);
-    RenderFunc() ;
-    Window.Display;
-  end;
-
-  lobj.SendExit() ;
+  DebugAllowed:=FileExists('developer') ;
 end;
 
 procedure TView.setUpMusicAndSoundVolumes;
@@ -259,7 +227,7 @@ begin
     Magic[i].Volume:=IfThen(options.isSoundOn(),100,0) ;
 end;
 
-destructor TView.Destroy();
+procedure TView.UnInit();
 var key:string ;
 begin
   HeroWait.Free ;
@@ -280,7 +248,7 @@ begin
 
   gamemenu.Free ;
 
-  inherited Destroy();
+  lobj.SendExit() ;
 end;
 
 procedure TView.trySetTarget(x,y:Integer) ;
@@ -296,18 +264,6 @@ procedure TView.trySetTarget(wayidx:Integer) ;
 begin
   trySetTarget(lobj.getWayPoint(wayidx).x,lobj.getWayPoint(wayidx).y) ;
 end ;
-
-procedure TView.drawSprite(spr: TSfmlSprite; x, y: Single);
-begin
-  spr.Position:=SfmlVector2f(x,y) ;
-  Window.draw(spr) ;
-end;
-
-procedure TView.drawText(text: TSfmlText; str:string);
-begin
-  text.UnicodeString:=UTF8Decode(str) ;
-  Window.Draw(text) ;
-end;
 
 procedure TView.insertMusic(Amusic: TSfmlMusic; Afile: string);
 begin
@@ -359,10 +315,9 @@ begin
   Result:=0 ;
 end;
 
-procedure TView.FrameFunc(dt:Single);
-var mx,my:Integer ;
-    ao:TGameObject ;
-    Event:TSfmlEvent;
+function TView.FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ;
+var ao:TGameObject ;
+    Event:TSfmlEventEx;
     p:TSfmlVector2f ;
     kc:TSfmlKeyCode ;
     i:Integer ;
@@ -373,11 +328,12 @@ var mx,my:Integer ;
     zsortedobjects:TUniList<TGameObject> ;
     dtleft,ddt,speedupk:Single ;
 begin
+  Result:=TSceneResult.Normal ;
+
+  lobj.BeginWork() ;
+  try
   if isInDebugView() then
     dt:=dt*0.2;
-
-  mx:=Window.MousePosition.X ;
-  my:=Window.MousePosition.Y ;
 
   viewsprites.Clear() ;
   viewspritesz1.Clear() ;
@@ -397,29 +353,22 @@ begin
     zsortedobjects.Free ;
   end;
 
-  if isInDebugView() then
-    Window.SetTitle(Format('%d %d',[mx,my]));
+  {if isInDebugView() then
+    Window.SetTitle(Format('%d %d',[mx,my]));}
 
-  Cursor.Position:=SfmlVector2f(mx,my) ;
-  CursorQuest.Position:=SfmlVector2f(mx,my) ;
-  CursorWalk.Position:=SfmlVector2f(mx,my) ;
-
-  if gamemenu.isActive() then begin
-    gamemenu.Frame(dt,mx,my) ;
-    Exit ;
-  end;
+  Cursor.Position:=SfmlVector2f(mousex,mousey) ;
+  CursorQuest.Position:=SfmlVector2f(mousex,mousey) ;
+  CursorWalk.Position:=SfmlVector2f(mousex,mousey) ;
 
   if lobj.isPictureMode() then begin
-    while Window.PollEvent(Event) do
-    begin
-      if Event.EventType = sfEvtClosed then Window.Close;
-      if (Event.EventType = sfEvtKeyPressed) then begin
-        if (event.key.code = sfKeyEscape) then lobj.sendSkipClick(scFull);
-        if (event.key.code = sfKeySpace) then lobj.sendSkipClick(scPartial);
-        if (event.key.code = sfKeyReturn) then lobj.sendSkipClick(scPartial);
+    for Event in Events do begin
+      if (Event.Event.EventType = sfEvtKeyPressed) then begin
+        if (event.Event.key.code = sfKeyEscape) then lobj.sendSkipClick(scFull);
+        if (event.Event.key.code = sfKeySpace) then lobj.sendSkipClick(scPartial);
+        if (event.Event.key.code = sfKeyReturn) then lobj.sendSkipClick(scPartial);
       end;
-      if (Event.EventType = sfEvtMouseButtonPressed) then
-        if (event.MouseButton.Button = sfMouseLeft) then
+      if (Event.Event.EventType = sfEvtMouseButtonPressed) then
+        if (event.Event.MouseButton.Button = sfMouseLeft) then
           lobj.sendSkipClick(scPartial);
     end ;
     Exit ;
@@ -428,53 +377,54 @@ begin
   overobject:=nil ;
   for ao in lobj.getActiveObjects() do
     if ao.isactive then
-    if (ao.x<mx)and(ao.y<my)and
-       (mx<ao.x+getSprite(PREFIX_ACTIVEOBJECT,ao).LocalBounds.Width)and
-       (my<ao.y+getSprite(PREFIX_ACTIVEOBJECT,ao).LocalBounds.Height) then
+    if (ao.x<mousex)and(ao.y<mousey)and
+       (mousex<ao.x+getSprite(PREFIX_ACTIVEOBJECT,ao).LocalBounds.Width)and
+       (mousey<ao.y+getSprite(PREFIX_ACTIVEOBJECT,ao).LocalBounds.Height) then
       overobject:=ao ;
 
-  while Window.PollEvent(Event) do
-  begin
-    if Event.EventType = sfEvtClosed then Window.Close;
+  for Event in Events do begin
     if lobj.isInScript() then begin
-      if (Event.EventType = sfEvtKeyPressed) then begin
-        if (event.key.code = sfKeyEscape) then lobj.sendSkipClick(scFull);
-        if (event.key.code = sfKeySpace) then lobj.sendSkipClick(scPartial);
-        if (event.key.code = sfKeyReturn) then lobj.sendSkipClick(scPartial);
+      if (Event.Event.EventType = sfEvtKeyPressed) then begin
+        if (event.Event.key.code = sfKeyEscape) then lobj.sendSkipClick(scFull);
+        if (event.Event.key.code = sfKeySpace) then lobj.sendSkipClick(scPartial);
+        if (event.Event.key.code = sfKeyReturn) then lobj.sendSkipClick(scPartial);
       end;
-      if (Event.EventType = sfEvtMouseButtonPressed) then
-        if (event.MouseButton.Button = sfMouseLeft) then
+      if (Event.Event.EventType = sfEvtMouseButtonPressed) then
+        if (event.Event.MouseButton.Button = sfMouseLeft) then
           lobj.sendSkipClick(scPartial);
     end
     else begin
-    if (Event.EventType = sfEvtKeyPressed) then begin
-      if (event.key.code = sfKeyF5)and DebugAllowed then lobj.executeScript('debug.script','runDebug1()') ;
-      if (event.key.code = sfKeyF6)and DebugAllowed then lobj.executeScript('debug.script','runDebug2()') ;
-      if (event.key.code = sfKeyF7)and DebugAllowed then lobj.executeScript('debug.script','runDebug3()') ;
-      if (event.key.code = sfKeyEscape)or(event.key.code = sfKeyF10) then gamemenu.setActive(True) ;
+    if (Event.Event.EventType = sfEvtKeyPressed) then begin
+      if (event.Event.key.code = sfKeyF5)and DebugAllowed then lobj.executeScript('debug.script','runDebug1()') ;
+      if (event.Event.key.code = sfKeyF6)and DebugAllowed then lobj.executeScript('debug.script','runDebug2()') ;
+      if (event.Event.key.code = sfKeyF7)and DebugAllowed then lobj.executeScript('debug.script','runDebug3()') ;
+      if (event.Event.key.code = sfKeyEscape)or(event.Event.key.code = sfKeyF10) then begin
+        subscene:=TMainMenu.Create(false,options,'continue') ;
+        Exit(TSceneResult.SetSubScene) ;
+      end;
       if selectedobject<>nil then begin
         kc:=sfKeyNum1 ;
         for i := 0 to markerpos.Count-1 do begin
-          if event.key.code = kc then tryStartMarker(i) ;
+          if event.Event.key.code = kc then tryStartMarker(i) ;
           Inc(kc) ;
         end;
       end;
     end;
-    if (Event.EventType = sfEvtMouseButtonPressed) then
-      if (event.MouseButton.Button = sfMouseLeft) then begin
+    if (Event.Event.EventType = sfEvtMouseButtonPressed) then
+      if (event.Event.MouseButton.Button = sfMouseLeft) then begin
         targetobject:=nil ;
         if (overobject<>nil) then begin
           trySetTarget(overobject.way_idx) ;
           targetobject:=overobject ;
         end
         else
-          if (my<500) then trySetTarget(mx,my) ;
+          if (mousey<500) then trySetTarget(mousex,mousey) ;
         if (selectedobject<>nil) then begin
-          if ((my>500)and(mx>650))or(selectedobject=overobject) then lobj.executeInfoProc(selectedobject);
+          if ((mousey>500)and(mousex>650))or(selectedobject=overobject) then lobj.executeInfoProc(selectedobject);
         end;
         if selectedobject<>nil then
           for i := 0 to markerpos.Count-1 do
-            if dist2(markerpos[i].X,mx,markerpos[i].Y,my)<MARKERRADIUS2 then tryStartMarker(i) ;
+            if dist2(markerpos[i].X,mousex,markerpos[i].Y,mousey)<MARKERRADIUS2 then tryStartMarker(i) ;
       end;
     end;
   end;
@@ -575,19 +525,18 @@ begin
     Music.Play() ;
   end;
 
+  finally
+    lobj.EndWork() ;
+  end;
 end;
 
 procedure TView.RenderFunc;
 var spr:TSfmlSprite ;
     zscale:Single ;
     i:Integer ;
-    mx,my:Single ;
     tmpws:TUniList<Integer> ;
     usewalk:Boolean ;
 begin
-  mx:=Window.MousePosition.X ;
-  my:=Window.MousePosition.Y ;
-
   for spr in viewspritesz1 do
     Window.Draw(spr);
 
@@ -613,7 +562,8 @@ begin
 
   if lobj.getDialogText()<>'' then begin
     TextDialog.Color:=createSFMLColor(lobj.getDialogColor()) ;
-    drawText(TextDialog,getTextOrKey(lobj.getDialogText())) ;
+    TextDialog.UnicodeString:=UTF8Decode(getTextOrKey(lobj.getDialogText())) ;
+    Window.Draw(TextDialog) ;
   end;
 
   if lobj.isPictureMode() then Exit ;
@@ -647,19 +597,14 @@ begin
   else
     if selectedobject<>nil then drawObjIcoAndText(selectedobject) ;
 
-  if gamemenu.isActive then begin
-    gamemenu.Render() ;
-    Window.Draw(Cursor)
-  end
-  else begin
   if not lobj.isInScript() then begin
-  if (overobject<>nil)or((selectedobject<>nil)and(my>500)and(mx>650)) then
+  if (overobject<>nil)or((selectedobject<>nil)and(mousey>500)and(mousex>650)) then
     Window.Draw(CursorQuest)
   else begin
 
     usewalk:=False ;
-    if my<500 then begin
-      tmpws:=lobj.buildWayStack(Round(mx),Round(my)) ;
+    if mousey<500 then begin
+      tmpws:=lobj.buildWayStack(mousex,mousey) ;
       if (tmpws.Count>0) then
         if lobj.isWayOut(tmpws[tmpws.Count-1]) then usewalk:=True ;
       tmpws.Free ;
@@ -672,7 +617,7 @@ begin
       // Дублирование условия показа рога
       if (selectedobject<>nil)or(marker.isPlayed()) then // Нужно ли marker.isPlayed()?
         for i := 0 to lobj.getAllowerMarkerCount()-1 do
-          if (dist2(markerpos[i].X,mx,markerpos[i].Y,my)<MARKERRADIUS2) then begin
+          if (dist2(markerpos[i].X,mousex,markerpos[i].Y,mousey)<MARKERRADIUS2) then begin
             Cursor.Color:=markercolors[i] ;
             Break ;
           end ;
@@ -681,7 +626,6 @@ begin
   end;
 
   end ;
-  end;
 
   if isInDebugView() then wayrenderer.Render(lobj);
 end;
@@ -758,7 +702,7 @@ begin
   drawObjIco(obj) ;
   TextInfo.UnicodeString:=UTF8Decode(getTextOrKey(obj.caption)) ;
   TextInfo.Position := SfmlVector2f(720-TextInfo.LocalBounds.Width/2,570);
-  drawText(TextInfo,getTextOrKey(obj.caption)) ;
+  Window.Draw(TextInfo) ;
 end ;
 
 end.

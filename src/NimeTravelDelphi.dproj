@@ -98,7 +98,7 @@
         <DCC_ExeOutput>..\bin</DCC_ExeOutput>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>(None)</Manifest_File>
-        <DCC_UnitSearchPath>pascalscript;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>pascalscript;..\PascalGameEngine\sfml;..\PascalGameEngine\engine;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <Icon_MainIcon>..\graphics\main.ico</Icon_MainIcon>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
     </PropertyGroup>

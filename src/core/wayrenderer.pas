@@ -7,11 +7,11 @@ uses SfmlGraphics, SfmlSystem,
 type
   TWayRenderer = class
   private
-    window: TSfmlRenderWindow ;
+    window: TSfmlRenderTarget ;
     circle:TSfmlRectangleShape ;
     line:TSfmlVertexArray;
   public
-    constructor Create(Awindow:TSfmlRenderWindow) ;
+    constructor Create(Awindow:TSfmlRenderTarget) ;
     destructor Destroy ; override ;
     procedure Render(lobj:TLogic) ;
   end;
@@ -20,7 +20,7 @@ implementation
 
 { TWayRenderer }
 
-constructor TWayRenderer.Create(Awindow: TSfmlRenderWindow);
+constructor TWayRenderer.Create(Awindow: TSfmlRenderTarget);
 begin
   window:=Awindow ;
   circle:=TSfmlRectangleShape.Create() ;

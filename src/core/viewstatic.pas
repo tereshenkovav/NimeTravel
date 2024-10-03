@@ -2,27 +2,27 @@ unit viewstatic;
 
 interface
 uses SfmlGraphics,
-  CommonClasses, helpers ;
+  CommonClasses, helpers, Scene ;
 
 type
-  TViewStatic = class
+  TViewStatic = class(TScene)
   private
-    Window:TSfmlRenderWindow ;
     Font:TSfmlFont ;
     Text:TSfmlText ;
     Tasks:TUniList<TStaticTask> ;
     tektaskidx:Integer ;
-    function FrameFunc(dt:Single):Boolean ;
-    procedure RenderFunc() ;
+    options:TOptions ;
   public
-    constructor Create(Awindow:TSfmlRenderWindow) ;
+    constructor Create(Aoptions:TOptions) ;
     procedure AddTask(text:string; size:Integer) ;
-    procedure Run() ;
-    destructor Destroy() ; override ;
+    function Init():Boolean ; override ;
+    procedure UnInit() ; override ;
+    procedure RenderFunc() ; override ;
+    function FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ; override ;
   end;
 
 implementation
-uses SfmlWindow, SfmlSystem ;
+uses SfmlWindow, SfmlSystem, SfmlUtils, View, Logic ;
 
 { TViewStatic }
 
@@ -31,43 +31,48 @@ begin
   Tasks.Add(TStaticTask.Create(text,size)) ;
 end;
 
-constructor TViewStatic.Create(Awindow: TSfmlRenderWindow);
+constructor TViewStatic.Create(Aoptions:TOptions);
 begin
-  Window:=Awindow ;
-  Font:=TSfmlFont.Create('fonts'+PATH_SEP+'arial.ttf');
-  Text := TSfmlText.Create;
-  Text.&String := '';
-  Text.Font := Font.Handle;
-  Text.CharacterSize := 18;
-  Text.Color := SfmlWhite;
-
+  options:=Aoptions ;
   Tasks:=TUniList<TStaticTask>.Create() ;
   tektaskidx:=0 ;
 end;
 
-destructor TViewStatic.Destroy;
+function TViewStatic.Init():Boolean;
 begin
-  Font.Free ;
-  inherited Destroy ;
+  Font:=TSfmlFont.Create('fonts'+PATH_SEP+'arial.ttf');
+  Text:=createText(font,'',18,SfmlWhite) ;
 end;
 
-function TViewStatic.FrameFunc(dt: Single):Boolean;
-var Event:TSfmlEvent ;
-    next:Boolean ;
+procedure TViewStatic.UnInit() ;
 begin
-    Result:=True ;
+  Font.Free ;
+  Text.Free ;
+end;
+
+function TViewStatic.FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ;
+var Event:TSfmlEventEx ;
+    next:Boolean ;
+    lobj:TLogic ;
+begin
+  Result:=TSceneResult.Normal ;
+
     next:=False ;
-    while Window.PollEvent(Event) do
-    begin
-      if Event.EventType = sfEvtClosed then Window.Close;
-      if (Event.EventType = sfEvtKeyPressed) then begin
-        if (event.key.code in [sfKeyEscape,sfKeySpace,sfKeyReturn]) then next:=True ;
+    for Event in events do begin
+      if (Event.Event.EventType = sfEvtKeyPressed) then begin
+        if (event.Event.key.code in [sfKeyEscape,sfKeySpace,sfKeyReturn]) then next:=True ;
       end;
-      if (Event.EventType = sfEvtMouseButtonPressed) then
-        if (event.MouseButton.Button = sfMouseLeft) then next:=True ;
+      if (Event.Event.EventType = sfEvtMouseButtonPressed) then
+        if (event.Event.MouseButton.Button = sfMouseLeft) then next:=True ;
     end ;
     if next then begin
-      if tektaskidx+1>=Tasks.Count then Result:=False else Inc(tektaskidx) ;
+      if tektaskidx+1>=Tasks.Count then begin
+        lobj:=TLogic.Create();
+        nextscene:=TView.Create(lobj,options) ;
+        Exit(TSceneResult.Switch) ;
+      end
+      else
+        Inc(tektaskidx) ;
     end;
 end;
 
@@ -78,17 +83,6 @@ begin
   text.Position:=SfmlVector2f((WINDOW_W-text.LocalBounds.Width)/2,
      (WINDOW_H-text.LocalBounds.Height)/2) ;
   Window.Draw(text) ;
-end;
-
-procedure TViewStatic.Run;
-begin
-  while Window.IsOpen do
-  begin
-    if not FrameFunc(1.0) then Break ;
-    Window.Clear(SfmlBlack);
-    RenderFunc() ;
-    Window.Display;
-  end;
 end;
 
 end.

@@ -3,51 +3,47 @@ unit mainmenu;
 interface
 uses Classes,
   SfmlGraphics, SfmlSystem,
-  CommonClasses, helpers ;
+  CommonClasses, helpers, Scene ;
 
 type
-  TMainMenu = class
+  TMainMenu = class(TScene)
   private
-    window: TSfmlRenderWindow ;
-    back: TSfmlSprite ;
-    sublayer: TSfmlSprite ;
+    Cursor:TSfmlSprite ;
+    menu_back: TSfmlSprite ;
     button: TSfmlSprite ;
     icons:TUniDictionary<string,TSfmlSprite> ;
     font:TSfmlFont ;
     text:TSfmlText ;
-    active:Boolean ;
     menu_texts:TStringList ;
     buttonw:Integer ;
     buttonh:Integer ;
-    lastmx:Single ;
-    lastmy:Single ;
     options:TOptions ;
     items:TStringList ;
     help_back:TSfmlSprite ;
     helpmode:Boolean ;
     first_item:string ;
-    exit_code:string ;
     shifty:Integer ;
     texthelptitle:TSfmlText ;
     texthelp:TSfmlText ;
+    back:TSfmlSprite ;
+    logo:TSfmlSprite ;
     function getButtonX(i:Integer):Integer ;
     function getButtonY(i:Integer):Integer ;
     function isMouseOver(i:Integer):Boolean ;
     procedure rebuildItems() ;
     procedure loadItemsText() ;
+    procedure loadLogo() ;
   public
-    constructor Create(Awindow:TSfmlRenderWindow; sublayerfile:string;
+    constructor Create(Astartmode:Boolean;
       Aoptions:TOptions; Afirst_item:string; Ashifty:Integer=0) ;
-    destructor Destroy ; override ;
-    procedure Render() ;
-    procedure Frame(dt:Single; mx,my:Single) ;
-    procedure setActive(value:Boolean) ;
-    function isActive():Boolean ;
-    function getExitCode():string ;
+    function Init():Boolean ; override ;
+    procedure UnInit() ; override ;
+    procedure RenderFunc() ; override ;
+    function FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ; override ;
   end;
 
 implementation
-uses sfmlutils,
+uses sfmlutils, ViewStatic, CommonProc,
   SfmlWindow, SysUtils ;
 
 const
@@ -55,93 +51,108 @@ const
 
 { TMainMenu }
 
-constructor TMainMenu.Create(Awindow: TSfmlRenderWindow; sublayerfile:string;
+constructor TMainMenu.Create(Astartmode:Boolean;
   Aoptions:TOptions; Afirst_item:string; Ashifty:Integer);
 var lang:string ;
 begin
-  window:=Awindow ;
   options:=Aoptions ;
   first_item:=Afirst_item ;
   shifty:=Ashifty ;
-  back:=LoadSprite('images'+PATH_SEP+'menu_back.png',[sloCentered]) ;
-  back.Position:=SfmlVector2f(WINDOW_W/2,(WINDOW_H-100)/2+shifty) ;
-  help_back:=LoadSprite('images'+PATH_SEP+'help_back.png') ;
-  help_back.Position:=SfmlVector2f(0,0) ;
-  if sublayerfile<>'' then begin
-    sublayer:=LoadSprite(sublayerfile) ;
-    sublayer.Position:=SfmlVector2f(0,0) ;
+
+  if not Astartmode then begin
+    back:=LoadSprite('images'+PATH_SEP+'gray.png') ; ;
+    back.Position:=SfmlVector2f(0,0) ;
+    logo:=nil ;
   end
-  else
-    sublayer:=nil ;
-  button:=LoadSprite('images'+PATH_SEP+'button.png') ;
+  else begin
+    back:=LoadSprite('images'+PATH_SEP+'intro.png') ;
+    back.Position:=SfmlVector2f(0,0) ;
+    loadLogo() ;
+  end;
+
   icons:=TUniDictionary<string,TSfmlSprite>.Create ;
   for lang in options.getLangsAll() do
     icons.Add(lang,LoadSprite('images'+PATH_SEP+'lang.'+lang+'.png')) ;
+end;
+
+procedure TMainMenu.UnInit;
+begin
+  if back<>nil then back.Free ;
+  if logo<>nil then logo.Free ;
+  menu_back.Free ;
+  button.Free ;
+  icons.Free ;
+  font.Free ;
+  menu_texts.Free ;
+  Cursor.Free ;
+end;
+
+function TMainMenu.Init():Boolean;
+begin
+  menu_back:=LoadSprite('images'+PATH_SEP+'menu_back.png',[sloCentered]) ;
+  menu_back.Position:=SfmlVector2f(WINDOW_W/2,(WINDOW_H-100)/2+shifty) ;
+  help_back:=LoadSprite('images'+PATH_SEP+'help_back.png') ;
+  help_back.Position:=SfmlVector2f(0,0) ;
+  button:=LoadSprite('images'+PATH_SEP+'button.png') ;
   font:=TSfmlFont.Create('fonts'+PATH_SEP+'arial.ttf');
-  text:=TSfmlText.Create;
-  text.&String:='';
-  text.Font:=Font.Handle;
-  text.CharacterSize:=24;
-  texthelptitle:=TSfmlText.Create;
-  texthelptitle.&String:='';
-  texthelptitle.Font:=Font.Handle;
-  texthelptitle.CharacterSize:=28;
-  texthelptitle.Color:=createSFMLColor($493100) ;
-  texthelp:=TSfmlText.Create;
-  texthelp.&String:='';
-  texthelp.Font:=Font.Handle;
-  texthelp.CharacterSize:=20;
-  texthelp.Color:=createSFMLColor($493100) ;
+  text:=createText(font,'',24,SfmlWhite) ;
+  texthelptitle:=createText(font,'',28,createSFMLColor($493100)) ;
+  texthelp:=createText(font,'',20,createSFMLColor($493100)) ;
   menu_texts:=TStringList.Create ;
   loadItemsText() ;
   buttonw:=SfmlTextureGetSize(button.Texture).X ;
   buttonh:=SfmlTextureGetSize(button.Texture).Y ;
   items:=TStringList.Create ;
   helpmode:=False ;
-  exit_code:='' ;
+
+  Cursor:=loadSprite('images'+PATH_SEP+'cursor.png');
+  Cursor.Origin:=SfmlVector2f(0,10) ;
+
+  rebuildItems() ;
 end;
 
-destructor TMainMenu.Destroy;
-begin
-  back.Free ;
-  if sublayer<>nil then sublayer.Free ;
-  button.Free ;
-  icons.Free ;
-  font.Free ;
-  menu_texts.Free ;
-  inherited Destroy ;
-end;
-
-procedure TMainMenu.Frame(dt, mx, my: Single);
-var Event:TSfmlEvent;
+function TMainMenu.FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ;
+var Event:TSfmlEventEx;
     i:Integer ;
 begin
+  Result:=TSceneResult.Normal ;
+
   if helpmode then begin
-    while Window.PollEvent(Event) do
-      begin
-        if Event.EventType = sfEvtClosed then Window.Close;
-        if (Event.EventType = sfEvtKeyPressed) then helpmode:=False ;
-        if (Event.EventType = sfEvtMouseButtonPressed) then helpmode:=False ;
+      for Event in events do begin
+        if (Event.Event.EventType = sfEvtKeyPressed) then helpmode:=False ;
+        if (Event.Event.EventType = sfEvtMouseButtonPressed) then helpmode:=False ;
       end;
     Exit ;
   end;
 
-  exit_code:='' ;
-  lastmx:=mx ;
-  lastmy:=my ;
-  while Window.PollEvent(Event) do
-    begin
-      if Event.EventType = sfEvtClosed then Window.Close;
-      if (Event.EventType = sfEvtKeyPressed) then begin
-        if (event.key.code = sfKeyEscape) then setActive(False) ;
+  for Event in events do begin
+      if (Event.Event.EventType = sfEvtKeyPressed) then begin
+        if (event.Event.key.code = sfKeyEscape) then begin
+              if (items[0]='continue') then begin
+                Exit(TSceneResult.ExitSubScene) ;
+              end;
+              if (items[0]='newgame') then begin
+                Exit(TSceneResult.Close) ;
+              end;
+        end ;
       end;
-      if (Event.EventType = sfEvtMouseButtonPressed) then
-        if (event.MouseButton.Button = sfMouseLeft) then begin
+      if (Event.Event.EventType = sfEvtMouseButtonPressed) then
+        if (event.Event.MouseButton.Button = sfMouseLeft) then begin
           for i :=0 to items.Count do
             if isMouseOver(i) then begin
-              if (items[i]='continue')or(items[i]='newgame') then begin
-                exit_code:=items[i] ;
-                setActive(False) ;
+              if (items[i]='continue') then begin
+                Exit(TSceneResult.ExitSubScene) ;
+              end;
+              if (items[i]='newgame') then begin
+                nextscene:=TViewStatic.Create(options) ;
+                with TStringList.Create do begin
+                  LoadFromFile('text'+PATH_SEP+'common.dat.'+Self.options.getLang());
+                  TViewStatic(nextscene).AddTask(Values['intro1'].Replace('\n',#10),48) ;
+                  TViewStatic(nextscene).AddTask(Values['intro2'].Replace('\n',#10),32) ;
+                  TViewStatic(nextscene).AddTask(Values['intro3'].Replace('\n',#10),32) ;
+                  Free ;
+                end;
+                Exit(TSceneResult.Switch) ;
               end;
               if (items[i]='sound_on')or(items[i]='sound_off') then begin
                 options.switchSound() ;
@@ -156,14 +167,12 @@ begin
               if items[i]=LANG_ITEM then begin
                 options.switchLang() ;
                 loadItemsText() ;
-                break ;
+                newwindowtitle:=getWindowTitle(options) ;
+                if logo<>nil then loadLogo() ;
+                Exit(TSceneResult.SetWindowTitle) ;
               end ;
               if items[i]='help' then helpmode:=True ;
-
-              if items[i]='exit' then begin
-                exit_code:='exit' ;
-                window.Close() ;
-              end;
+              if items[i]='exit' then Exit(TSceneResult.Close) ;
             end;
         end ;
     end ;
@@ -179,20 +188,10 @@ begin
   Result:=154+i*40-buttonh div 2 +shifty ;
 end;
 
-function TMainMenu.getExitCode: string;
-begin
-  Result:=exit_code ;
-end;
-
-function TMainMenu.isActive: Boolean;
-begin
-  Result:=active ;
-end;
-
 function TMainMenu.isMouseOver(i: Integer): Boolean;
 begin
-  Result:=(lastmx>getButtonX(i))and(lastmx<getButtonX(i)+buttonw)and
-    (lastmy>getButtonY(i))and(lastmy<getButtonY(i)+buttonh) ;
+  Result:=(mousex>getButtonX(i))and(mousex<getButtonX(i)+buttonw)and
+    (mousey>getButtonY(i))and(mousey<getButtonY(i)+buttonh) ;
 end;
 
 procedure TMainMenu.loadItemsText;
@@ -206,6 +205,12 @@ begin
   end;
 end;
 
+procedure TMainMenu.loadLogo;
+begin
+  logo:=LoadSprite('images'+PATH_SEP+'logo.'+options.getLang()+'.png') ;
+  logo.Position:=SfmlVector2f(0,30) ;
+end;
+
 procedure TMainMenu.rebuildItems;
 begin
   items.Clear ;
@@ -217,12 +222,13 @@ begin
   items.Add('exit') ;
 end;
 
-procedure TMainMenu.Render;
+procedure TMainMenu.RenderFunc();
 var
   i: Integer;
   shiftlang:Integer ;
 begin
-  if sublayer<>nil then window.Draw(sublayer) ;
+  if back<>nil then window.Draw(back) ;
+  if logo<>nil then window.Draw(logo) ;
 
   if helpmode then begin
     window.Draw(help_back) ;
@@ -233,7 +239,7 @@ begin
     Exit ;
   end;
 
-  window.Draw(back) ;
+  window.Draw(menu_back) ;
 
   for i := 0 to items.Count-1 do begin
     shiftlang:=0 ;
@@ -261,12 +267,8 @@ begin
       window.Draw(icons[options.getLang()]) ;
     end;
   end;
-end;
 
-procedure TMainMenu.setActive(value: Boolean);
-begin
-  active:=value ;
-  rebuildItems() ;
+  DrawSprite(Cursor,mousex,mousey) ;
 end;
 
 end.
