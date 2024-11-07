@@ -356,10 +356,6 @@ begin
   {if isInDebugView() then
     Window.SetTitle(Format('%d %d',[mx,my]));}
 
-  Cursor.Position:=SfmlVector2f(mousex,mousey) ;
-  CursorQuest.Position:=SfmlVector2f(mousex,mousey) ;
-  CursorWalk.Position:=SfmlVector2f(mousex,mousey) ;
-
   if lobj.isPictureMode() then begin
     for Event in Events do begin
       if (Event.Event.EventType = sfEvtKeyPressed) then begin
@@ -597,9 +593,10 @@ begin
   else
     if selectedobject<>nil then drawObjIcoAndText(selectedobject) ;
 
-  if not lobj.isInScript() then begin
+  if not lobj.isInScript() then
+  if subscene=nil then begin // Skip cursor for menu
   if (overobject<>nil)or((selectedobject<>nil)and(mousey>500)and(mousex>650)) then
-    Window.Draw(CursorQuest)
+    DrawSprite(CursorQuest,mousex,mousey)
   else begin
 
     usewalk:=False ;
@@ -611,7 +608,7 @@ begin
     end;
 
     if usewalk then
-      Window.Draw(CursorWalk)
+      DrawSprite(CursorWalk,mousex,mousey)
     else begin
       Cursor.Color:=createSFMLColor($FFFFFF) ;
       // Дублирование условия показа рога
@@ -621,7 +618,7 @@ begin
             Cursor.Color:=markercolors[i] ;
             Break ;
           end ;
-      Window.Draw(Cursor) ;
+      DrawSprite(Cursor,mousex,mousey) ;
     end;
   end;
 

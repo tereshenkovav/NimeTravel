@@ -236,6 +236,7 @@ begin
     window.Draw(texthelptitle) ;
     texthelp.Position := SfmlVector2f(WINDOW_W/2-texthelp.LocalBounds.Width/2,100);
     window.Draw(texthelp) ;
+    DrawSprite(Cursor,mousex,mousey) ;
     Exit ;
   end;
 
