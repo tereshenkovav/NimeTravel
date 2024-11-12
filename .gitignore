@@ -66,3 +66,7 @@ __recovery/
 
 bin/developer
 bin/text/default
+
+build/i386-win32
+build/x86_64-linux
+build/x86_64-darwin
