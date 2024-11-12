@@ -499,6 +499,10 @@ begin
   marker.Update(dt);
   MagicAura.Update(dt);
 
+  for ao in lobj.getActiveObjects() do
+    if getSprite(PREFIX_ACTIVEOBJECT,ao) is TSfmlAnimation then
+      TSfmlAnimation(getSprite(PREFIX_ACTIVEOBJECT,ao)).Update(dt);
+
   if lobj.getMusic()<>tekmusicfile then begin
     tekmusicfile:=lobj.getMusic() ;
     if Music<>nil then Music.Free ;
