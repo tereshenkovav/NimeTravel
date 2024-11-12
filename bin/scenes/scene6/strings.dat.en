@@ -1,0 +1,5 @@
+scene6_Fire=Fire
+scene6_Pony=Baker
+scene6_Pony dialog 1=The baker is very busy. It's better not to distract him.
+scene6_Fire dialog 1=It's fire magic!
+scene6_Fire dialog 2=I can memorize it, but I'm too weak to use it.

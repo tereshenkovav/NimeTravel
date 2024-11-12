@@ -291,8 +291,35 @@ begin
 end;
 
 procedure TView.loadTexts;
+var i:Integer ;
+    fname:string ;
+
+  procedure addFileWithPrefix(filename:string; prefix:string) ;
+  var j:Integer ;
+  begin
+     with TStringList.Create() do begin
+        LoadFromFile(filename) ;
+        for j:=0 to Count-1 do
+          if Trim(Strings[j])<>'' then
+            Texts.Add(prefix+'_'+Strings[j]) ;
+        Free ;
+     end ;
+  end;
+
 begin
-  Texts.LoadFromFile('text'+PATH_SEP+'strings.dat.'+options.getLang());
+  Texts.Clear() ;
+
+  i:=1 ;
+  while True do begin
+    if not DirectoryExists(Format('scenes%sscene%d',[PATH_SEP,i])) then Break ;
+    fname:=Format('scenes%sscene%d%sstrings.dat.%s',
+      [PATH_SEP,i,PATH_SEP,options.getLang()]) ;
+    if FileExists(fname) then addFileWithPrefix(fname,'scene'+IntToStr(i)) ;
+    Inc(i) ;
+  end ;
+
+  addFileWithPrefix(Format('text%sstrings.dat.%s',
+     [PATH_SEP,Self.options.getLang()]),'global') ;
 end;
 
 procedure TView.tryStartMarker(i:Integer) ;

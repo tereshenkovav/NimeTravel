@@ -1,0 +1,11 @@
+Colb=Flask
+Pony=Alchemist
+Pony dialog secondary 1=Anything else interesting?
+Pony dialog secondary 2=So far, only a levitation solution.
+Pony dialog 1=Hi! How's your research going?
+Pony dialog 2=Finally, I was able to achieve stable chemical levitation. If you helped me more often...
+Pony dialog 3=You know it yourself - I only studied the theory. My experience isn't enough even for simple spells.
+Colb dialog upper=This is levitation. I can memorize how it works. I can cast the spell in both directions. At least, this level of magic is available to me.
+Colb dialog lower=The reversed effect. The same magic, but in reversed order. I can try it.
+Colb down already=The levitation effect has already been removed.
+Colb up already=The flask is already levitating.

@@ -1,0 +1,16 @@
+Books=Books
+Pony=Guards
+Book dialog 1=Here are my books and diaries. Not many. I didn't have much time to study.
+Pony dialog secondary 1=Can you tell me what my guilt is?
+Pony dialog secondary 2=Don't argue and get ready quickly. The princess awaits you in the castle.
+Pony dialog 1=In the name of Princess Celestia, you are detained and coming with us.
+Pony dialog 2=Very funny. I haven't left this village for two years. And I'm not a subject of the princess at all.
+Pony dialog 3=Now you are a subject, you are on the territory of Equestria. Follow us and don't do anything stupid.
+Pony dialog 4=No, that won't do. I'm not going anywhere until I get an explanation.
+Pony dialog 5=The orders of the Princess are not discussed. Get ready and follow us.
+No need speak to guard=There's nothing to talk to them about right now.
+No need lower guard=Better let them hang in the air.
+Guard up OK 1=It will give me a chance. It's time to get out of here.
+Guard up OK 2=The wretch! Put us on the ground immediately!
+Guard up OK 3=Sorry, guys, but I don't want to be detained without a reason.
+Cannot out=Stop right there!
