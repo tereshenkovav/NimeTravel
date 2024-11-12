@@ -5,7 +5,8 @@ interface
 uses
   Classes, SysUtils,
   SfmlGraphics,SfmlSystem,SfmlWindow,SfmlAudio, Scene,
-  Logic,GameObject,Helpers, WayRenderer, SfmlAnimation, MainMenu, CommonClasses ;
+  Logic,GameObject,Helpers, WayRenderer, SfmlAnimation,
+  ListZOrders, MainMenu, CommonClasses ;
 
 type
 
@@ -41,9 +42,7 @@ type
     selectedobject:TGameObject ;
     targetobject:TGameObject ;
     sprites:TUniDictionary<string,TSfmlSprite> ;
-    viewsprites:TUniList<TSfmlSprite> ;
-    viewspritesz1:TUniList<TSfmlSprite> ;
-    viewspritesz2:TUniList<TSfmlSprite> ;
+    listzsprites:TListZOrders ;
     wayrenderer:TWayRenderer ;
     vx:Single ;
     vy:Single ;
@@ -77,6 +76,7 @@ type
     function getZScale():Single ;
     procedure setUpMusicAndSoundVolumes() ;
     procedure loadTexts() ;
+    function getScaleVector():TSfmlVector2f;
   public
     constructor Create(obj:TLogic; Aoptions:TOptions) ;
     procedure insertMusic(Amusic:TSfmlMusic; Afile:string) ;
@@ -111,9 +111,7 @@ function TView.Init():Boolean ;
 var i:Integer ;
 begin
   sprites:=TUniDictionary<string,TSfmlSprite>.Create() ;
-  viewsprites:=TUniList<TSfmlSprite>.Create() ;
-  viewspritesz1:=TUniList<TSfmlSprite>.Create() ;
-  viewspritesz2:=TUniList<TSfmlSprite>.Create() ;
+  listzsprites:=TListZOrders.Create ;
 
   Cursor:=loadSprite('images'+PATH_SEP+'cursor.png');
   Cursor.Origin:=SfmlVector2f(0,10) ;
@@ -242,11 +240,11 @@ begin
   TextDialog.Free ;
 
   sprites.Free ;
-  viewsprites.Free ;
   wayrenderer.Free ;
   waystack.Free ;
 
   gamemenu.Free ;
+  listzsprites.Free ;
 
   lobj.SendExit() ;
 end;
@@ -307,25 +305,19 @@ begin
   end;
 end;
 
-const EPS=0.001 ;
-function compareZ(const a:TGameObject; const b:TGameObject):Integer ;
+function TView.getScaleVector():TSfmlVector2f;
 begin
-  if a.z-b.z<-EPS then Result:=1 else
-  if a.z-b.z>EPS then Result:=-1 else
-  Result:=0 ;
-end;
+  Result:=SfmlVector2f(IfThen(ismirr,-getZScale(),getZScale()),getZScale()) ;
+end ;
 
 function TView.FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ;
 var ao:TGameObject ;
     Event:TSfmlEventEx;
-    p:TSfmlVector2f ;
     kc:TSfmlKeyCode ;
     i:Integer ;
     spellcode:Integer ;
     reverse:Boolean ;
     way_id:Integer ;
-    spr:TSfmlSprite ;
-    zsortedobjects:TUniList<TGameObject> ;
     dtleft,ddt,speedupk:Single ;
 begin
   Result:=TSceneResult.Normal ;
@@ -335,22 +327,23 @@ begin
   if isInDebugView() then
     dt:=dt*0.2;
 
-  viewsprites.Clear() ;
-  viewspritesz1.Clear() ;
-  viewspritesz2.Clear() ;
+  listzsprites.Clear() ;
   if lobj.getBackground()<>'' then
-    viewspritesz1.Add(retAndPosSprite(getSpriteStatic(PREFIX_BACKGROUND,lobj.getBackground()),0,0,0)) ;
+    listzsprites.Add(retAndPosSprite(getSpriteStatic(PREFIX_BACKGROUND,lobj.getBackground()),0,0,0),Single.MaxValue) ;
 
   if not lobj.isPictureMode() then begin
-    zsortedobjects:=TUniList<TGameObject>.Create() ;
-    zsortedobjects.AddRange(lobj.getActiveObjects());
-    zsortedobjects.Sort(compareZ) ;
-    for ao in zsortedobjects do begin
-      spr:=retAndPosSprite(getSprite(PREFIX_ACTIVEOBJECT,ao),ao.x,ao.y,ao.transp) ;
-      viewsprites.Add(spr) ;
-      if ao.z>=lobj.getHeroZ() then viewspritesz1.Add(spr) else viewspritesz2.Add(spr) ;
-    end;
-    zsortedobjects.Free ;
+    for ao in lobj.getActiveObjects() do
+      listzsprites.Add(retAndPosSprite(getSprite(PREFIX_ACTIVEOBJECT,ao),ao.x,ao.y,ao.transp),ao.z) ;
+    HeroWalk.ScaleFactor:=getScaleVector() ;
+    HeroAction.ScaleFactor:=getScaleVector() ;
+    HeroWait.ScaleFactor:=getScaleVector() ;
+    if isgo then
+      listzsprites.Add(HeroWalk,lobj.getHeroZ())
+    else
+    if playedspellstack.Count>0 then
+      listzsprites.Add(HeroAction,lobj.getHeroZ())
+    else
+      listzsprites.Add(HeroWait,lobj.getHeroZ());
   end;
 
   {if isInDebugView() then
@@ -507,10 +500,6 @@ begin
   marker.Update(dt);
   MagicAura.Update(dt);
 
-  for spr in viewsprites do
-    if spr is TSfmlAnimation then
-      TSfmlAnimation(spr).Update(dt);
-
   if lobj.getMusic()<>tekmusicfile then begin
     tekmusicfile:=lobj.getMusic() ;
     if Music<>nil then Music.Free ;
@@ -528,33 +517,11 @@ end;
 
 procedure TView.RenderFunc;
 var spr:TSfmlSprite ;
-    zscale:Single ;
     i:Integer ;
     tmpws:TUniList<Integer> ;
     usewalk:Boolean ;
 begin
-  for spr in viewspritesz1 do
-    Window.Draw(spr);
-
-  if not lobj.isPictureMode then begin
-    zscale := getZScale() ;
-  if isgo then begin
-    HeroWalk.ScaleFactor:=SfmlVector2f(IfThen(ismirr,-zscale,zscale),zscale) ;
-    Window.Draw(HeroWalk);
-  end
-  else
-  if playedspellstack.Count>0 then begin
-    HeroAction.ScaleFactor:=SfmlVector2f(IfThen(ismirr,-zscale,zscale),zscale) ;
-    Window.Draw(HeroAction);
-  end
-  else begin
-    HeroWait.ScaleFactor:=SfmlVector2f(IfThen(ismirr,-zscale,zscale),zscale) ;
-    Window.Draw(HeroWait);
-  end ;
-  end;
-
-  for spr in viewspritesz2 do
-    Window.Draw(spr);
+  listzsprites.Render(window) ;
 
   if lobj.getDialogText()<>'' then begin
     TextDialog.Color:=createSFMLColor(lobj.getDialogColor()) ;
