@@ -158,7 +158,6 @@ begin
 
   TextInfo:=createText(Font,'',18,SfmlWhite) ;
   TextDialog:=createText(Font,'',20,SfmlWhite) ;
-  TextDialog.Position:=SfmlVector2f(250,505);
 
   Marker:=TSfmlAnimation.Create('images'+PATH_SEP+'marker.png',30,34,16,20) ;
   Marker.Origin:=SfmlVector2f(15,17) ;
@@ -525,8 +524,8 @@ begin
 
   if lobj.getDialogText()<>'' then begin
     TextDialog.Color:=createSFMLColor(lobj.getDialogColor()) ;
-    TextDialog.UnicodeString:=UTF8Decode(getTextOrKey(lobj.getDialogText())) ;
-    Window.Draw(TextDialog) ;
+    drawTextInBlockWidth(TextDialog,getTextOrKey(lobj.getDialogText()),
+      240,505,450,2) ;
   end;
 
   if lobj.isPictureMode() then Exit ;
