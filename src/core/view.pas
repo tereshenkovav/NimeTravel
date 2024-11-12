@@ -388,6 +388,7 @@ begin
       if (event.Event.key.code = sfKeyF7)and DebugAllowed then lobj.executeScript('debug.script','runDebug3()') ;
       if (event.Event.key.code = sfKeyEscape)or(event.Event.key.code = sfKeyF10) then begin
         subscene:=TMainMenu.Create(false,options,'continue') ;
+        Galop.Pause;
         Exit(TSceneResult.SetSubScene) ;
       end;
       if selectedobject<>nil then begin
@@ -502,6 +503,9 @@ begin
   for ao in lobj.getActiveObjects() do
     if getSprite(PREFIX_ACTIVEOBJECT,ao) is TSfmlAnimation then
       TSfmlAnimation(getSprite(PREFIX_ACTIVEOBJECT,ao)).Update(dt);
+
+  // Возобновление после паузы при входе в меню
+  if Galop.Status=sfPaused then Galop.Play ;
 
   if lobj.getMusic()<>tekmusicfile then begin
     tekmusicfile:=lobj.getMusic() ;
