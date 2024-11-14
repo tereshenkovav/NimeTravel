@@ -18,7 +18,7 @@ type
     items:TStringList ;
     help_back:TSfmlSprite ;
     helpmode:Boolean ;
-    first_item:string ;
+    ismainmenu:Boolean ;
     shifty:Integer ;
     texthelptitle:TSfmlText ;
     texthelp:TSfmlText ;
@@ -31,7 +31,8 @@ type
     procedure setHelpText() ;
     procedure loadLogo() ;
   public
-    constructor Create(Astartmode:Boolean; Afirst_item:string; Ashifty:Integer=0) ;
+    constructor CreateAsMainMenu() ;
+    constructor CreateAsGameMenu() ;
     function Init():Boolean ; override ;
     procedure UnInit() ; override ;
     procedure RenderFunc() ; override ;
@@ -40,34 +41,30 @@ type
 
 implementation
 uses sfmlutils, ViewStatic, CommonProc, CommonData,
-  SfmlWindow, Math, SysUtils ;
+  SfmlWindow, Math, SysUtils, StrUtils ;
 
 const
   LANG_ITEM = 'lang' ;
 
 { TMainMenu }
 
-constructor TMainMenu.Create(Astartmode:Boolean;
-  Afirst_item:string; Ashifty:Integer);
-var lang:string ;
+constructor TMainMenu.CreateAsMainMenu() ;
 begin
-  first_item:=Afirst_item ;
-  shifty:=Ashifty ;
+  ismainmenu:=True ;
+  shifty:=110 ;
 
-  if not Astartmode then begin
-    back:=LoadSprite('images'+PATH_SEP+'gray.png') ; ;
-    back.Position:=SfmlVector2f(0,0) ;
-    logo:=nil ;
-  end
-  else begin
-    back:=LoadSprite('images'+PATH_SEP+'intro.png') ;
-    back.Position:=SfmlVector2f(0,0) ;
-    loadLogo() ;
-  end;
+  back:=LoadSprite('images'+PATH_SEP+'intro.png') ;
+  back.Position:=SfmlVector2f(0,0) ;
+  loadLogo() ;
+end;
 
-  icons:=TUniDictionary<string,TSfmlSprite>.Create ;
-  for lang in TCommonData.languages.getAll() do
-    icons.Add(lang,LoadSprite('images'+PATH_SEP+'lang.'+lang+'.png')) ;
+constructor TMainMenu.CreateAsGameMenu() ;
+begin
+  ismainmenu:=False ;
+
+  back:=LoadSprite('images'+PATH_SEP+'gray.png') ; ;
+  back.Position:=SfmlVector2f(0,0) ;
+  logo:=nil ;
 end;
 
 procedure TMainMenu.UnInit;
@@ -81,6 +78,7 @@ begin
 end;
 
 function TMainMenu.Init():Boolean;
+var lang:string ;
 begin
   menu_back:=LoadSprite('images'+PATH_SEP+'menu_back.png',[sloCentered]) ;
   menu_back.Position:=SfmlVector2f(WINDOW_W/2,(WINDOW_H-100)/2+shifty) ;
@@ -98,6 +96,12 @@ begin
 
   Cursor:=loadSprite('images'+PATH_SEP+'cursor.png');
   Cursor.Origin:=SfmlVector2f(0,10) ;
+
+  icons:=TUniDictionary<string,TSfmlSprite>.Create ;
+  for lang in TCommonData.languages.getAll() do
+    icons.Add(lang,LoadSprite('images'+PATH_SEP+'lang.'+lang+'.png')) ;
+
+  if ismainmenu then TCommonData.LoadMusicIfNew(TCommonData.INTRO_MUSIC) ;
 
   rebuildItems() ;
 end;
@@ -119,12 +123,10 @@ begin
   for Event in events do begin
       if (Event.Event.EventType = sfEvtKeyPressed) then begin
         if (event.Event.key.code = sfKeyEscape) then begin
-              if (items[0]='continue') then begin
+              if ismainmenu then
+                Exit(TSceneResult.Close)
+              else
                 Exit(TSceneResult.ExitSubScene) ;
-              end;
-              if (items[0]='newgame') then begin
-                Exit(TSceneResult.Close) ;
-              end;
         end ;
       end;
       if (Event.Event.EventType = sfEvtMouseButtonPressed) then
@@ -162,6 +164,10 @@ begin
               end ;
               if items[i]='help' then helpmode:=True ;
               if items[i]='exit' then Exit(TSceneResult.Close) ;
+              if items[i]='mainmenu' then begin
+                nextscene:=TMainMenu.CreateAsMainMenu() ;
+                Exit(TSceneResult.Switch) ;
+              end;
             end;
         end ;
     end ;
@@ -198,12 +204,21 @@ end;
 procedure TMainMenu.rebuildItems;
 begin
   items.Clear ;
-  items.Add(first_item) ;
-  items.Add(LANG_ITEM) ;
-  if profile.isMusicOn then items.Add('music_on') else items.Add('music_off') ;
-  if profile.isSoundOn then items.Add('sound_on') else items.Add('sound_off') ;
-  items.Add('help') ;
-  items.Add('exit') ;
+  if ismainmenu then begin
+    items.Add('newgame') ;
+    items.Add(LANG_ITEM) ;
+    items.Add(IfThen(profile.isMusicOn,'music_on','music_off')) ;
+    items.Add(IfThen(profile.isSoundOn,'sound_on','sound_off')) ;
+    items.Add('help') ;
+    items.Add('exit') ;
+  end
+  else begin
+    items.Add('continue') ;
+    items.Add(IfThen(profile.isMusicOn,'music_on','music_off')) ;
+    items.Add(IfThen(profile.isSoundOn,'sound_on','sound_off')) ;
+    items.Add('help') ;
+    items.Add('mainmenu') ;
+  end;
 end;
 
 procedure TMainMenu.RenderFunc();

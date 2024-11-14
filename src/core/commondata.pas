@@ -14,6 +14,7 @@ type
   TCommonData = class
   private
     class var profile:TProfile ;
+    class var musiccode:string ;
   public
     class var font:TSfmlFont ;
     class var texts:TTexts ;
@@ -25,7 +26,7 @@ type
     class procedure UnInit() ;
     class procedure updateMusicVolume() ;
     class procedure setProfile(Aprofile:TProfile) ;
-    class procedure LoadMusic(musicname:string) ;
+    class procedure LoadMusicIfNew(Amusiccode:string) ;
   end;
 
 implementation
@@ -41,13 +42,17 @@ begin
   languages.setCurrentByFile('text'+PATH_SEP+'default');
   texts:=TTexts.Create() ;
   reloadTexts() ;
+  musiccode:='' ;
   Result:=True ;
 end ;
 
-class procedure TCommonData.LoadMusic(musicname: string);
+class procedure TCommonData.LoadMusicIfNew(Amusiccode: string);
 begin
+  if musiccode=Amusiccode then Exit ;
+  musiccode:=Amusiccode ;
+
   if music<>nil then music.Free ;
-  music:=TSFMLMusic.Create('music'+PATH_SEP+musicname) ;
+  music:=TSFMLMusic.Create('music'+PATH_SEP+musiccode) ;
   music.Loop:=True ;
   updateMusicVolume() ;
   music.Play() ;

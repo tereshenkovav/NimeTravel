@@ -26,7 +26,6 @@ type
     MagicAura:TSfmlAnimation ;
     Galop:TSfmlSound ;
     Magic:TUniList<TSfmlSound> ;
-    tekmusicfile:string ;
     clock:TSfmlClock ;
     Cursor:TSfmlSprite ;
     CursorQuest:TSfmlSprite ;
@@ -198,8 +197,6 @@ begin
   loadTexts() ;
 
   setUpMusicAndSoundVolumes() ;
-
-  tekmusicfile:=TCommonData.INTRO_MUSIC ;
 
   flag_entered_menu:=False ;
 
@@ -411,7 +408,7 @@ begin
       if (event.Event.key.code = sfKeyF6)and DebugAllowed then lobj.executeScript('debug.script','runDebug2()') ;
       if (event.Event.key.code = sfKeyF7)and DebugAllowed then lobj.executeScript('debug.script','runDebug3()') ;
       if (event.Event.key.code = sfKeyEscape)or(event.Event.key.code = sfKeyF10) then begin
-        subscene:=TMainMenu.Create(false,'continue') ;
+        subscene:=TMainMenu.CreateAsGameMenu() ;
         Galop.Pause;
         flag_entered_menu:=True ;
         Exit(TSceneResult.SetSubScene) ;
@@ -536,10 +533,7 @@ begin
     flag_entered_menu:=False ;
   end;
 
-  if lobj.getMusic()<>tekmusicfile then begin
-    tekmusicfile:=lobj.getMusic() ;
-    TCommonData.LoadMusic(tekmusicfile) ;
-  end;
+  TCommonData.LoadMusicIfNew(lobj.getMusic()) ;
 
   finally
     lobj.EndWork() ;

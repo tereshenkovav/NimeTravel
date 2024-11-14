@@ -27,9 +27,8 @@ begin
     getWindowTitle(),'images'+PATH_SEP+'icon.png') ;
 
   TCommonData.setProfile(game.getProfile()) ;
-  TCommonData.LoadMusic(TCommonData.INTRO_MUSIC) ;
 
-  game.Run(TMainMenu.Create(true,'newgame',+110)) ;
+  game.Run(TMainMenu.CreateAsMainMenu()) ;
   game.Free ;
   TCommonData.UnInit() ;
 end ;
