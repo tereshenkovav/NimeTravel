@@ -51,7 +51,6 @@ type
     ismirr:Boolean ;
     waystack:TUniList<Integer> ;
     markerpos:TUniList<TSfmlVector2f> ;
-    markercolors:array of TSfmlColor ;
     spellstack:TUniList<Integer> ;
     playedspellstack:TUniList<Integer> ;
     lastspellclicktime:Single ;
@@ -175,18 +174,6 @@ begin
   markerpos.Add(SfmlVector2f(138,500+22)) ;
   markerpos.Add(SfmlVector2f(167,500+30)) ;
   markerpos.Add(SfmlVector2f(192,500+20)) ;
-
-  SetLength(markercolors,10) ;
-  markercolors[0]:=createSFMLColor($00FF00) ;
-  markercolors[1]:=createSFMLColor($0000FF) ;
-  markercolors[2]:=createSFMLColor($FF0000) ;
-  markercolors[3]:=createSFMLColor($FFFF00) ;
-  markercolors[4]:=createSFMLColor($FF00FF) ;
-  markercolors[5]:=createSFMLColor($00FFFF) ;
-  markercolors[6]:=createSFMLColor($FFFFFF) ;
-  markercolors[7]:=createSFMLColor($FFFFFF) ;
-  markercolors[8]:=createSFMLColor($FFFFFF) ;
-  markercolors[9]:=createSFMLColor($FFFFFF) ;
 
   spellstack:=TUniList<Integer>.Create() ;
   playedspellstack:=TUniList<Integer>.Create() ;
@@ -450,7 +437,7 @@ begin
     else
       Marker.Position:=markerpos[spellstack[0]] ;
     Marker.ScaleFactor:=SfmlVector2f(2*getZScale(),2*getZScale()) ;
-    Marker.Color:=markercolors[spellstack[0]] ;
+    Marker.Color:=TCommonData.markercolors[spellstack[0]] ;
     spellstack.Delete(0);
   end;
 
@@ -607,7 +594,7 @@ begin
       if (selectedobject<>nil)or(marker.isPlayed()) then // Нужно ли marker.isPlayed()?
         for i := 0 to lobj.getAllowerMarkerCount()-1 do
           if (dist2(markerpos[i].X,mousex,markerpos[i].Y,mousey)<MARKERRADIUS2) then begin
-            Cursor.Color:=markercolors[i] ;
+            Cursor.Color:=TCommonData.markercolors[i] ;
             Break ;
           end ;
       DrawSprite(Cursor,mousex,mousey) ;

@@ -16,6 +16,8 @@ type
     class var profile:TProfile ;
     class var musiccode:string ;
   public
+    class var markercolors:array of TSfmlColor ;
+
     class var font:TSfmlFont ;
     class var texts:TTexts ;
     class var languages:TLanguages ;
@@ -43,6 +45,19 @@ begin
   texts:=TTexts.Create() ;
   reloadTexts() ;
   musiccode:='' ;
+
+  SetLength(markercolors,10) ;
+  markercolors[0]:=createSFMLColor($00FF00) ;
+  markercolors[1]:=createSFMLColor($0000FF) ;
+  markercolors[2]:=createSFMLColor($FF0000) ;
+  markercolors[3]:=createSFMLColor($FFFF00) ;
+  markercolors[4]:=createSFMLColor($FF00FF) ;
+  markercolors[5]:=createSFMLColor($00FFFF) ;
+  markercolors[6]:=createSFMLColor($FFFFFF) ;
+  markercolors[7]:=createSFMLColor($FFFFFF) ;
+  markercolors[8]:=createSFMLColor($FFFFFF) ;
+  markercolors[9]:=createSFMLColor($FFFFFF) ;
+
   Result:=True ;
 end ;
 
