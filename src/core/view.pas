@@ -84,6 +84,7 @@ type
     procedure UnInit() ; override ;
     procedure RenderFunc() ; override ;
     function FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ; override ;
+    procedure FocusChanged(isfocus:Boolean) ; override ;
   end;
 
 implementation
@@ -335,6 +336,15 @@ function TView.getScaleVector():TSfmlVector2f;
 begin
   Result:=SfmlVector2f(IfThen(ismirr,-getZScale(),getZScale()),getZScale()) ;
 end ;
+
+procedure TView.FocusChanged(isfocus: Boolean);
+begin
+  if (isfocus) then begin
+    if Galop.Status=sfPaused then Galop.Play ;
+  end
+  else
+    Galop.Pause() ;
+end;
 
 function TView.FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ;
 var ao:TGameObject ;
