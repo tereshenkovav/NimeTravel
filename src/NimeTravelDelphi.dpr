@@ -15,7 +15,8 @@ uses
   scriptexecutor in 'core\scriptexecutor.pas',
   waysearch in 'core\waysearch.pas',
   mainmenu in 'core\mainmenu.pas',
-  viewstatic in 'core\viewstatic.pas';
+  viewstatic in 'core\viewstatic.pas',
+  commondata in 'core\commondata.pas';
 
 begin
   with TMain.Create() do begin

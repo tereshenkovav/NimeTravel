@@ -33,33 +33,6 @@ type
     function ToString():string ;
   end;
 
-  TProcSetMusicAndSound = procedure of object ;
-  TProcSetLanguage = procedure of object ;
-
-  TOptions = class
-  private
-    music:Boolean ;
-    sound:Boolean ;
-    lang:string ;
-    langsall:TStringList ;
-    procsetmusicandsound:TProcSetMusicAndSound ;
-    listprocsetlanguage:TUniList<TProcSetLanguage> ;
-  public
-    function isMusicOn():Boolean ;
-    function isSoundOn():Boolean ;
-    function getLang():string ;
-    function getLangsAll():TStringList ;
-    procedure switchMusic() ;
-    procedure switchSound() ;
-    procedure setProcSetMusicAndSound(proc:TProcSetMusicAndSound) ;
-    procedure setLang(Alang:string) ;
-    procedure switchLang() ;
-    procedure addProcSetLanguage(proc:TProcSetLanguage) ;
-    procedure delProcSetLanguage(proc:TProcSetLanguage) ;
-    constructor Create() ;
-    destructor Destroy ; override ;
-  end;
-
   TStaticTask = record
     text:string ;
     textsize:Integer ;
@@ -188,101 +161,6 @@ begin
   Result:=False ;
   for link in links do
     if link.isLinkBetween(idx1,idx2) then Exit(True) ;
-end;
-
-{ TOptions }
-
-procedure TOptions.addProcSetLanguage(proc: TProcSetLanguage);
-begin
-  if listprocsetlanguage.IndexOf(proc)=-1 then
-    listprocsetlanguage.Add(proc) ;
-end;
-
-constructor TOptions.Create;
-begin
-  listprocsetlanguage:=TUniList<TProcSetLanguage>.Create() ;
-  music:=True ;
-  sound:=True ;
-
-  langsall:=TStringList.Create() ;
-  langsall.LoadFromFile('text'+PATH_SEP+'languages') ;
-
-  setLang(DEFAULT_LANG) ;
-  if FileExists('text'+PATH_SEP+'default') then
-    with TStringList.Create() do begin
-      LoadFromFile('text'+PATH_SEP+'default') ;
-      if Count>0 then
-        setLang(Trim(Strings[0])) ;
-      Free ;
-    end;
-
-  procsetmusicandsound:=nil ;
-end;
-
-procedure TOptions.delProcSetLanguage(proc: TProcSetLanguage);
-begin
-  listprocsetlanguage.Remove(proc) ;
-end;
-
-destructor TOptions.Destroy;
-begin
-  langsall.Free ;
-  listprocsetlanguage.Free ;
-  inherited Destroy;
-end;
-
-function TOptions.getLang: string;
-begin
-  Result:=lang ;
-end;
-
-function TOptions.getLangsAll: TStringList;
-begin
-  Result:=langsall ;
-end;
-
-function TOptions.isSoundOn: Boolean;
-begin
-  Result:=sound ;
-end;
-
-function TOptions.isMusicOn: Boolean;
-begin
-  Result:=music ;
-end;
-
-procedure TOptions.setLang(Alang: string);
-var i:Integer ;
-begin
-  if lang=Alang then Exit ;
-
-  if langsall.IndexOf(Alang)=-1 then lang:=DEFAULT_LANG else lang:=Alang ;
-  for i := 0 to listprocsetlanguage.Count-1 do
-    listprocsetlanguage[i]() ;
-end;
-
-procedure TOptions.setProcSetMusicAndSound(proc: TProcSetMusicAndSound);
-begin
-  procsetmusicandsound:=proc ;
-end;
-
-procedure TOptions.switchLang;
-var idx:Integer ;
-begin
-  idx:=langsall.IndexOf(lang)+1 ;
-  setLang(langsall[idx mod langsall.Count]) ;
-end;
-
-procedure TOptions.switchMusic;
-begin
-  music:=not music ;
-  if Assigned(procsetmusicandsound) then procsetmusicandsound() ;
-end;
-
-procedure TOptions.switchSound;
-begin
-  sound:=not sound ;
-  if Assigned(procsetmusicandsound) then procsetmusicandsound() ;
 end;
 
 { TStaticTask }

@@ -1,9 +1,0 @@
-newgame=Новая игра
-continue=Продолжить
-music_on=Музыка: вкл
-sound_on=Звуки: вкл
-music_off=Музыка: выкл
-sound_off=Звуки: выкл
-lang=Язык: RU
-help=Помощь
-exit=Выход

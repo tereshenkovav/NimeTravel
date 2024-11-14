@@ -7,13 +7,11 @@ uses SfmlGraphics,
 type
   TViewStatic = class(TScene)
   private
-    Font:TSfmlFont ;
     Text:TSfmlText ;
     Tasks:TUniList<TStaticTask> ;
     tektaskidx:Integer ;
-    options:TOptions ;
   public
-    constructor Create(Aoptions:TOptions) ;
+    constructor Create() ;
     procedure AddTask(text:string; size:Integer) ;
     function Init():Boolean ; override ;
     procedure UnInit() ; override ;
@@ -22,7 +20,7 @@ type
   end;
 
 implementation
-uses SfmlWindow, SfmlSystem, SfmlUtils, View, Logic ;
+uses SfmlWindow, SfmlSystem, SfmlUtils, View, Logic, CommonData ;
 
 { TViewStatic }
 
@@ -31,22 +29,19 @@ begin
   Tasks.Add(TStaticTask.Create(text,size)) ;
 end;
 
-constructor TViewStatic.Create(Aoptions:TOptions);
+constructor TViewStatic.Create();
 begin
-  options:=Aoptions ;
   Tasks:=TUniList<TStaticTask>.Create() ;
   tektaskidx:=0 ;
 end;
 
 function TViewStatic.Init():Boolean;
 begin
-  Font:=TSfmlFont.Create('fonts'+PATH_SEP+'arial.ttf');
-  Text:=createText(font,'',18,SfmlWhite) ;
+  Text:=createText(TCommonData.font,'',18,SfmlWhite) ;
 end;
 
 procedure TViewStatic.UnInit() ;
 begin
-  Font.Free ;
   Text.Free ;
 end;
 
@@ -68,7 +63,7 @@ begin
     if next then begin
       if tektaskidx+1>=Tasks.Count then begin
         lobj:=TLogic.Create();
-        nextscene:=TView.Create(lobj,options) ;
+        nextscene:=TView.Create(lobj) ;
         Exit(TSceneResult.Switch) ;
       end
       else

@@ -117,6 +117,7 @@
         <DCCReference Include="core\waysearch.pas"/>
         <DCCReference Include="core\mainmenu.pas"/>
         <DCCReference Include="core\viewstatic.pas"/>
+        <DCCReference Include="core\commondata.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -159,6 +160,12 @@
                     </Platform>
                 </DeployFile>
                 <DeployFile LocalName="..\bin\NimeTravelDelphi.exe" Configuration="Release" Class="ProjectOutput"/>
+                <DeployFile LocalName="..\bin\NimeTravelDelphi.exe" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>NimeTravelDelphi.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Win32\Debug\NimeTravelDelphi.exe" Configuration="Debug" Class="ProjectOutput"/>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="iOSSimulator">

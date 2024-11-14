@@ -20,14 +20,12 @@ type
     HeroWalk: TSfmlAnimation;
     Horn:TSfmlSprite ;
     Zones:TUniList<TSfmlSprite> ;
-    Font:TSfmlFont ;
     TextInfo:TSfmlText ;
     TextDialog:TSfmlText ;
     Marker:TSfmlAnimation ;
     MagicAura:TSfmlAnimation ;
     Galop:TSfmlSound ;
     Magic:TUniList<TSfmlSound> ;
-    Music:TSfmlMusic ;
     tekmusicfile:string ;
     clock:TSfmlClock ;
     Cursor:TSfmlSprite ;
@@ -35,7 +33,6 @@ type
     CursorWalk:TSfmlSprite ;
     DebugAllowed:Boolean ;
     gamemenu:TMainMenu ;
-    options:TOptions ;
     lobj:TLogic ;
     Texts:TStringList ;
     overobject:TGameObject ;
@@ -59,6 +56,7 @@ type
     spellstack:TUniList<Integer> ;
     playedspellstack:TUniList<Integer> ;
     lastspellclicktime:Single ;
+    flag_entered_menu:Boolean ;
 
     function loadSpriteOrAnimation(filename:string):TSfmlSprite ;
     function getSprite(prefix:string; ao:TGameObject):TSfmlSprite ;
@@ -78,8 +76,7 @@ type
     procedure loadTexts() ;
     function getScaleVector():TSfmlVector2f;
   public
-    constructor Create(obj:TLogic; Aoptions:TOptions) ;
-    procedure insertMusic(Amusic:TSfmlMusic; Afile:string) ;
+    constructor Create(obj:TLogic) ;
     function Init():Boolean ; override ;
     procedure UnInit() ; override ;
     procedure RenderFunc() ; override ;
@@ -89,7 +86,7 @@ type
 
 implementation
 uses math,
-  sfmlutils, commonproc ;
+  sfmlutils, commonproc, CommonData ;
 
 const
   PREFIX_ACTIVEOBJECT='activeobject_' ;
@@ -102,10 +99,9 @@ const
 
 { TView }
 
-constructor TView.Create(obj:TLogic; Aoptions:TOptions);
+constructor TView.Create(obj:TLogic);
 begin
   lobj:=obj ;
-  options:=Aoptions ;
 end ;
 
 function TView.Init():Boolean ;
@@ -142,8 +138,6 @@ begin
   for i := 3 to 10 do
     Zones.Add(LoadSprite('images'+PATH_SEP+'zone.png',[sloCentered]));
 
-  Font:=TSfmlFont.Create('fonts'+PATH_SEP+'arial.ttf');
-
   Galop:=TSfmlSound.Create(TSfmlSoundBuffer.Create('sounds'+PATH_SEP+'galop.ogg'));
   Magic:=TUniList<TSfmlSound>.Create() ;
   Magic.Add(TSfmlSound.Create(TSfmlSoundBuffer.Create('sounds'+PATH_SEP+'magic1.ogg')));
@@ -157,8 +151,8 @@ begin
   Magic.Add(TSfmlSound.Create(TSfmlSoundBuffer.Create('sounds'+PATH_SEP+'magic.ogg')));
   Magic.Add(TSfmlSound.Create(TSfmlSoundBuffer.Create('sounds'+PATH_SEP+'magic.ogg')));
 
-  TextInfo:=createText(Font,'',18,SfmlWhite) ;
-  TextDialog:=createText(Font,'',20,SfmlWhite) ;
+  TextInfo:=createText(TCommonData.font,'',18,SfmlWhite) ;
+  TextDialog:=createText(TCommonData.font,'',20,SfmlWhite) ;
 
   Marker:=TSfmlAnimation.Create('images'+PATH_SEP+'marker.png',30,34,16,20) ;
   Marker.Origin:=SfmlVector2f(15,17) ;
@@ -203,12 +197,11 @@ begin
   Texts:=TStringList.Create ;
   loadTexts() ;
 
-  options.setProcSetMusicAndSound(setUpMusicAndSoundVolumes) ;
-  options.addProcSetLanguage(loadTexts) ;
   setUpMusicAndSoundVolumes() ;
 
-  Music:=nil ;
-  tekmusicfile:='' ;
+  tekmusicfile:=TCommonData.INTRO_MUSIC ;
+
+  flag_entered_menu:=False ;
 
   isgo:=False ;
   lobj.Start() ;
@@ -219,10 +212,10 @@ end;
 procedure TView.setUpMusicAndSoundVolumes;
 var i:Integer ;
 begin
-  if Music<>nil then Music.Volume:=IfThen(options.isMusicOn(),100,0) ;
-  Galop.Volume:=IfThen(options.isSoundOn(),100,0) ;
+  TCommonData.updateMusicVolume() ;
+  Galop.Volume:=IfThen(profile.isSoundOn(),100,0) ;
   for i := 0 to Magic.Count-1 do
-    Magic[i].Volume:=IfThen(options.isSoundOn(),100,0) ;
+    Magic[i].Volume:=IfThen(profile.isSoundOn(),100,0) ;
 end;
 
 procedure TView.UnInit();
@@ -262,12 +255,6 @@ procedure TView.trySetTarget(wayidx:Integer) ;
 begin
   trySetTarget(lobj.getWayPoint(wayidx).x,lobj.getWayPoint(wayidx).y) ;
 end ;
-
-procedure TView.insertMusic(Amusic: TSfmlMusic; Afile: string);
-begin
-  music:=Amusic ;
-  tekmusicfile:=Afile ;
-end;
 
 function TView.isInDebugView: Boolean;
 begin
@@ -314,13 +301,13 @@ begin
   while True do begin
     if not DirectoryExists(Format('scenes%sscene%d',[PATH_SEP,i])) then Break ;
     fname:=Format('scenes%sscene%d%sstrings.dat.%s',
-      [PATH_SEP,i,PATH_SEP,options.getLang()]) ;
+      [PATH_SEP,i,PATH_SEP,TCommonData.languages.getCurrent()]) ;
     if FileExists(fname) then addFileWithPrefix(fname,'scene'+IntToStr(i)) ;
     Inc(i) ;
   end ;
 
   addFileWithPrefix(Format('text%sstrings.dat.%s',
-     [PATH_SEP,Self.options.getLang()]),'global') ;
+     [PATH_SEP,TCommonData.languages.getCurrent()]),'global') ;
 end;
 
 procedure TView.tryStartMarker(i:Integer) ;
@@ -424,8 +411,9 @@ begin
       if (event.Event.key.code = sfKeyF6)and DebugAllowed then lobj.executeScript('debug.script','runDebug2()') ;
       if (event.Event.key.code = sfKeyF7)and DebugAllowed then lobj.executeScript('debug.script','runDebug3()') ;
       if (event.Event.key.code = sfKeyEscape)or(event.Event.key.code = sfKeyF10) then begin
-        subscene:=TMainMenu.Create(false,options,'continue') ;
+        subscene:=TMainMenu.Create(false,'continue') ;
         Galop.Pause;
+        flag_entered_menu:=True ;
         Exit(TSceneResult.SetSubScene) ;
       end;
       if selectedobject<>nil then begin
@@ -542,16 +530,15 @@ begin
       TSfmlAnimation(getSprite(PREFIX_ACTIVEOBJECT,ao)).Update(dt);
 
   // Возобновление после паузы при входе в меню
-  if Galop.Status=sfPaused then Galop.Play ;
+  if flag_entered_menu then begin
+    setUpMusicAndSoundVolumes() ;
+    if Galop.Status=sfPaused then Galop.Play ;
+    flag_entered_menu:=False ;
+  end;
 
   if lobj.getMusic()<>tekmusicfile then begin
     tekmusicfile:=lobj.getMusic() ;
-    if Music<>nil then Music.Free ;
-
-    Music:=TSFMLMusic.Create('music'+PATH_SEP+tekmusicfile) ;
-    Music.Loop:=True ;
-    setupMusicAndSoundVolumes() ;
-    Music.Play() ;
+    TCommonData.LoadMusic(tekmusicfile) ;
   end;
 
   finally

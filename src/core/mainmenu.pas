@@ -12,12 +12,9 @@ type
     menu_back: TSfmlSprite ;
     button: TSfmlSprite ;
     icons:TUniDictionary<string,TSfmlSprite> ;
-    font:TSfmlFont ;
     text:TSfmlText ;
-    menu_texts:TStringList ;
     buttonw:Integer ;
     buttonh:Integer ;
-    options:TOptions ;
     items:TStringList ;
     help_back:TSfmlSprite ;
     helpmode:Boolean ;
@@ -31,11 +28,10 @@ type
     function getButtonY(i:Integer):Integer ;
     function isMouseOver(i:Integer):Boolean ;
     procedure rebuildItems() ;
-    procedure loadItemsText() ;
+    procedure setHelpText() ;
     procedure loadLogo() ;
   public
-    constructor Create(Astartmode:Boolean;
-      Aoptions:TOptions; Afirst_item:string; Ashifty:Integer=0) ;
+    constructor Create(Astartmode:Boolean; Afirst_item:string; Ashifty:Integer=0) ;
     function Init():Boolean ; override ;
     procedure UnInit() ; override ;
     procedure RenderFunc() ; override ;
@@ -43,8 +39,8 @@ type
   end;
 
 implementation
-uses sfmlutils, ViewStatic, CommonProc,
-  SfmlWindow, SysUtils ;
+uses sfmlutils, ViewStatic, CommonProc, CommonData,
+  SfmlWindow, Math, SysUtils ;
 
 const
   LANG_ITEM = 'lang' ;
@@ -52,10 +48,9 @@ const
 { TMainMenu }
 
 constructor TMainMenu.Create(Astartmode:Boolean;
-  Aoptions:TOptions; Afirst_item:string; Ashifty:Integer);
+  Afirst_item:string; Ashifty:Integer);
 var lang:string ;
 begin
-  options:=Aoptions ;
   first_item:=Afirst_item ;
   shifty:=Ashifty ;
 
@@ -71,7 +66,7 @@ begin
   end;
 
   icons:=TUniDictionary<string,TSfmlSprite>.Create ;
-  for lang in options.getLangsAll() do
+  for lang in TCommonData.languages.getAll() do
     icons.Add(lang,LoadSprite('images'+PATH_SEP+'lang.'+lang+'.png')) ;
 end;
 
@@ -82,8 +77,6 @@ begin
   menu_back.Free ;
   button.Free ;
   icons.Free ;
-  font.Free ;
-  menu_texts.Free ;
   Cursor.Free ;
 end;
 
@@ -94,12 +87,10 @@ begin
   help_back:=LoadSprite('images'+PATH_SEP+'help_back.png') ;
   help_back.Position:=SfmlVector2f(0,0) ;
   button:=LoadSprite('images'+PATH_SEP+'button.png') ;
-  font:=TSfmlFont.Create('fonts'+PATH_SEP+'arial.ttf');
-  text:=createText(font,'',24,SfmlWhite) ;
-  texthelptitle:=createText(font,'',28,createSFMLColor($493100)) ;
-  texthelp:=createText(font,'',20,createSFMLColor($493100)) ;
-  menu_texts:=TStringList.Create ;
-  loadItemsText() ;
+  text:=createText(TCommonData.font,'',24,SfmlWhite) ;
+  texthelptitle:=createText(TCommonData.font,'',28,createSFMLColor($493100)) ;
+  texthelp:=createText(TCommonData.font,'',20,createSFMLColor($493100)) ;
+  setHelpText() ;
   buttonw:=SfmlTextureGetSize(button.Texture).X ;
   buttonh:=SfmlTextureGetSize(button.Texture).Y ;
   items:=TStringList.Create ;
@@ -144,30 +135,28 @@ begin
                 Exit(TSceneResult.ExitSubScene) ;
               end;
               if (items[i]='newgame') then begin
-                nextscene:=TViewStatic.Create(options) ;
-                with TStringList.Create do begin
-                  LoadFromFile('text'+PATH_SEP+'common.dat.'+Self.options.getLang());
-                  TViewStatic(nextscene).AddTask(Values['intro1'].Replace('\n',#10),48) ;
-                  TViewStatic(nextscene).AddTask(Values['intro2'].Replace('\n',#10),32) ;
-                  TViewStatic(nextscene).AddTask(Values['intro3'].Replace('\n',#10),32) ;
-                  Free ;
-                end;
+                nextscene:=TViewStatic.Create() ;
+                TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro1'),48) ;
+                TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro2'),32) ;
+                TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro3'),32) ;
                 Exit(TSceneResult.Switch) ;
               end;
               if (items[i]='sound_on')or(items[i]='sound_off') then begin
-                options.switchSound() ;
+                profile.switchSoundOn() ;
                 rebuildItems() ;
                 break ;
               end;
               if (items[i]='music_on')or(items[i]='music_off') then begin
-                options.switchMusic() ;
+                profile.switchMusicOn() ;
+                TCommonData.updateMusicVolume() ;
                 rebuildItems() ;
                 break ;
               end;
               if items[i]=LANG_ITEM then begin
-                options.switchLang() ;
-                loadItemsText() ;
-                newwindowtitle:=getWindowTitle(options) ;
+                TCommonData.languages.switchCurrent() ;
+                TCommonData.reloadTexts() ;
+                setHelpText() ;
+                newwindowtitle:=getWindowTitle() ;
                 if logo<>nil then loadLogo() ;
                 Exit(TSceneResult.SetWindowTitle) ;
               end ;
@@ -194,20 +183,15 @@ begin
     (mousey>getButtonY(i))and(mousey<getButtonY(i)+buttonh) ;
 end;
 
-procedure TMainMenu.loadItemsText;
+procedure TMainMenu.setHelpText;
 begin
-  menu_texts.LoadFromFile('text'+PATH_SEP+'menu.dat.'+options.getLang());
-  with TStringList.Create do begin
-    LoadFromFile('text'+PATH_SEP+'common.dat.'+Self.options.getLang());
-    texthelptitle.UnicodeString:=UTF8Decode(Values['help_caption']) ;
-    texthelp.UnicodeString:=UTF8Decode(Values['help'].Replace('\n',#10)) ;
-    Free ;
-  end;
+  texthelptitle.UnicodeString:=UTF8Decode(TCommonData.texts.getText('help_caption')) ;
+  texthelp.UnicodeString:=UTF8Decode(TCommonData.texts.getText('help_text')) ;
 end;
 
 procedure TMainMenu.loadLogo;
 begin
-  logo:=LoadSprite('images'+PATH_SEP+'logo.'+options.getLang()+'.png') ;
+  logo:=LoadSprite('images'+PATH_SEP+'logo.'+TCommonData.languages.getCurrent()+'.png') ;
   logo.Position:=SfmlVector2f(0,30) ;
 end;
 
@@ -216,8 +200,8 @@ begin
   items.Clear ;
   items.Add(first_item) ;
   items.Add(LANG_ITEM) ;
-  if options.isMusicOn then items.Add('music_on') else items.Add('music_off') ;
-  if options.isSoundOn then items.Add('sound_on') else items.Add('sound_off') ;
+  if profile.isMusicOn then items.Add('music_on') else items.Add('music_off') ;
+  if profile.isSoundOn then items.Add('sound_on') else items.Add('sound_off') ;
   items.Add('help') ;
   items.Add('exit') ;
 end;
@@ -255,7 +239,7 @@ begin
       text.Color:=createSFMLColor($895722) ;
       text.Style:=0 ;
     end;
-    text.UnicodeString:=UTF8Decode(menu_texts.Values[items[i]]) ;
+    text.UnicodeString:=UTF8Decode(TCommonData.texts.getText('menu_'+items[i])) ;
 
     if items[i]=LANG_ITEM then shiftlang:=27+10 ;
 
@@ -263,9 +247,9 @@ begin
     window.Draw(text) ;
 
     if items[i]=LANG_ITEM then begin
-      icons[options.getLang()].Position:=SfmlVector2f(
+      icons[TCommonData.languages.getCurrent()].Position:=SfmlVector2f(
         text.Position.X+text.LocalBounds.Width+10,getButtonY(i)+5) ;
-      window.Draw(icons[options.getLang()]) ;
+      window.Draw(icons[TCommonData.languages.getCurrent()]) ;
     end;
   end;
 

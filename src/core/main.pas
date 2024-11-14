@@ -7,8 +7,6 @@ uses SfmlWindow, SfmlGraphics, SfmlAudio,
 type
   TMain = class
   private
-    Music:TSfmlMusic ;
-    options:TOptions ;
   public
     procedure Run() ;
   end;
@@ -16,25 +14,24 @@ type
 implementation
 uses SysUtils, StrUtils, Types, Math, Classes,
   SfmlSystem,
-  Game, CommonProc,
+  Game, CommonProc, CommonData,
   view, viewstatic, logic, helpers, sfmlutils ;
 
 procedure TMain.Run() ;
 var game:TGame ;
-const INTRO_MUSIC = 'music_main.ogg' ;
 begin
   ChDir(ExtractFilePath(ParamStr(0))) ;
   Randomize() ;
-  options:=TOptions.Create ;
+  TCommonData.Init() ;
   game:=TGame.Create(WINDOW_W,WINDOW_H,'NimeTravel',
-    getWindowTitle(options),'images'+PATH_SEP+'icon.png') ;
+    getWindowTitle(),'images'+PATH_SEP+'icon.png') ;
 
-  Music:=TSFMLMusic.Create('music'+PATH_SEP+INTRO_MUSIC) ;
-  Music.Loop:=True ;
-  Music.Play() ;
+  TCommonData.setProfile(game.getProfile()) ;
+  TCommonData.LoadMusic(TCommonData.INTRO_MUSIC) ;
 
-  game.Run(TMainMenu.Create(true,options,'newgame',+110)) ;
+  game.Run(TMainMenu.Create(true,'newgame',+110)) ;
   game.Free ;
+  TCommonData.UnInit() ;
 end ;
 
 end.
