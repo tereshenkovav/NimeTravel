@@ -163,7 +163,7 @@ begin
               end;
               if (items[i]='newgame') then begin
                 nextscene:=TViewStatic.Create() ;
-                TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro1'),48) ;
+                TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro1'),44) ;
                 TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro2'),32) ;
                 TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro3'),32) ;
                 Exit(TSceneResult.Switch) ;
@@ -218,7 +218,6 @@ end;
 procedure TMainMenu.setHelpText;
 begin
   texthelptitle.UnicodeString:=UTF8Decode(TCommonData.texts.getText('help_caption')) ;
-  texthelp.UnicodeString:=UTF8Decode(TCommonData.texts.getText('help_text')) ;
   if spells.Count>0 then
     textjournaltitle.UnicodeString:=UTF8Decode(TCommonData.texts.getText('journal_caption'))
   else
@@ -265,8 +264,8 @@ begin
     window.Draw(help_back) ;
     texthelptitle.Position := SfmlVector2f(WINDOW_W/2-texthelptitle.LocalBounds.Width/2,60);
     window.Draw(texthelptitle) ;
-    texthelp.Position := SfmlVector2f(WINDOW_W/2-texthelp.LocalBounds.Width/2,100);
-    window.Draw(texthelp) ;
+    drawTextInBlockWidth(texthelp,TCommonData.texts.getText('help_text'),
+      50,100,WINDOW_W-100,3) ;
     DrawSprite(Cursor,mousex,mousey) ;
     Exit ;
   end;

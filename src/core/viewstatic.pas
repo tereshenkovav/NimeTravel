@@ -73,11 +73,8 @@ end;
 
 procedure TViewStatic.RenderFunc;
 begin
-  text.UnicodeString:=UTF8Decode(Tasks[tektaskidx].Text) ;
   text.CharacterSize:=Tasks[tektaskidx].textsize ;
-  text.Position:=SfmlVector2f((WINDOW_W-text.LocalBounds.Width)/2,
-     (WINDOW_H-text.LocalBounds.Height)/2) ;
-  Window.Draw(text) ;
+  drawTextInBlockWidth(text,Tasks[tektaskidx].Text,50,100,WINDOW_W-100,3) ;
 end;
 
 end.
