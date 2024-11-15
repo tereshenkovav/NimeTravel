@@ -26,11 +26,13 @@ type
     seq:array[0..9] of Integer ;
     len:Integer ;
     activated:Boolean ;
+    iconfile:string ;
     procedure GenByParam(Alen:Integer; minincpos:Integer; symmetric:Boolean) ;
     function isSpellMatchDirect(testseq:TUniList<Integer>):Boolean ;
     function isSpellMatchReverse(testseq:TUniList<Integer>):Boolean ;
     function isSpellCrossingWith(const spell:TSpell):Boolean ;
     function ToString():string ;
+    class operator Equal(a: TSpell; b: TSpell): Boolean;
   end;
 
   TStaticTask = record
@@ -88,6 +90,11 @@ begin
 end;
 
 { TSpell }
+
+class operator TSpell.Equal(a, b: TSpell): Boolean;
+begin
+  Result:=False ;
+end;
 
 procedure TSpell.GenByParam(Alen, minincpos: Integer; symmetric: Boolean);
 var i,p:Integer ;

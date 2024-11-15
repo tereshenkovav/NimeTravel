@@ -395,7 +395,7 @@ begin
       if (event.Event.key.code = sfKeyF6)and DebugAllowed then lobj.executeScript('debug.script','runDebug2()') ;
       if (event.Event.key.code = sfKeyF7)and DebugAllowed then lobj.executeScript('debug.script','runDebug3()') ;
       if (event.Event.key.code = sfKeyEscape)or(event.Event.key.code = sfKeyF10) then begin
-        subscene:=TMainMenu.CreateAsGameMenu() ;
+        subscene:=TMainMenu.CreateAsGameMenu(lobj.getActivatedSpells()) ;
         Galop.Pause;
         flag_entered_menu:=True ;
         Exit(TSceneResult.SetSubScene) ;

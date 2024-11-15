@@ -56,8 +56,8 @@ begin
       RegisterMethod('procedure setFlag(flagname:string)') ;
       RegisterMethod('procedure clearFlag(flagname:string)') ;
       RegisterMethod('function isFlagSet(flagname:string):Boolean') ;
-      RegisterMethod('procedure genSpell(spellcode:Integer; spelllen:Integer; minincpos:Integer; symmetric:Boolean)') ;
-      RegisterMethod('procedure setSpell(spellcode:Integer; spellseq:array of Integer)') ;
+      RegisterMethod('procedure genSpell(spellcode:Integer; spelllen:Integer; minincpos:Integer; symmetric:Boolean; iconscene:string; iconfile:string)') ;
+      RegisterMethod('procedure setSpell(spellcode:Integer; spellseq:array of Integer; iconscene:string; iconfile:string)') ;
       RegisterMethod('procedure playSpell(spellcode:Integer; reverse:Boolean)') ;
       RegisterMethod('procedure goPicture(picture:string; text:string)') ;
       RegisterMethod('procedure goScene(scene:string; initx:Integer; inity:Integer; initz:Single; way_idx:Integer)') ;

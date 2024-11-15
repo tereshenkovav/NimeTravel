@@ -30,6 +30,7 @@ type
     back:TSfmlSprite ;
     logo:TSfmlSprite ;
     markerseed:Single ;
+    spells:TUniList<TSpell> ;
     function getButtonX(i:Integer):Integer ;
     function getButtonY(i:Integer):Integer ;
     function isMouseOver(i:Integer):Boolean ;
@@ -38,7 +39,7 @@ type
     procedure loadLogo() ;
   public
     constructor CreateAsMainMenu() ;
-    constructor CreateAsGameMenu() ;
+    constructor CreateAsGameMenu(Aspells:TUniList<TSpell>) ;
     function Init():Boolean ; override ;
     procedure UnInit() ; override ;
     procedure RenderFunc() ; override ;
@@ -58,15 +59,17 @@ constructor TMainMenu.CreateAsMainMenu() ;
 begin
   ismainmenu:=True ;
   shifty:=110 ;
+  spells:=TUniList<TSpell>.Create() ;
 
   back:=LoadSprite('images'+PATH_SEP+'intro.png') ;
   back.Position:=SfmlVector2f(0,0) ;
   loadLogo() ;
 end;
 
-constructor TMainMenu.CreateAsGameMenu() ;
+constructor TMainMenu.CreateAsGameMenu(Aspells:TUniList<TSpell>) ;
 begin
   ismainmenu:=False ;
+  spells:=Aspells ;
 
   back:=LoadSprite('images'+PATH_SEP+'gray.png') ; ;
   back.Position:=SfmlVector2f(0,0) ;
@@ -74,9 +77,13 @@ begin
 end;
 
 procedure TMainMenu.UnInit;
+var i:Integer ;
 begin
   if back<>nil then back.Free ;
   if logo<>nil then logo.Free ;
+  for i:=0 to Length(spellicons)-1 do
+    spellicons[i].Free ;
+  SetLength(spellicons,0) ;
   menu_back.Free ;
   button.Free ;
   icons.Free ;
@@ -85,6 +92,7 @@ end;
 
 function TMainMenu.Init():Boolean;
 var lang:string ;
+    i:Integer ;
 begin
   menu_back:=LoadSprite('images'+PATH_SEP+'menu_back.png',[sloCentered]) ;
   menu_back.Position:=SfmlVector2f(WINDOW_W/2,(WINDOW_H-100)/2+shifty) ;
@@ -108,9 +116,9 @@ begin
   Marker.Origin:=SfmlVector2f(15,17) ;
   markerseed:=0 ;
 
-  SetLength(spellicons,2) ;
-  spellicons[0]:=loadSprite('scenes'+PATH_SEP+'scene6'+PATH_SEP+'fire_ico.png',[sloCentered]);
-  spellicons[1]:=loadSprite('scenes'+PATH_SEP+'scene5'+PATH_SEP+'colb_ico.png',[sloCentered]);
+  SetLength(spellicons,spells.Count) ;
+  for i:=0 to Length(spellicons)-1 do
+    spellicons[i]:=loadSprite(spells[i].iconfile,[sloCentered]);
 
   icons:=TUniDictionary<string,TSfmlSprite>.Create ;
   for lang in TCommonData.languages.getAll() do
@@ -211,7 +219,10 @@ procedure TMainMenu.setHelpText;
 begin
   texthelptitle.UnicodeString:=UTF8Decode(TCommonData.texts.getText('help_caption')) ;
   texthelp.UnicodeString:=UTF8Decode(TCommonData.texts.getText('help_text')) ;
-  textjournaltitle.UnicodeString:=UTF8Decode(TCommonData.texts.getText('journal_caption')) ;
+  if spells.Count>0 then
+    textjournaltitle.UnicodeString:=UTF8Decode(TCommonData.texts.getText('journal_caption'))
+  else
+    textjournaltitle.UnicodeString:=UTF8Decode(TCommonData.texts.getText('journal_caption_nospells')) ;
 end;
 
 procedure TMainMenu.loadLogo;
@@ -264,10 +275,10 @@ begin
     window.Draw(help_back) ;
     textjournaltitle.Position := SfmlVector2f(WINDOW_W/2-textjournaltitle.LocalBounds.Width/2,60);
     window.Draw(textjournaltitle) ;
-    for i := 0 to 1 do begin
-      DrawSprite(spellicons[i],100,140+i*70) ;
-      for j := 0 to 2 do begin
-        Marker.Color:=TCommonData.markercolors[j] ;
+    for i := 0 to spells.Count-1 do begin
+      DrawSprite(spellicons[i],100,135+i*70) ;
+      for j := 0 to spells[i].len-1 do begin
+        Marker.Color:=TCommonData.markercolors[spells[i].seq[j]] ;
         Marker.SetFrame(3+(Round(markerseed)+i*10+j) mod 9) ;
         DrawSprite(Marker,160+j*30,140+i*70) ;
       end;

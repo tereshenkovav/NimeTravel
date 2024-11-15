@@ -85,6 +85,7 @@ type
     function getActiveScenePath():string ;
     function getActiveScene():string ;
     function getAllowerMarkerCount():Integer ;
+    function getActivatedSpells():TUniList<TSpell> ;
     function isInScript():Boolean ;
     // Методы, публикуемые в скрипте
     procedure setBackground(filename:string) ;
@@ -104,8 +105,10 @@ type
     procedure setFlag(flagname:string) ;
     procedure clearFlag(flagname:string) ;
     function isFlagSet(flagname:string):Boolean ;
-    procedure genSpell(spellcode:Integer; spelllen:Integer; minincpos:Integer; symmetric:Boolean) ;
-    procedure setSpell(spellcode:Integer; spellseq:array of Integer) ;
+    procedure genSpell(spellcode:Integer; spelllen:Integer; minincpos:Integer;
+      symmetric:Boolean; icoscene,icofile:string) ;
+    procedure setSpell(spellcode:Integer; spellseq:array of Integer;
+      icoscene,icofile:string) ;
     procedure playSpell(spellcode:Integer; reverse:Boolean) ;
     procedure goPicture(picture:string; text:string) ;
     procedure goScene(newactivescene:string; initx,inity:Integer; initz:Single; way_idx:Integer) ;
@@ -127,6 +130,11 @@ type
 implementation
 uses Math, StrUtils,
   commonproc, ScriptExecutor, waysearch ;
+
+function formatSpellIcon(icoscene,icofile:string):string ;
+begin
+  Result:='scenes'+PATH_SEP+icoscene+PATH_SEP+icofile ;
+end;
 
 { TLogic }
 
@@ -276,10 +284,11 @@ begin
 end;
 
 procedure TLogic.genSpell(spellcode, spelllen, minincpos: Integer;
-  symmetric: Boolean);
+  symmetric: Boolean; icoscene,icofile:string);
 var spell:TSpell ;
 begin
   spell.GenByParam(spelllen,minincpos,symmetric);
+  spell.iconfile:=formatSpellIcon(icoscene,icofile) ;
   spells.Add(spellcode,spell);
 end;
 
@@ -296,6 +305,15 @@ end;
 function TLogic.getAllowerMarkerCount: Integer;
 begin
   Result:=allowedmarkercount ;
+end;
+
+function TLogic.getActivatedSpells: TUniList<TSpell>;
+var code:Integer ;
+begin
+  Result:=TUniList<TSpell>.Create() ;
+  for code in spells.AllKeys do
+    if spells[code].activated then
+      Result.Add(spells[code]) ;
 end;
 
 function TLogic.getActiveObjects: TUniList<TGameObject>;
@@ -632,12 +650,14 @@ begin
   EndWork() ;
 end;
 
-procedure TLogic.setSpell(spellcode: Integer; spellseq: array of Integer);
+procedure TLogic.setSpell(spellcode: Integer; spellseq: array of Integer;
+  icoscene,icofile:string);
 var spell:TSpell ;
     i:Integer ;
 begin
   spell.len:=Length(spellseq) ;
   spell.activated:=False ;
+  spell.iconfile:=formatSpellIcon(icoscene,icofile) ;
   for i := 0 to spell.len-1 do
     spell.seq[i]:=spellseq[i] ;
   spells.Add(spellcode,spell);
