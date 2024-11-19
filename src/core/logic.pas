@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils, syncobjs,
-  gameobject, helpers, commonclasses ;
+  gameobject, helpers, commonclasses, spell ;
 
 type
 

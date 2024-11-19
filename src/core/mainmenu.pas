@@ -3,7 +3,7 @@ unit mainmenu;
 interface
 uses Classes,
   SfmlGraphics, SfmlSystem,
-  CommonClasses, helpers, Scene, SfmlAnimation ;
+  CommonClasses, helpers, Scene, SfmlAnimation, Spell ;
 
 type
   TSubMode = (smNone,smHelp,smJournal) ;

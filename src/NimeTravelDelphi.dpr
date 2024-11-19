@@ -16,7 +16,8 @@ uses
   waysearch in 'core\waysearch.pas',
   mainmenu in 'core\mainmenu.pas',
   viewstatic in 'core\viewstatic.pas',
-  commondata in 'core\commondata.pas';
+  commondata in 'core\commondata.pas',
+  spell in 'core\spell.pas';
 
 begin
   with TMain.Create() do begin

@@ -118,6 +118,7 @@
         <DCCReference Include="core\mainmenu.pas"/>
         <DCCReference Include="core\viewstatic.pas"/>
         <DCCReference Include="core\commondata.pas"/>
+        <DCCReference Include="core\spell.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
