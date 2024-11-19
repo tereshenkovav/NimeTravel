@@ -30,9 +30,7 @@ end;
 procedure TSpell.GenByParam(Alen, minincpos: Integer; symmetric: Boolean);
 var i,p:Integer ;
 begin
-  //+1 Переделать на более случайное создание
   // 2 Проверять пересечение с другими
-  //+3 Задействовать симметрию
   len:=Alen ;
   for i := 0 to len-1 do
     seq[i]:=-1 ;

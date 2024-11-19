@@ -65,7 +65,9 @@ __recovery/
 *.stat
 
 bin/developer
+bin/spells.log
 bin/text/default
+bin.tests
 
 build/i386-win32
 build/x86_64-linux

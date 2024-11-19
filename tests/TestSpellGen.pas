@@ -3,7 +3,7 @@ unit TestSpellGen;
 interface
 uses
   DUnitX.TestFramework,
-  commonclasses;
+  commonclasses, Spell;
 
 type
 
@@ -36,6 +36,7 @@ uses SysUtils, StrUtils ;
 
 procedure TTestSpellGen.Setup;
 begin
+  Randomize ;
 end;
 
 procedure TTestSpellGen.TearDown;

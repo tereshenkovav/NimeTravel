@@ -183,7 +183,7 @@ begin
                 TCommonData.languages.switchCurrent() ;
                 TCommonData.reloadTexts() ;
                 setHelpText() ;
-                newwindowtitle:=getWindowTitle() ;
+                newwindowtitle:=TCommonData.texts.getText('caption') ;
                 if logo<>nil then loadLogo() ;
                 Exit(TSceneResult.SetWindowTitle) ;
               end ;
