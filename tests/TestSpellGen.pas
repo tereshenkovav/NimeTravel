@@ -63,7 +63,7 @@ begin
   cnt:=0 ;
   for i := 0 to spell.len-1 do
     if spell.seq[i]=Aminincpos-1 then Inc(cnt) ;
-  Assert.IsTrue((cnt=1) or (cnt=2),'test_mininc') ;
+  Assert.IsTrue(cnt>0,'test_mininc') ;
 
   cnt:=0 ;
   for i := 0 to spell.len-1 do

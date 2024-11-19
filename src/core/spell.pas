@@ -29,6 +29,7 @@ end;
 
 procedure TSpell.GenByParam(Alen, minincpos: Integer; symmetric: Boolean);
 var i,p:Integer ;
+    testsym:Boolean ;
 begin
   // 2 Проверять пересечение с другими
   len:=Alen ;
@@ -36,17 +37,25 @@ begin
     seq[i]:=-1 ;
 
   if symmetric then begin
-    seq[Random(len div 2)]:=minincpos-1 ;
-    for i := 0 to (len+1)div 2-1 do
+    p:=len div 2 ;
+    if len mod 2 = 1 then Inc(p) ;
+    seq[Random(p)]:=minincpos-1 ;
+    for i := 0 to p-1 do
       if seq[i]=-1 then seq[i]:=Random(minincpos-1) ;
     for i := 0 to (len+1)div 2-1 do
       seq[len-1-i]:=seq[i] ;
   end
   else begin
-    p:=Random((len+1)div 2 - 1) ;
-    if Random(2)=0 then seq[p]:=minincpos-1 else seq[len-1-p]:=minincpos-1 ;
-    for i := 0 to len-1 do
-      if seq[i]=-1 then seq[i]:=Random(minincpos-1) ;
+    repeat
+      for i := 0 to len-1 do
+        seq[i]:=-1 ;
+      seq[Random(len)]:=minincpos-1 ;
+      for i := 0 to len-1 do
+        if seq[i]=-1 then seq[i]:=Random(minincpos) ;
+      testsym:=True ;
+      for i := 0 to len-1 do
+        testsym:=testsym and (seq[i]=seq[len-1-i]) ;
+    until not testsym;
   end ;
 
   activated:=False ;
