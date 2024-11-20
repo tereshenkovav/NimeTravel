@@ -1,5 +1,20 @@
 #!/bin/bash
 
+for i in `git tag --list --sort=committerdate`; do BUILDTAG=$i; done
+
+for i in `git rev-parse HEAD`; do BUILDCOMMIT=$i; done
+BUILDCOMMIT=${BUILDCOMMIT:0:8}
+
+for i in `git rev-parse --abbrev-ref HEAD`; do BUILDBRANCH=$i; done
+
+echo $BUILDTAG $BUILDCOMMIT $BUILDBRANCH
+
+VERSION=${BUILDTAG:1}
+
+echo $BUILDTAG > ../../bin/text/version.txt
+echo $BUILDCOMMIT >> ../../bin/text/version.txt
+echo $BUILDBRANCH >> ../../bin/text/version.txt
+
 appdir=/tmp/NimeTravel.AppDir
 
 rm -rf $appdir
@@ -42,7 +57,7 @@ cp -r ../../bin/text $appdir/usr/bin
 export ARCH=x86_64
 
 echo en > $appdir/usr/bin/text/default
-appimagetool-x86_64.AppImage $appdir /tmp/NimeTravel-prologue-EN-1.1.0-x86_64.AppImage
+appimagetool-x86_64.AppImage $appdir /tmp/NimeTravel-EN-$VERSION-x86_64.AppImage
 
 echo ru > $appdir/usr/bin/text/default
-appimagetool-x86_64.AppImage $appdir /tmp/NimeTravel-prologue-RU-1.1.0-x86_64.AppImage
+appimagetool-x86_64.AppImage $appdir /tmp/NimeTravel-RU-$VERSION-x86_64.AppImage
