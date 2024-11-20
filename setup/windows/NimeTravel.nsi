@@ -19,18 +19,10 @@ XPStyle on
 ReserveFile /plugin InstallOptions.dll
 ReserveFile "runapp_${GAMELANG}.ini"
 
-!ifdef updatemode
-  OutFile "M:\NimeTravel-prologue-1.1.0-Win32-update.exe"
-!else
-  OutFile "M:\NimeTravel-prologue-${UPPERLANG}-1.1.0-Win32.exe"
-!endif
-
-var is_update
+OutFile "NimeTravel-${UPPERLANG}-${VERSION}-Win32.exe"
 
 Page directory
-!ifndef updatemode
 Page components
-!endif
 Page instfiles
 Page custom SetRunApp ValidateRunApp "$(AfterParams)" 
 
@@ -44,17 +36,9 @@ Function .onInit
   File /oname=$PLUGINSDIR\runapp_${GAMELANG}.ini "runapp_${GAMELANG}.ini"
 
   StrCpy $INSTDIR $PROGRAMFILES\NimeTravel
-
-  IfFileExists $INSTDIR\NimeTravel.exe +3
-  StrCpy $is_update "0"
-  Goto +2
-  StrCpy $is_update "1"
-  
 FunctionEnd
 
 Function .onInstSuccess
-  StrCmp $is_update "1" SkipAll
-
   ReadINIStr ${TEMP1} "$PLUGINSDIR\runapp_${GAMELANG}.ini" "Field 1" "State"
   StrCmp ${TEMP1} "0" SkipDesktop
 
@@ -69,8 +53,6 @@ SkipDesktop:
   Exec $INSTDIR\NimeTravel.exe
 
   SkipRun:
-  SkipAll:
-
 FunctionEnd
 
 Function un.onUninstSuccess
@@ -87,10 +69,6 @@ FunctionEnd
 
 Section "$(GamePrologName)"
   SectionIn RO
-
-  StrCmp $is_update "0" SkipSleep
-  Sleep 3000
-  SkipSleep:
 
   SetOutPath $INSTDIR
   File ..\..\bin\*.dll
@@ -116,10 +94,6 @@ Section "$(GamePrologName)"
   FileWrite $0 ${GAMELANG}
   FileClose $0
 
-  StrCmp $is_update "1" Skip2
-
-;  CreateDirectory $LOCALAPPDATA\NimeTravel
-  
   WriteUninstaller $INSTDIR\Uninst.exe
 
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NimeTravel" \
@@ -138,19 +112,16 @@ Section "$(GamePrologName)"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NimeTravel" \
                  "Publisher"  "$(PublisherName)"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\NimeTravel" \
-                 "DisplayVersion"  "1.1.0"
+                 "DisplayVersion"  "${VERSION}"
 
   SetOutPath $INSTDIR
   CreateDirectory "$SMPROGRAMS\$(GameName)"
   CreateShortCut "$SMPROGRAMS\$(GameName)\$(GameName).lnk" "$INSTDIR\NimeTravel.exe" "" 
 
-Skip2:
-
 SectionEnd
 
 Section "Uninstall"
   RMDir /r $INSTDIR
-  ;RMDir /r $LOCALAPPDATA\NimeTravel
   RMDir /r "$SMPROGRAMS\$(GameName)"
   Delete "$DESKTOP\$(GameName).lnk"
 

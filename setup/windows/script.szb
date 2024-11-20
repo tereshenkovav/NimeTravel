@@ -1,0 +1,17 @@
+SetCompressor LZMA
+SetCompressionLevel 9
+ZipFile NimeTravel-$LANGH$-%VERSION%-Win32.zip
+
+Files ..\..\bin\NimeTravel.exe
+Files ..\..\PascalGameEngine\csfml\win32\*.dll
+
+Dir ..\..\bin\fonts
+Dir ..\..\bin\images
+Dir ..\..\bin\music
+Dir ..\..\bin\scenes
+Dir ..\..\bin\scripts
+Dir ..\..\bin\sounds
+Dir ..\..\bin\text
+
+SetOutPath text
+Text $LANGL$\r\n default

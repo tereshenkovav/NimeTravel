@@ -2,7 +2,7 @@ LoadLanguageFile "${NSISDIR}\Contrib\Language files\Russian.nlf"
 
 LangString GameName 0 "Путешествие Нимэ"
 LangString GameGameName 0 "Игра Путешествие Нимэ"
-LangString GamePrologName 0 "Игра Путешествие Нимэ (пролог)"
+LangString GamePrologName 0 "Игра Путешествие Нимэ"
 LangString AfterParams 0 ": настройка"
 LangString PublisherName 0 "Терешенков А.В."
 LangString MsgInstError 0 "Ошибка установки игры Путешествие Нимэ!"

@@ -67,7 +67,12 @@ __recovery/
 bin/developer
 bin/spells.log
 bin/text/default
+bin/text/version.txt
 bin.tests
+
+setup/windows/*.zip
+setup/windows/*.exe
+setup/linux/*.AppImage
 
 build/i386-win32
 build/x86_64-linux
