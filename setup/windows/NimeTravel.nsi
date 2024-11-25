@@ -71,7 +71,7 @@ Section "$(GamePrologName)"
   SectionIn RO
 
   SetOutPath $INSTDIR
-  File ..\..\bin\*.dll
+  File ..\..\PascalGameEngine\csfml\win32\*.dll
   File ..\..\bin\NimeTravel.exe
   File ..\..\graphics\main.ico
 

@@ -69,6 +69,7 @@ bin/spells.log
 bin/text/default
 bin/text/version.txt
 bin.tests
+bin/*.dll
 
 setup/windows/*.zip
 setup/windows/*.exe
