@@ -62,7 +62,7 @@ begin
     end ;
     if next then begin
       if tektaskidx+1>=Tasks.Count then begin
-        lobj:=TLogic.Create();
+        lobj:=TLogic.Create(logger);
         nextscene:=TView.Create(lobj) ;
         Exit(TSceneResult.Switch) ;
       end

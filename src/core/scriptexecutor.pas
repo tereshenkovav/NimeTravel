@@ -10,7 +10,7 @@ uses
 type
   TScriptExecutor = class
   private
-    lobj:TLogic ;
+    class var lobj:TLogic ;
     procedure execProc(filename,proc:string) ;
   public
     procedure execSceneProc(scene, proc: string);
@@ -115,8 +115,11 @@ end ;
 
 procedure getError(Sender: TPSExec; ExError: TPSError; const ExParam: tbtstring; ExObject: TObject; ProcNo, Position: Cardinal);
 begin
-  Writeln('Error code: ',ErrorCode2Str(ExError)) ;
-  Writeln(ExParam) ;
+  TScriptExecutor.lobj.writeLog(Format('Error execute. Code %s, ProcNo: %d, Position: %d',
+    [ErrorCode2Str(ExError),ProcNo,Position])) ;
+  TScriptExecutor.lobj.WriteLog('ExParam: '+ExParam) ;
+  raise Exception.CreateFmt('Error execute. Code %s, ProcNo: %d, Position: %d',
+    [ErrorCode2Str(ExError),ProcNo,Position]) ;
 end ;
 
 procedure TScriptExecutor.execSceneProc(scene, proc: string);
@@ -146,11 +149,11 @@ begin
   Compiler.OnUses := ScriptOnUses;
   if not Compiler.Compile(scriptbody+'begin '+proc+' ; end.') then
   begin
-    Writeln('Error compile') ;
+    lobj.WriteLog('Error compile '+filename+' => '+proc) ;
     for i:=0 to Compiler.MsgCount-1 do
-      Writeln(Compiler.Msg[i].MessageToString) ;
+      lobj.WriteLog(Compiler.Msg[i].MessageToString) ;
     Compiler.Free;
-    Exit;
+    raise Exception.Create('Error compile '+filename+' => '+proc);
   end;
 
   Compiler.GetOutput(Data);
@@ -200,9 +203,9 @@ begin
 
   if not Exec.LoadData(Data) then
   begin
-    Writeln('Error load') ;
+    lobj.WriteLog('Error load data '+filename+' => '+proc) ;
     Exec.Free;
-    Exit;
+    raise Exception.Create('Error load data '+filename+' => '+proc);
   end;
 
   SetVariantToClass(Exec.GetVarNo(Exec.GetVar('game')), lobj);

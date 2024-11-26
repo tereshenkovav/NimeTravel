@@ -4,6 +4,7 @@ interface
 
 uses
   Classes, SysUtils, syncobjs,
+  Logger,
   gameobject, helpers, commonclasses, spell ;
 
 type
@@ -44,7 +45,7 @@ type
     IsActiveSpellReverse:Boolean ;
     newway_idx:Integer ;
     lookState:TLookState ;
-    procedure writeInfo() ;
+    logger:TLogger ;
   public
 
     procedure BeginWork() ;
@@ -123,7 +124,7 @@ type
     procedure writeLog(value:string) ;
     procedure delWayPoint(idx:Integer) ;
     //
-    constructor Create() ;
+    constructor Create(Alogger:TLogger) ;
     destructor Destroy ; override ;
   end;
 
@@ -147,7 +148,7 @@ begin
   end;
 end;
 
-constructor TLogic.Create();
+constructor TLogic.Create(Alogger:TLogger);
 begin
   inherited Create(True);
 
@@ -158,6 +159,8 @@ begin
 
   flags:=TStringList.Create() ;
   spells:=TUniDictionary<Integer,TSpell>.Create() ;
+
+  logger:=Alogger;
 
   isfinished:=False ;
   sect:=TCriticalSection.Create;
@@ -175,8 +178,6 @@ begin
   defaultcolor:=$ffdef7 ;
   ActiveSpell.len:=0 ;
   goScene('scene4',0,0,0.0,-1) ;
-
-  //writeInfo() ;
 end;
 
 procedure TLogic.delActiveObject(code: string);
@@ -418,20 +419,6 @@ begin
   BeginWork() ;
   musicfile:=filename ;
   EndWork() ;
-end;
-
-procedure TLogic.writeInfo;
-var wp:TWayPoint ;
-    wl:TWayLink ;
-    code:Integer ;
-begin
-  for wp in way do
-    Writeln(wp.idx,' ',wp.x,' ',wp.y,' ',wp.z) ;
-  for wl in links do
-    Writeln(wl.idx1,' ',wl.idx2) ;
-  Writeln('Spells') ;
-  for code in spells.AllKeys do
-    Writeln(code,' ',spells[code].ToString()) ;
 end;
 
 destructor TLogic.Destroy;
@@ -763,7 +750,7 @@ end;
 
 procedure TLogic.writeLog(value: string);
 begin
-  Writeln('Log: ',value) ;
+  logger.WriteLog('Msg from script: '+value) ;
 end;
 
 procedure TLogic.addToSpellStackIfNeed(spellstack: TUniList<Integer>);
