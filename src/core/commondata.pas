@@ -79,7 +79,8 @@ begin
   texts.loadFromFile('text'+PATH_SEP+'texts.'+languages.getCurrent()) ;
   credits:=Helpers.readAllText('text'+PATH_SEP+'credits.'+languages.getCurrent()) ;
   // Fix for working primitive procedure TScene.drawTextInBlockWidth
-  credits:=credits.Replace(#13#10,#10' ') ;
+  credits:=credits.Replace(#13,'') ;
+  credits:=credits.Replace(#10,#10' ') ;
 end;
 
 class procedure TCommonData.setProfile(Aprofile: TProfile);
