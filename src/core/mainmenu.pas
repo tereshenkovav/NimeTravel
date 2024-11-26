@@ -12,13 +12,10 @@ type
   private
     Cursor:TSfmlSprite ;
     menu_back: TSfmlSprite ;
-    button: TSfmlSprite ;
     icons:TUniDictionary<string,TSfmlSprite> ;
     Marker:TSfmlAnimation ;
     SpellIcons:array of TSfmlSprite ;
     text:TSfmlText ;
-    buttonw:Integer ;
-    buttonh:Integer ;
     items:TStringList ;
     help_back:TSfmlSprite ;
     submode:TSubMode ;
@@ -85,7 +82,6 @@ begin
     spellicons[i].Free ;
   SetLength(spellicons,0) ;
   menu_back.Free ;
-  button.Free ;
   icons.Free ;
   Cursor.Free ;
 end;
@@ -98,14 +94,11 @@ begin
   menu_back.Position:=SfmlVector2f(WINDOW_W/2,(WINDOW_H-100)/2+shifty) ;
   help_back:=LoadSprite('images'+PATH_SEP+'help_back.png') ;
   help_back.Position:=SfmlVector2f(0,0) ;
-  button:=LoadSprite('images'+PATH_SEP+'button.png') ;
   text:=createText(TCommonData.font,'',24,SfmlWhite) ;
   texthelptitle:=createText(TCommonData.font,'',28,createSFMLColor($493100)) ;
   texthelp:=createText(TCommonData.font,'',20,createSFMLColor($493100)) ;
   textjournaltitle:=createText(TCommonData.font,'',28,createSFMLColor($493100)) ;
   setHelpText() ;
-  buttonw:=SfmlTextureGetSize(button.Texture).X ;
-  buttonh:=SfmlTextureGetSize(button.Texture).Y ;
   items:=TStringList.Create ;
   submode:=smNone ;
 
@@ -206,18 +199,18 @@ end;
 
 function TMainMenu.getButtonX(i: Integer): Integer;
 begin
-  Result:=WINDOW_W div 2-buttonw div 2+(i-2)*3 ;
+  Result:=WINDOW_W div 2-200 div 2+(i-2)*3 ;
 end;
 
 function TMainMenu.getButtonY(i: Integer): Integer;
 begin
-  Result:=154+i*40-buttonh div 2 +shifty ;
+  Result:=154+i*40-40 div 2 +shifty ;
 end;
 
 function TMainMenu.isMouseOver(i: Integer): Boolean;
 begin
-  Result:=(mousex>getButtonX(i))and(mousex<getButtonX(i)+buttonw)and
-    (mousey>getButtonY(i))and(mousey<getButtonY(i)+buttonh) ;
+  Result:=(mousex>getButtonX(i))and(mousex<getButtonX(i)+200)and
+    (mousey>getButtonY(i))and(mousey<getButtonY(i)+40) ;
 end;
 
 procedure TMainMenu.setHelpText;
@@ -296,14 +289,11 @@ begin
 
   for i := 0 to items.Count-1 do begin
     shiftlang:=0 ;
-    button.Position:=SfmlVector2f(getButtonX(i),getButtonY(i)) ;
     if isMouseOver(i) then begin
-      button.Color:=createSFMLColor($FFFFFF) ;
       text.Color:=createSFMLColor($996732) ;
       text.Style:=1 ;
     end
     else begin
-      button.Color:=createSFMLColor($A0A0A0) ;
       text.Color:=createSFMLColor($895722) ;
       text.Style:=0 ;
     end;
