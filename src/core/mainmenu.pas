@@ -168,6 +168,11 @@ begin
                 TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro3'),32) ;
                 Exit(TSceneResult.Switch) ;
               end;
+              if (items[i]='fullscr_on')or(items[i]='fullscr_off') then begin
+                profile.switchFullScreen() ;
+                nextscene:=TMainMenu.CreateAsMainMenu() ;
+                Exit(TSceneResult.RebuildWindow) ;
+              end;
               if (items[i]='sound_on')or(items[i]='sound_off') then begin
                 profile.switchSoundOn() ;
                 rebuildItems() ;
@@ -236,6 +241,7 @@ begin
   if ismainmenu then begin
     items.Add('newgame') ;
     items.Add(LANG_ITEM) ;
+    items.Add(IfThen(profile.isFullScreen,'fullscr_on','fullscr_off')) ;
     items.Add(IfThen(profile.isMusicOn,'music_on','music_off')) ;
     items.Add(IfThen(profile.isSoundOn,'sound_on','sound_off')) ;
     items.Add('help') ;
