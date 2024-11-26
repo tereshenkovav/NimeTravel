@@ -24,7 +24,7 @@ type
     texthelptitle:TSfmlText ;
     textjournaltitle:TSfmlText ;
     texthelp:TSfmlText ;
-    back:TSfmlSprite ;
+    back:TSfmlTransformable ;
     logo:TSfmlSprite ;
     markerseed:Single ;
     spells:TUniList<TSpell> ;
@@ -59,7 +59,6 @@ begin
   spells:=TUniList<TSpell>.Create() ;
 
   back:=LoadSprite('images'+PATH_SEP+'intro.png') ;
-  back.Position:=SfmlVector2f(0,0) ;
   loadLogo() ;
 end;
 
@@ -68,8 +67,11 @@ begin
   ismainmenu:=False ;
   spells:=Aspells ;
 
-  back:=LoadSprite('images'+PATH_SEP+'gray.png') ; ;
-  back.Position:=SfmlVector2f(0,0) ;
+  back:=TSfmlRectangleShape.Create() ;
+  back.Position:=SfmlVector2f(0,0);
+  TSfmlRectangleShape(back).FillColor:=SfmlColorFromRGBA(0,0,0,128) ;
+  TSfmlRectangleShape(back).OutlineThickness:=0;
+  TSfmlRectangleShape(back).Size:=SfmlVector2f(WINDOW_W,500) ;
   logo:=nil ;
 end;
 
@@ -256,7 +258,10 @@ var
   shiftlang:Integer ;
   j: Integer;
 begin
-  if back<>nil then window.Draw(back) ;
+  if back<>nil then begin
+    if back is TSfmlSprite then window.Draw(TSfmlSprite(back)) ;
+    if back is TSfmlRectangleShape then window.Draw(TSfmlRectangleShape(back)) ;
+  end ;
   if logo<>nil then window.Draw(logo) ;
 
   if submode=smHelp then begin
