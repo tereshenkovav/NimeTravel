@@ -6,7 +6,7 @@ uses Classes,
   CommonClasses, helpers, Scene, SfmlAnimation, Spell ;
 
 type
-  TSubMode = (smNone,smHelp,smJournal) ;
+  TSubMode = (smNone,smHelp,smCredits,smJournal) ;
 
   TMainMenu = class(TScene)
   private
@@ -23,6 +23,7 @@ type
     shifty:Integer ;
     texthelptitle:TSfmlText ;
     textjournaltitle:TSfmlText ;
+    textcreditstitle:TSfmlText ;
     texthelp:TSfmlText ;
     back:TSfmlTransformable ;
     logo:TSfmlSprite ;
@@ -100,6 +101,7 @@ begin
   texthelptitle:=createText(TCommonData.font,'',28,createSFMLColor($493100)) ;
   texthelp:=createText(TCommonData.font,'',20,createSFMLColor($493100)) ;
   textjournaltitle:=createText(TCommonData.font,'',28,createSFMLColor($493100)) ;
+  textcreditstitle:=createText(TCommonData.font,'',28,createSFMLColor($493100)) ;
   setHelpText() ;
   items:=TStringList.Create ;
   submode:=smNone ;
@@ -188,6 +190,7 @@ begin
                 Exit(TSceneResult.SetWindowTitle) ;
               end ;
               if items[i]='help' then submode:=smHelp ;
+              if items[i]='credits' then submode:=smCredits ;
               if items[i]='journal' then submode:=smJournal ;
               if items[i]='exit' then Exit(TSceneResult.Close) ;
               if items[i]='mainmenu' then begin
@@ -222,6 +225,7 @@ begin
     textjournaltitle.UnicodeString:=UTF8Decode(TCommonData.texts.getText('journal_caption'))
   else
     textjournaltitle.UnicodeString:=UTF8Decode(TCommonData.texts.getText('journal_caption_nospells')) ;
+  textcreditstitle.UnicodeString:=UTF8Decode(TCommonData.texts.getText('menu_credits')) ;
 end;
 
 procedure TMainMenu.loadLogo;
@@ -240,6 +244,7 @@ begin
     items.Add(IfThen(profile.isMusicOn,'music_on','music_off')) ;
     items.Add(IfThen(profile.isSoundOn,'sound_on','sound_off')) ;
     items.Add('help') ;
+    items.Add('credits') ;
     items.Add('exit') ;
   end
   else begin
@@ -270,6 +275,16 @@ begin
     window.Draw(texthelptitle) ;
     drawTextInBlockWidth(texthelp,TCommonData.texts.getText('help_text'),
       50,100,WINDOW_W-100,3) ;
+    DrawSprite(Cursor,mousex,mousey) ;
+    Exit ;
+  end;
+
+  if submode=smCredits then begin
+    window.Draw(help_back) ;
+    textcreditstitle.Position := SfmlVector2f(WINDOW_W/2-textcreditstitle.LocalBounds.Width/2,60);
+    window.Draw(textcreditstitle) ;
+    drawTextInBlockWidth(texthelp,TCommonData.credits,
+      50,120,WINDOW_W-100,3) ;
     DrawSprite(Cursor,mousex,mousey) ;
     Exit ;
   end;

@@ -22,6 +22,7 @@ type
     class var texts:TTexts ;
     class var languages:TLanguages ;
     class var music:TSfmlMusic ;
+    class var credits:string ;
     const INTRO_MUSIC = 'music_main.ogg' ;
     class function Init():Boolean ;
     class procedure reloadTexts() ;
@@ -76,6 +77,9 @@ end;
 class procedure TCommonData.reloadTexts;
 begin
   texts.loadFromFile('text'+PATH_SEP+'texts.'+languages.getCurrent()) ;
+  credits:=Helpers.readAllText('text'+PATH_SEP+'credits.'+languages.getCurrent()) ;
+  // Fix for working primitive procedure TScene.drawTextInBlockWidth
+  credits:=credits.Replace(#13#10,#10' ') ;
 end;
 
 class procedure TCommonData.setProfile(Aprofile: TProfile);

@@ -16,6 +16,7 @@ menu_music_off=Музыка: выкл
 menu_sound_off=Звуки: выкл
 menu_lang=Язык: RU
 menu_help=Помощь
+menu_credits=Благодарности
 menu_journal=Заклинания
 menu_exit=Выход
 menu_mainmenu=Главное меню
