@@ -119,6 +119,7 @@
         <DCCReference Include="core\viewstatic.pas"/>
         <DCCReference Include="core\commondata.pas"/>
         <DCCReference Include="core\spell.pas"/>
+        <DCCReference Include="core\sceneclosehandler.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

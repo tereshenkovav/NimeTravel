@@ -15,7 +15,7 @@ type
 implementation
 uses SysUtils, StrUtils, Types, Math, Classes,
   SfmlSystem,
-  Game, CommonProc, CommonData, Spell,
+  Game, CommonProc, CommonData, Spell, SceneCloseHandler,
   view, viewstatic, logic, helpers, sfmlutils ;
 
 procedure TMain.GenTestSpells;
@@ -72,7 +72,7 @@ begin
   TCommonData.Init() ;
   game:=TGame.Create(WINDOW_W,WINDOW_H,'NimeTravel',
     TCommonData.texts.getText('caption'),'images'+PATH_SEP+'icon.png') ;
-
+  game.setCloseHandler(TSceneCloseHandler.Create()) ;
   TCommonData.setProfile(game.getProfile()) ;
 
   game.Run(TMainMenu.CreateAsMainMenu()) ;

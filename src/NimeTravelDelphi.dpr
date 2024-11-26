@@ -17,7 +17,8 @@ uses
   mainmenu in 'core\mainmenu.pas',
   viewstatic in 'core\viewstatic.pas',
   commondata in 'core\commondata.pas',
-  spell in 'core\spell.pas';
+  spell in 'core\spell.pas',
+  sceneclosehandler in 'core\sceneclosehandler.pas';
 
 begin
   with TMain.Create() do begin

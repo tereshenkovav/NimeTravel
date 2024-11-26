@@ -19,3 +19,6 @@ menu_help=Помощь
 menu_journal=Заклинания
 menu_exit=Выход
 menu_mainmenu=Главное меню
+but_yes=Да
+but_no=Нет
+text_close_quest=Закрыть игру?
