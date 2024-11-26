@@ -22,38 +22,42 @@ procedure TMain.GenTestSpells;
 var f:textfile ;
     i:Integer ;
     sp:TSpell ;
+    spells:TUniDictionary<Integer,TSpell> ;
 begin
+  spells:=TUniDictionary<Integer,TSpell>.Create() ;
+
   AssignFile(f,'spells.log') ;
   ReWrite(f) ;
   for i := 0 to 9 do begin
-    sp.GenByParam(3, 2, False);
+    sp.GenByParam(3, 2, False, spells);
     Writeln(f,sp.ToString()) ;
   end ;
   Writeln(f) ;
   for i := 0 to 9 do begin
-    sp.GenByParam(3, 3, True);
+    sp.GenByParam(3, 3, True, spells);
     Writeln(f,sp.ToString()) ;
   end ;
   Writeln(f) ;
   for i := 0 to 9 do begin
-    sp.GenByParam(4, 3, False);
+    sp.GenByParam(4, 3, False, spells);
     Writeln(f,sp.ToString()) ;
   end ;
   Writeln(f) ;
   for i := 0 to 9 do begin
-    sp.GenByParam(4, 4, True);
+    sp.GenByParam(4, 4, True, spells);
     Writeln(f,sp.ToString()) ;
   end ;
   Writeln(f) ;
   for i := 0 to 9 do begin
-    sp.GenByParam(5, 4, False);
+    sp.GenByParam(5, 4, False, spells);
     Writeln(f,sp.ToString()) ;
   end ;
   Writeln(f) ;
   for i := 0 to 9 do begin
-    sp.GenByParam(5, 5, True);
+    sp.GenByParam(5, 5, True, spells);
     Writeln(f,sp.ToString()) ;
   end ;
+  spells.Free ;
   CloseFile(f) ;
 end;
 

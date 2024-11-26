@@ -9,7 +9,8 @@ type
     len:Integer ;
     activated:Boolean ;
     iconfile:string ;
-    procedure GenByParam(Alen:Integer; minincpos:Integer; symmetric:Boolean) ;
+    function GenByParam(Alen:Integer; minincpos:Integer; symmetric:Boolean;
+      otherspells:TUniDictionary<Integer,TSpell>):Boolean ;
     function isSpellMatchDirect(testseq:TUniList<Integer>):Boolean ;
     function isSpellMatchReverse(testseq:TUniList<Integer>):Boolean ;
     function isSpellCrossingWith(const spell:TSpell):Boolean ;
@@ -27,12 +28,18 @@ begin
   Result:=False ;
 end;
 
-procedure TSpell.GenByParam(Alen, minincpos: Integer; symmetric: Boolean);
-var i,p:Integer ;
-    testsym:Boolean ;
+function TSpell.GenByParam(Alen, minincpos: Integer; symmetric: Boolean;
+  otherspells:TUniDictionary<Integer,TSpell>):Boolean;
+var i,p,q,code:Integer ;
+    testsym,intersected:Boolean ;
+const MAX_GEN = 100 ;
 begin
-  // 2 Проверять пересечение с другими
+  Result:=False ;
+  activated:=False ;
   len:=Alen ;
+
+  for q := 0 to MAX_GEN-1 do begin
+
   for i := 0 to len-1 do
     seq[i]:=-1 ;
 
@@ -58,7 +65,13 @@ begin
     until not testsym;
   end ;
 
-  activated:=False ;
+  intersected:=False ;
+  for code in otherspells.AllKeys do
+    if otherspells[code].isSpellCrossingWith(self) then intersected:=True ;
+
+  if not intersected then Exit(True) ;
+
+  end;
 end;
 
 function TSpell.isSpellCrossingWith(const spell: TSpell): Boolean;

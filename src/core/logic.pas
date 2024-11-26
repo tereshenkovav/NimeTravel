@@ -287,9 +287,12 @@ procedure TLogic.genSpell(spellcode, spelllen, minincpos: Integer;
   symmetric: Boolean; icoscene,icofile:string);
 var spell:TSpell ;
 begin
-  spell.GenByParam(spelllen,minincpos,symmetric);
-  spell.iconfile:=formatSpellIcon(icoscene,icofile) ;
-  spells.Add(spellcode,spell);
+  if spell.GenByParam(spelllen,minincpos,symmetric,spells) then begin
+    spell.iconfile:=formatSpellIcon(icoscene,icofile) ;
+    spells.Add(spellcode,spell);
+  end
+  else
+    raise Exception.CreateFmt('Cant create spell with code: %d',[0]);
 end;
 
 function TLogic.getActiveScene: string;
