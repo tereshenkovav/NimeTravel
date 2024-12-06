@@ -48,9 +48,9 @@ cp -R /Library/Frameworks/vorbisfile.framework $appdir/Contents/Frameworks
 cd /tmp 
 
 echo en > $appdir/Contents/MacOS/text/default
-zip -r9 NimeTravel-prologue-EN-$VERSION-MacOS.app.zip NimeTravel.app
+zip -r9 NimeTravel-EN-$VERSION-MacOS.app.zip NimeTravel.app
 hdiutil create -srcfolder $appdir -volname "NimeTravel" -fs HFS+ -fsargs "-c c=64,a=16,e=16" -format UDZO -size 30000k -imagekey zlib-level=9 NimeTravel-EN-$VERSION-MacOS.dmg
 
 echo ru > $appdir/Contents/MacOS/text/default
-zip -r9 NimeTravel-prologue-RU-$VERSION-MacOS.app.zip NimeTravel.app
+zip -r9 NimeTravel-RU-$VERSION-MacOS.app.zip NimeTravel.app
 hdiutil create -srcfolder $appdir -volname "NimeTravel" -fs HFS+ -fsargs "-c c=64,a=16,e=16" -format UDZO -size 30000k -imagekey zlib-level=9 NimeTravel-RU-$VERSION-MacOS.dmg
