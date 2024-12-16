@@ -5,7 +5,8 @@ interface
 uses
   Classes, SysUtils, syncobjs,
   Logger,
-  gameobject, helpers, commonclasses, spell ;
+  gameobject, helpers, commonclasses, spell,
+  ObjectSaver ;
 
 type
 
@@ -46,6 +47,16 @@ type
     newway_idx:Integer ;
     lookState:TLookState ;
     logger:TLogger ;
+    function WriteLogic(obj:TObject; store:TWriterAPI):Boolean ;
+    function ReadLogic(obj:TObject; store:TReaderAPI):Boolean ;
+    function WriteSpell(rec:Pointer; store:TWriterAPI):Boolean ;
+    function ReadSpell(rec:Pointer; store:TReaderAPI):Boolean ;
+    function WriteGameObject(obj:TObject; store:TWriterAPI):Boolean ;
+    function ReadGameObject(obj:TObject; store:TReaderAPI):Boolean ;
+    function WriteWayPoint(rec:Pointer; store:TWriterAPI):Boolean ;
+    function ReadWayPoint(rec:Pointer; store:TReaderAPI):Boolean ;
+    function WriteWayLink(rec:Pointer; store:TWriterAPI):Boolean ;
+    function ReadWayLink(rec:Pointer; store:TReaderAPI):Boolean ;
   public
 
     procedure BeginWork() ;
@@ -126,6 +137,8 @@ type
     //
     constructor Create(Alogger:TLogger) ;
     destructor Destroy ; override ;
+    procedure SaveToFile(const FileName:string) ;
+    procedure LoadFromFile(const FileName:string) ;
   end;
 
 implementation
@@ -399,9 +412,136 @@ begin
   end;
 end;
 
+function TLogic.ReadGameObject(obj: TObject; store: TReaderAPI): Boolean;
+begin
+  TGameObject(obj).code:=store.ReadString('code') ;
+  TGameObject(obj).filename:=store.ReadString('filename') ;
+  TGameObject(obj).icofile:=store.ReadString('icofile') ;
+  TGameObject(obj).caption:=store.ReadString('caption') ;
+  TGameObject(obj).x:=store.ReadInteger('x') ;
+  TGameObject(obj).y:=store.ReadInteger('y') ;
+  TGameObject(obj).z:=store.ReadSingle('z') ;
+  TGameObject(obj).isactive:=store.ReadBoolean('isactive') ;
+  TGameObject(obj).callbackinfo:=store.ReadString('callbackinfo') ;
+  TGameObject(obj).callbackspell:=store.ReadString('callbackspell') ;
+  TGameObject(obj).way_idx:=store.ReadInteger('way_idx') ;
+  TGameObject(obj).transp:=store.ReadInteger('transp') ;
+end;
+
+function TLogic.ReadLogic(obj: TObject; store: TReaderAPI): Boolean;
+begin
+  background:=store.ReadString('background') ;
+  musicfile:=store.ReadString('musicfile') ;
+  activescene:=store.ReadString('activescene') ;
+  herox:=store.ReadSingle('herox') ;
+  heroy:=store.ReadSingle('heroy') ;
+  heroz:=store.ReadSingle('heroz') ;
+  allowedmarkercount:=store.ReadInteger('allowedmarkercount') ;
+  Result:=True ;
+end;
+
+function TLogic.ReadSpell(rec: Pointer; store: TReaderAPI): Boolean;
+var i:Integer ;
+begin
+  TSpell(rec^).len:=store.ReadInteger('len') ;
+  for i := 0 to TSpell(rec^).len-1 do
+    TSpell(rec^).seq[i]:=store.ReadInteger(Format('seq_%d',[i])) ;
+  TSpell(rec^).activated:=store.ReadBoolean('activated') ;
+  TSpell(rec^).iconfile:=store.ReadString('iconfile') ;
+  Result:=True ;
+end;
+
+function TLogic.ReadWayLink(rec: Pointer; store: TReaderAPI): Boolean;
+begin
+  TWayLink(rec^).idx1:=store.ReadInteger('idx1') ;
+  TWayLink(rec^).idx2:=store.ReadInteger('idx2') ;
+end;
+
+function TLogic.ReadWayPoint(rec: Pointer; store: TReaderAPI): Boolean;
+begin
+  TWayPoint(rec^).idx:=store.ReadInteger('idx') ;
+  TWayPoint(rec^).x:=store.ReadInteger('x') ;
+  TWayPoint(rec^).y:=store.ReadInteger('y') ;
+  TWayPoint(rec^).z:=store.ReadSingle('z') ;
+  TWayPoint(rec^).isout:=store.ReadBoolean('isout') ;
+end;
+
 procedure TLogic.EndWork();
 begin
   sect.Leave ;
+end;
+
+procedure TLogic.SaveToFile(const FileName: string);
+var saver:TObjectSaver ;
+    code:Integer ;
+    scode:string ;
+begin
+  saver:=TObjectSaver.Create() ;
+  saver.WriteObject('vars',Self,WriteLogic) ;
+  saver.WriteStringList('flags',flags) ;
+
+  saver.WriteArrayInteger('spells',spells.AllKeys) ;
+  for code in spells.AllKeys do
+    saver.WriteRecord<TSpell>(Format('spell_%d',[code]),spells[code],WriteSpell) ;
+
+  saver.WriteArrayString('worlds',world_activeobjects.AllKeys) ;
+  for scode in world_activeobjects.AllKeys do begin
+    saver.WriteObjectList(Format('activeobjects_%s',[scode]),
+      TUniList<TObject>(world_activeobjects[scode]),WriteGameObject) ;
+    saver.WriteRecordList<TWayPoint>(Format('ways_%s',[scode]),
+      TUniList<TWayPoint>(world_way[scode]),WriteWayPoint) ;
+    saver.WriteRecordList<TWayLink>(Format('links_%s',[scode]),
+      TUniList<TWayLink>(world_links[scode]),WriteWayLink) ;
+  end;
+
+  WriteAllText(FileName,saver.getData()) ;
+  saver.Free ;
+end;
+
+procedure TLogic.LoadFromFile(const FileName: string);
+var loader:TObjectLoader ;
+    codes:TArray<Integer> ;
+    code:Integer ;
+    scode:string ;
+    scodes:TArray<string> ;
+    spell:TSpell ;
+    tmp_active_objects:TUniList<TGameObject> ;
+    tmp_ways:TUniList<TWayPoint> ;
+    tmp_links:TUniList<TWayLink> ;
+begin
+  loader:=TObjectLoader.Create(ReadAllText(FileName)) ;
+  loader.ReadObject('vars',Self,ReadLogic) ;
+  loader.ReadStringList('flags',flags) ;
+
+  spells.Clear() ;
+  loader.ReadArrayInteger('spells',codes) ;
+  for code in codes do begin
+    loader.ReadRecord<TSpell>(Format('spell_%d',[code]),@spell,ReadSpell) ;
+    spells.Add(code,spell) ;
+  end;
+
+  world_activeobjects.Clear() ;
+  world_way.Clear() ;
+  world_links.Clear() ;
+  loader.ReadArrayString('worlds',scodes) ;
+  for scode in scodes do begin
+    tmp_active_objects:=TUniList<TGameObject>.Create() ;
+    loader.ReadObjectList(Format('activeobjects_%s',[scode]),
+      TUniList<TObject>(tmp_active_objects),ReadGameObject,TGameObject) ;
+    world_activeobjects.Add(scode,tmp_active_objects) ;
+
+    tmp_ways:=TUniList<TWayPoint>.Create() ;
+    loader.ReadRecordList<TWayPoint>(Format('ways_%s',[scode]),
+      tmp_ways,ReadWayPoint) ;
+    world_way.Add(scode,tmp_ways) ;
+
+    tmp_links:=TUniList<TWayLink>.Create() ;
+    loader.ReadRecordList<TWayLink>(Format('links_%s',[scode]),
+      tmp_links,ReadWayLink) ;
+    world_links.Add(scode,tmp_links) ;
+  end;
+
+  loader.Free ;
 end;
 
 procedure TLogic.SendExit();
@@ -748,9 +888,66 @@ begin
   end;
 end;
 
+function TLogic.WriteGameObject(obj: TObject; store: TWriterAPI): Boolean;
+begin
+  store.WriteString('code',TGameObject(obj).code) ;
+  store.WriteString('filename',TGameObject(obj).filename) ;
+  store.WriteString('icofile',TGameObject(obj).icofile) ;
+  store.WriteString('caption',TGameObject(obj).caption) ;
+  store.WriteInteger('x',TGameObject(obj).x) ;
+  store.WriteInteger('y',TGameObject(obj).y) ;
+  store.WriteSingle('z',TGameObject(obj).z) ;
+  store.WriteBoolean('isactive',TGameObject(obj).isactive) ;
+  store.WriteString('callbackinfo',TGameObject(obj).callbackinfo) ;
+  store.WriteString('callbackspell',TGameObject(obj).callbackspell) ;
+  store.WriteInteger('way_idx',TGameObject(obj).way_idx) ;
+  store.WriteInteger('transp',TGameObject(obj).transp) ;
+end;
+
 procedure TLogic.writeLog(value: string);
 begin
   logger.WriteLog('Msg from script: '+value) ;
+end;
+
+function TLogic.WriteLogic(obj: TObject; store: TWriterAPI): Boolean;
+begin
+  store.WriteString('background',background) ;
+  store.WriteString('musicfile',musicfile) ;
+  store.WriteString('activescene',activescene) ;
+  store.WriteSingle('herox',herox) ;
+  store.WriteSingle('heroy',heroy) ;
+  store.WriteSingle('heroz',heroz) ;
+  store.WriteInteger('allowedmarkercount',allowedmarkercount) ;
+  Result:=True ;
+end;
+
+function TLogic.WriteSpell(rec: Pointer; store: TWriterAPI): Boolean;
+var spell:TSpell ;
+    i:Integer ;
+begin
+  spell:=TSpell(rec^) ;
+  store.WriteInteger('len',spell.len) ;
+  for i := 0 to spell.len-1 do
+    store.WriteInteger(Format('seq_%d',[i]),spell.seq[i]) ;
+  store.WriteBoolean('activated',spell.activated) ;
+  store.WriteString('iconfile',spell.iconfile) ;
+end;
+
+function TLogic.WriteWayLink(rec: Pointer; store: TWriterAPI): Boolean;
+begin
+  store.WriteInteger('idx1',TWayLink(rec^).idx1) ;
+  store.WriteInteger('idx2',TWayLink(rec^).idx2) ;
+end;
+
+function TLogic.WriteWayPoint(rec: Pointer; store: TWriterAPI): Boolean;
+var wp:TWayPoint ;
+begin
+  wp:=TWayPoint(rec^) ;
+  store.WriteInteger('idx',wp.idx) ;
+  store.WriteInteger('x',wp.x) ;
+  store.WriteInteger('y',wp.y) ;
+  store.WriteSingle('z',wp.z) ;
+  store.WriteBoolean('isout',wp.isout) ;
 end;
 
 procedure TLogic.addToSpellStackIfNeed(spellstack: TUniList<Integer>);
