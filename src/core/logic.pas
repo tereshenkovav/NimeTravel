@@ -150,6 +150,8 @@ begin
   Result:='scenes'+PATH_SEP+icoscene+PATH_SEP+icofile ;
 end;
 
+const LOGIC_VERSION = 1 ; // Данные для сериализатора
+
 { TLogic }
 
 function TLogic.buildWayStack(x, y: Integer): TUniList<Integer>;
@@ -477,6 +479,7 @@ var saver:TObjectSaver ;
     scode:string ;
 begin
   saver:=TObjectSaver.Create() ;
+  saver.SystemSection().WriteInteger('logic_version',LOGIC_VERSION) ;
   saver.WriteObject('vars',Self,WriteLogic) ;
   saver.WriteStringList('flags',flags) ;
 
