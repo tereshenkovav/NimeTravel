@@ -413,11 +413,17 @@ begin
       if (event.Event.MouseButton.Button = sfMouseLeft) then begin
         targetobject:=nil ;
         if (overobject<>nil) then begin
-          trySetTarget(overobject.way_idx) ;
-          targetobject:=overobject ;
+          if not Marker.isPlayed() then begin
+            trySetTarget(overobject.way_idx) ;
+            targetobject:=overobject ;
+          end;
         end
         else
-          if (mousey<500) then trySetTarget(mousex,mousey) ;
+          if (mousey<500) then begin
+            if not Marker.isPlayed() then begin
+              trySetTarget(mousex,mousey) ;
+            end;
+          end;
         if (selectedobject<>nil) then begin
           if ((mousey>500)and(mousex>650))or(selectedobject=overobject) then lobj.executeInfoProc(selectedobject);
         end;
