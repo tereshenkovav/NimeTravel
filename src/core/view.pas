@@ -56,6 +56,7 @@ type
     lastspellclicktime:Single ;
     flag_entered_menu:Boolean ;
     topicons:array of TSfmlSprite ;
+    cross:TSfmlSprite ;
 
     function loadSpriteOrAnimation(filename:string):TSfmlSprite ;
     function getSprite(prefix:string; ao:TGameObject):TSfmlSprite ;
@@ -182,6 +183,7 @@ begin
   topicons[2]:=LoadSprite('images'+PATH_SEP+'icon_sound.png',[sloCentered]) ;
   topicons[3]:=LoadSprite('images'+PATH_SEP+'icon_music.png',[sloCentered]) ;
   topicons[4]:=LoadSprite('images'+PATH_SEP+'icon_exit.png',[sloCentered]) ;
+  cross:=LoadSprite('images'+PATH_SEP+'cross.png',[sloCentered]) ;
 
   for i := 0 to Length(topicons)-1 do
     topicons[i].Position:=SfmlVector2f(
@@ -239,6 +241,7 @@ begin
   for i := 0 to Length(topicons)-1 do
     topicons[i].Free ;
   SetLength(topicons,0) ;
+  cross.Free ;
 
   lobj.SendExit() ;
 end;
@@ -430,11 +433,20 @@ begin
       if (event.Event.MouseButton.Button = sfMouseLeft) then begin
         for i := 0 to Length(topicons)-1 do begin
           if (Abs(topicons[i].Position.X-mousex)<64/2)and
-             (Abs(topicons[i].Position.Y-mousey)<64/2) then
-          if i=4 then begin
-            lobj.SaveToFile() ;
-            nextscene:=TMainMenu.CreateAsMainMenu() ;
-            Exit(TSceneResult.Switch) ;
+             (Abs(topicons[i].Position.Y-mousey)<64/2) then begin
+            if i=2 then begin
+              profile.switchSoundOn() ;
+              setUpMusicAndSoundVolumes() ;
+            end;
+            if i=3 then begin
+              profile.switchMusicOn() ;
+              TCommonData.updateMusicVolume() ;
+            end;
+            if i=4 then begin
+              lobj.SaveToFile() ;
+              nextscene:=TMainMenu.CreateAsMainMenu() ;
+              Exit(TSceneResult.Switch) ;
+            end;
           end;
         end;
 
@@ -627,8 +639,12 @@ begin
           topicons[i].Color:=SfmlWhite
         else
           topicons[i].Color:=TCommonData.color_nobright ;
-          window.Draw(topicons[i]) ;
-        end;
+        window.Draw(topicons[i]) ;
+        if (i=2)and(not profile.isSoundOn()) then
+          DrawSprite(cross,topicons[i].Position.X,topicons[i].Position.Y) ;
+        if (i=3)and(not profile.isMusicOn()) then
+          DrawSprite(cross,topicons[i].Position.X,topicons[i].Position.Y) ;
+      end;
 
     if usewalk then
       DrawSprite(CursorWalk,mousex,mousey)
