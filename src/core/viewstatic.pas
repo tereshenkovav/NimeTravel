@@ -74,7 +74,7 @@ end;
 procedure TViewStatic.RenderFunc;
 begin
   text.CharacterSize:=Tasks[tektaskidx].textsize ;
-  drawTextInBlockWidth(text,Tasks[tektaskidx].Text,50,100,WINDOW_W-100,3) ;
+  drawTextInBlockWidth(text,Tasks[tektaskidx].Text,50,100,wwidth-100,3) ;
 end;
 
 end.

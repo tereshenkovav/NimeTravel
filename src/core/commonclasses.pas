@@ -35,8 +35,6 @@ type
 function isLinked(links:TUniList<TWayLink>;idx1,idx2:Integer):Boolean ;
 
 const
-  WINDOW_W = 800 ;
-  WINDOW_H = 600 ;
   DEFAULT_LANG = 'ru' ;
 
 implementation

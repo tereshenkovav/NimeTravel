@@ -90,7 +90,7 @@ var lang:string ;
     i:Integer ;
 begin
   menu_back:=LoadSprite('images'+PATH_SEP+'menu_back.png',[sloCentered]) ;
-  menu_back.Position:=SfmlVector2f(WINDOW_W/2,(WINDOW_H-100)/2+shifty) ;
+  menu_back.Position:=SfmlVector2f(wwidth/2,(wheight-100)/2+shifty) ;
   help_back:=LoadSprite('images'+PATH_SEP+'help_back.png') ;
   help_back.Position:=SfmlVector2f(0,0) ;
   text:=createText(TCommonData.font,'',22,SfmlWhite) ;
@@ -212,7 +212,7 @@ end;
 
 function TMainMenu.getButtonX(i: Integer): Integer;
 begin
-  Result:=WINDOW_W div 2-200 div 2+(i-2)*3 ;
+  Result:=wwidth div 2-200 div 2+(i-2)*3 ;
 end;
 
 function TMainMenu.getButtonY(i: Integer): Integer;
@@ -281,27 +281,27 @@ begin
 
   if submode=smHelp then begin
     window.Draw(help_back) ;
-    texthelptitle.Position := SfmlVector2f(WINDOW_W/2-texthelptitle.LocalBounds.Width/2,60);
+    texthelptitle.Position := SfmlVector2f(wwidth/2-texthelptitle.LocalBounds.Width/2,60);
     window.Draw(texthelptitle) ;
     drawTextInBlockWidth(texthelp,TCommonData.texts.getText('help_text'),
-      50,100,WINDOW_W-100,3) ;
+      50,100,wwidth-100,3) ;
     DrawSprite(Cursor,mousex,mousey) ;
     Exit ;
   end;
 
   if submode=smCredits then begin
     window.Draw(help_back) ;
-    textcreditstitle.Position := SfmlVector2f(WINDOW_W/2-textcreditstitle.LocalBounds.Width/2,60);
+    textcreditstitle.Position := SfmlVector2f(wwidth/2-textcreditstitle.LocalBounds.Width/2,60);
     window.Draw(textcreditstitle) ;
     drawTextInBlockWidth(texthelp,TCommonData.credits,
-      50,120,WINDOW_W-100,3) ;
+      50,120,wwidth-100,3) ;
     DrawSprite(Cursor,mousex,mousey) ;
     Exit ;
   end;
 
   if submode=smJournal then begin
     window.Draw(help_back) ;
-    textjournaltitle.Position := SfmlVector2f(WINDOW_W/2-textjournaltitle.LocalBounds.Width/2,60);
+    textjournaltitle.Position := SfmlVector2f(wwidth/2-textjournaltitle.LocalBounds.Width/2,60);
     window.Draw(textjournaltitle) ;
     for i := 0 to spells.Count-1 do begin
       DrawSprite(spellicons[i],100,135+i*70) ;
@@ -331,7 +331,7 @@ begin
 
     if items[i]=LANG_ITEM then shiftlang:=27+10 ;
 
-    text.Position := SfmlVector2f(WINDOW_W/2-(text.LocalBounds.Width+shiftlang)/2,getButtonY(i));
+    text.Position := SfmlVector2f(wwidth/2-(text.LocalBounds.Width+shiftlang)/2,getButtonY(i));
     window.Draw(text) ;
 
     if items[i]=LANG_ITEM then begin

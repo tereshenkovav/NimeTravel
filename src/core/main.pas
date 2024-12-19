@@ -18,6 +18,9 @@ uses SysUtils, StrUtils, Types, Math, Classes,
   Game, CommonProc, CommonData, Spell, SceneCloseHandler, Logger,
   view, viewstatic, logic, helpers, sfmlutils ;
 
+const WINDOW_W=800 ;
+      WINDOW_H=600 ;
+
 procedure TMain.GenTestSpells;
 var f:textfile ;
     i:Integer ;
