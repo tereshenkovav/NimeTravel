@@ -93,7 +93,7 @@ begin
   menu_back.Position:=SfmlVector2f(WINDOW_W/2,(WINDOW_H-100)/2+shifty) ;
   help_back:=LoadSprite('images'+PATH_SEP+'help_back.png') ;
   help_back.Position:=SfmlVector2f(0,0) ;
-  text:=createText(TCommonData.font,'',24,SfmlWhite) ;
+  text:=createText(TCommonData.font,'',22,SfmlWhite) ;
   texthelptitle:=createText(TCommonData.font,'',28,createSFMLColor($493100)) ;
   texthelp:=createText(TCommonData.font,'',20,createSFMLColor($493100)) ;
   textjournaltitle:=createText(TCommonData.font,'',28,createSFMLColor($493100)) ;
@@ -217,13 +217,13 @@ end;
 
 function TMainMenu.getButtonY(i: Integer): Integer;
 begin
-  Result:=154+i*40-40 div 2 +shifty ;
+  Result:=124+i*33-40 div 2 +shifty ;
 end;
 
 function TMainMenu.isMouseOver(i: Integer): Boolean;
 begin
   Result:=(mousex>getButtonX(i))and(mousex<getButtonX(i)+200)and
-    (mousey>getButtonY(i))and(mousey<getButtonY(i)+40) ;
+    (mousey>getButtonY(i))and(mousey<getButtonY(i)+33) ;
 end;
 
 procedure TMainMenu.setHelpText;
