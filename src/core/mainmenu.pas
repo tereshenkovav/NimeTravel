@@ -154,7 +154,7 @@ begin
       end;
       if (Event.Event.EventType = sfEvtMouseButtonPressed) then
         if (event.Event.MouseButton.Button = sfMouseLeft) then begin
-          for i :=0 to items.Count do
+          for i :=0 to items.Count-1 do
             if isMouseOver(i) then begin
               if (items[i]='continue') then begin
                 Exit(TSceneResult.ExitSubScene) ;

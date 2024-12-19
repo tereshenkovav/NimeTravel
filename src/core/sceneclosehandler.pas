@@ -50,7 +50,7 @@ begin
   for event in events do
     if (Event.Event.EventType = sfEvtMouseButtonPressed) then
         if (event.Event.MouseButton.Button = sfMouseLeft) then
-          for i :=0 to items.Count do
+          for i :=0 to items.Count-1 do
             if isMouseOver(i) then begin
               if (items[i]='but_yes') then Exit(TSceneResult.Close) ;
               if (items[i]='but_no') then Exit(TSceneResult.Switch) ;
