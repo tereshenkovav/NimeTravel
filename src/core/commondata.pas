@@ -25,6 +25,7 @@ type
     class var credits:string ;
     class var intro:TSFMLSprite ;
     class var grayrect:TSfmlRectangleShape ;
+    class var color_nobright:TSfmlColor ;
     const INTRO_MUSIC = 'music_main.ogg' ;
     class function Init(window_w,window_h:Integer):Boolean ;
     class procedure reloadTexts() ;
@@ -55,6 +56,8 @@ begin
   grayrect.FillColor:=SfmlColorFromRGBA(0,0,0,128) ;
   grayrect.OutlineThickness:=0;
   grayrect.Size:=SfmlVector2f(window_w,500) ;
+
+  color_nobright:=SfmlColorFromRGBA(230,230,230,255) ;
 
   SetLength(markercolors,10) ;
   markercolors[0]:=createSFMLColor($00FF00) ;

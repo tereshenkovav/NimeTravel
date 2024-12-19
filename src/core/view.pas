@@ -55,6 +55,7 @@ type
     playedspellstack:TUniList<Integer> ;
     lastspellclicktime:Single ;
     flag_entered_menu:Boolean ;
+    topicons:array of TSfmlSprite ;
 
     function loadSpriteOrAnimation(filename:string):TSfmlSprite ;
     function getSprite(prefix:string; ao:TGameObject):TSfmlSprite ;
@@ -175,6 +176,17 @@ begin
   markerpos.Add(SfmlVector2f(167,500+30)) ;
   markerpos.Add(SfmlVector2f(192,500+20)) ;
 
+  SetLength(topicons,5) ;
+  topicons[0]:=LoadSprite('images'+PATH_SEP+'icon_help.png',[sloCentered]) ;
+  topicons[1]:=LoadSprite('images'+PATH_SEP+'icon_journal.png',[sloCentered]) ;
+  topicons[2]:=LoadSprite('images'+PATH_SEP+'icon_sound.png',[sloCentered]) ;
+  topicons[3]:=LoadSprite('images'+PATH_SEP+'icon_music.png',[sloCentered]) ;
+  topicons[4]:=LoadSprite('images'+PATH_SEP+'icon_exit.png',[sloCentered]) ;
+
+  for i := 0 to Length(topicons)-1 do
+    topicons[i].Position:=SfmlVector2f(
+      100+i*(wwidth-200)/(Length(topicons)-1),wheight*0.075) ;
+
   spellstack:=TUniList<Integer>.Create() ;
   playedspellstack:=TUniList<Integer>.Create() ;
 
@@ -204,6 +216,7 @@ end;
 
 procedure TView.UnInit();
 var key:string ;
+    i:Integer ;
 begin
   HeroWait.Free ;
   HeroWalk.Free ;
@@ -222,6 +235,10 @@ begin
 
   gamemenu.Free ;
   listzsprites.Free ;
+
+  for i := 0 to Length(topicons)-1 do
+    topicons[i].Free ;
+  SetLength(topicons,0) ;
 
   lobj.SendExit() ;
 end;
@@ -411,6 +428,16 @@ begin
     end;
     if (Event.Event.EventType = sfEvtMouseButtonPressed) then
       if (event.Event.MouseButton.Button = sfMouseLeft) then begin
+        for i := 0 to Length(topicons)-1 do begin
+          if (Abs(topicons[i].Position.X-mousex)<64/2)and
+             (Abs(topicons[i].Position.Y-mousey)<64/2) then
+          if i=4 then begin
+            lobj.SaveToFile() ;
+            nextscene:=TMainMenu.CreateAsMainMenu() ;
+            Exit(TSceneResult.Switch) ;
+          end;
+        end;
+
         targetobject:=nil ;
         if (overobject<>nil) then begin
           if not Marker.isPlayed() then begin
@@ -592,6 +619,16 @@ begin
         if lobj.isWayOut(tmpws[tmpws.Count-1]) then usewalk:=True ;
       tmpws.Free ;
     end;
+
+    if mousey<wheight*0.15 then
+      for i := 0 to Length(topicons)-1 do begin
+        if (Abs(topicons[i].Position.X-mousex)<64/2)and
+           (Abs(topicons[i].Position.Y-mousey)<64/2) then
+          topicons[i].Color:=SfmlWhite
+        else
+          topicons[i].Color:=TCommonData.color_nobright ;
+          window.Draw(topicons[i]) ;
+        end;
 
     if usewalk then
       DrawSprite(CursorWalk,mousex,mousey)
