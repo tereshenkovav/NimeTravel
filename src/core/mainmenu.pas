@@ -46,7 +46,8 @@ type
 
 implementation
 uses sfmlutils, ViewStatic, CommonProc, CommonData,
-  SfmlWindow, Math, SysUtils, StrUtils, Logic, View ;
+  SfmlWindow, Math, SysUtils, StrUtils, Logic, View,
+  SceneConfirmNewGame ;
 
 const
   LANG_ITEM = 'lang' ;
@@ -59,7 +60,7 @@ begin
   shifty:=110 ;
   spells:=TUniList<TSpell>.Create() ;
 
-  back:=LoadSprite('images'+PATH_SEP+'intro.png') ;
+  back:=TCommonData.intro ;
   loadLogo() ;
 end;
 
@@ -68,18 +69,13 @@ begin
   ismainmenu:=False ;
   spells:=Aspells ;
 
-  back:=TSfmlRectangleShape.Create() ;
-  back.Position:=SfmlVector2f(0,0);
-  TSfmlRectangleShape(back).FillColor:=SfmlColorFromRGBA(0,0,0,128) ;
-  TSfmlRectangleShape(back).OutlineThickness:=0;
-  TSfmlRectangleShape(back).Size:=SfmlVector2f(WINDOW_W,500) ;
+  back:=TCommonData.grayrect ;
   logo:=nil ;
 end;
 
 procedure TMainMenu.UnInit;
 var i:Integer ;
 begin
-  if back<>nil then back.Free ;
   if logo<>nil then logo.Free ;
   for i:=0 to Length(spellicons)-1 do
     spellicons[i].Free ;
@@ -165,12 +161,17 @@ begin
                 Exit(TSceneResult.Switch) ;
               end;
               if (items[i]='newgame') then begin
-                TLogic.clearSaveGame() ;
-                nextscene:=TViewStatic.Create() ;
-                TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro1'),44) ;
-                TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro2'),32) ;
-                TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro3'),32) ;
-                Exit(TSceneResult.Switch) ;
+                if TLogic.isSaveGameExist() then begin
+                  nextscene:=TSceneConfirmNewGame.Create() ;
+                  Exit(TSceneResult.Switch) ;
+                end
+                else begin
+                  nextscene:=TViewStatic.Create() ;
+                  TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro1'),44) ;
+                  TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro2'),32) ;
+                  TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro3'),32) ;
+                  Exit(TSceneResult.Switch) ;
+                end;
               end;
               if (items[i]='fullscr_on')or(items[i]='fullscr_off') then begin
                 profile.switchFullScreen() ;

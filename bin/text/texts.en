@@ -24,3 +24,4 @@ menu_mainmenu=Main menu
 but_yes=Yes
 but_no=No
 text_close_quest=Close the game?
+text_confirm_newgame=Start new game\nand delete saved?

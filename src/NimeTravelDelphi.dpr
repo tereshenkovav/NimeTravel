@@ -18,7 +18,8 @@ uses
   viewstatic in 'core\viewstatic.pas',
   commondata in 'core\commondata.pas',
   spell in 'core\spell.pas',
-  sceneclosehandler in 'core\sceneclosehandler.pas';
+  sceneclosehandler in 'core\sceneclosehandler.pas',
+  sceneconfirmnewgame in 'core\sceneconfirmnewgame.pas';
 
 begin
   with TMain.Create() do begin

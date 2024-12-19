@@ -24,3 +24,4 @@ menu_mainmenu=Главное меню
 but_yes=Да
 but_no=Нет
 text_close_quest=Закрыть игру?
+text_confirm_newgame=Начать новую игру\nи удалить старую?

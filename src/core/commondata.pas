@@ -23,8 +23,10 @@ type
     class var languages:TLanguages ;
     class var music:TSfmlMusic ;
     class var credits:string ;
+    class var intro:TSFMLSprite ;
+    class var grayrect:TSfmlRectangleShape ;
     const INTRO_MUSIC = 'music_main.ogg' ;
-    class function Init():Boolean ;
+    class function Init(window_w,window_h:Integer):Boolean ;
     class procedure reloadTexts() ;
     class procedure UnInit() ;
     class procedure updateMusicVolume() ;
@@ -37,7 +39,7 @@ uses SfmlUtils, Helpers, Scene, Math ;
 
 { TCommonData }
 
-class function TCommonData.Init():Boolean ;
+class function TCommonData.Init(window_w,window_h:Integer):Boolean ;
 begin
   font:=TSfmlFont.Create('fonts'+PATH_SEP+'arial.ttf');
   languages:=TLanguages.Create() ;
@@ -46,6 +48,13 @@ begin
   texts:=TTexts.Create() ;
   reloadTexts() ;
   musiccode:='' ;
+  intro:=LoadSprite('images'+PATH_SEP+'intro.png') ;
+
+  grayrect:=TSfmlRectangleShape.Create() ;
+  grayrect.Position:=SfmlVector2f(0,0);
+  grayrect.FillColor:=SfmlColorFromRGBA(0,0,0,128) ;
+  grayrect.OutlineThickness:=0;
+  grayrect.Size:=SfmlVector2f(window_w,500) ;
 
   SetLength(markercolors,10) ;
   markercolors[0]:=createSFMLColor($00FF00) ;
@@ -93,6 +102,8 @@ begin
   font.Free ;
   texts.Free ;
   languages.Free ;
+  intro.Free ;
+  grayrect.Free ;
 end ;
 
 class procedure TCommonData.updateMusicVolume();

@@ -1,4 +1,4 @@
-﻿unit SceneCloseHandler;
+﻿unit SceneConfirmNewGame;
 
 interface
 
@@ -9,9 +9,9 @@ uses
 
 type
 
-  { TSceneCloseHandler }
+  { TSceneConfirmNewGame }
 
-  TSceneCloseHandler = class(TScene)
+  TSceneConfirmNewGame = class(TScene)
   private
     Cursor:TSfmlSprite ;
     menu_back: TSfmlSprite ;
@@ -28,9 +28,9 @@ type
   end;
 
 implementation
-uses CommonData, SfmlUtils ;
+uses CommonData, SfmlUtils, MainMenu, Logic, ViewStatic ;
 
-function TSceneCloseHandler.Init():Boolean ;
+function TSceneConfirmNewGame.Init():Boolean ;
 begin
   menu_back:=LoadSprite('images'+PATH_SEP+'menu_back.png',[sloCentered]) ;
   menu_back.Position:=SfmlVector2f(wwidth/2,(wheight-100)/2) ;
@@ -42,7 +42,7 @@ begin
   items.Add('but_no') ;
 end ;
 
-function TSceneCloseHandler.FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ;
+function TSceneConfirmNewGame.FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ;
 var event:TSfmlEventEx ;
     i:Integer ;
 begin
@@ -52,22 +52,32 @@ begin
         if (event.Event.MouseButton.Button = sfMouseLeft) then
           for i :=0 to items.Count-1 do
             if isMouseOver(i) then begin
-              if (items[i]='but_yes') then Exit(TSceneResult.Close) ;
-              if (items[i]='but_no') then Exit(TSceneResult.Switch) ;
+              if (items[i]='but_yes') then begin
+                TLogic.clearSaveGame() ;
+                nextscene:=TViewStatic.Create() ;
+                TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro1'),44) ;
+                TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro2'),32) ;
+                TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro3'),32) ;
+                Exit(TSceneResult.Switch) ;
+              end;
+              if (items[i]='but_no') then begin
+                nextscene:=TMainMenu.CreateAsMainMenu() ;
+                Exit(TSceneResult.Switch) ;
+              end;
             end;
 end ;
 
-function TSceneCloseHandler.getButtonX(i: Integer): Integer;
+function TSceneConfirmNewGame.getButtonX(i: Integer): Integer;
 begin
   Result:=wwidth div 2-50+(i)*100 ;
 end;
 
-function TSceneCloseHandler.getButtonY(i: Integer): Integer;
+function TSceneConfirmNewGame.getButtonY(i: Integer): Integer;
 begin
   Result:=250 ;
 end;
 
-function TSceneCloseHandler.isMouseOver(i: Integer): Boolean;
+function TSceneConfirmNewGame.isMouseOver(i: Integer): Boolean;
 begin
   text.UnicodeString:=UTF8Decode(TCommonData.texts.getText(items[i])) ;
   text.Position := SfmlVector2f(getButtonX(i)-text.LocalBounds.Width/2,getButtonY(i));
@@ -77,7 +87,7 @@ begin
     (mousey<text.GlobalBounds.Top+text.GlobalBounds.Height) ;
 end;
 
-procedure TSceneCloseHandler.RenderFunc() ;
+procedure TSceneConfirmNewGame.RenderFunc() ;
 var i:Integer ;
 begin
   DrawSprite(TCommonData.intro,0,0) ;
@@ -85,7 +95,7 @@ begin
 
   text.Color:=createSFMLColor($895722) ;
   text.Style:=0 ;
-  text.UnicodeString:=UTF8Decode(TCommonData.texts.getText('text_close_quest')) ;
+  text.UnicodeString:=UTF8Decode(TCommonData.texts.getText('text_confirm_newgame')) ;
   DrawTextCentered(text,wwidth/2,170) ;
 
   for i := 0 to items.Count-1 do begin
@@ -105,7 +115,7 @@ begin
   DrawSprite(Cursor,mousex,mousey) ;
 end ;
 
-procedure TSceneCloseHandler.UnInit() ;
+procedure TSceneConfirmNewGame.UnInit() ;
 begin
   menu_back.Free ;
   Cursor.Free ;

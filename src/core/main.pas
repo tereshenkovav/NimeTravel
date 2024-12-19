@@ -69,7 +69,7 @@ begin
   if FileExists('developer') then GenTestSpells() ;
 
   ChDir(ExtractFilePath(ParamStr(0))) ;
-  TCommonData.Init() ;
+  TCommonData.Init(WINDOW_W,WINDOW_H) ;
   game:=TGame.Create(WINDOW_W,WINDOW_H,'NimeTravel',
     TCommonData.texts.getText('caption'),'images'+PATH_SEP+'icon.png') ;
   game.setCloseHandler(TSceneCloseHandler.Create()) ;
