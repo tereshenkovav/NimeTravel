@@ -57,6 +57,10 @@ type
     function ReadWayPoint(rec:Pointer; store:TReaderAPI):Boolean ;
     function WriteWayLink(rec:Pointer; store:TWriterAPI):Boolean ;
     function ReadWayLink(rec:Pointer; store:TReaderAPI):Boolean ;
+
+    procedure LoadFromFile() ;
+    class function getSaveGameFileName():string ;
+    procedure RestoreSceneFromWorld() ;
   public
 
     procedure BeginWork() ;
@@ -137,13 +141,14 @@ type
     //
     constructor Create(Alogger:TLogger) ;
     destructor Destroy ; override ;
-    procedure SaveToFile(const FileName:string) ;
-    procedure LoadFromFile(const FileName:string) ;
+    procedure SaveToFile() ;
+    class function isSaveGameExist():Boolean ;
+    class procedure clearSaveGame() ;
   end;
 
 implementation
 uses Math, StrUtils,
-  commonproc, ScriptExecutor, waysearch ;
+  commonproc, ScriptExecutor, waysearch, HomeDir ;
 
 function formatSpellIcon(icoscene,icofile:string):string ;
 begin
@@ -185,14 +190,22 @@ begin
   inscript:=False ;
   background:='' ;
   musicfile:='' ;
-  with TScriptExecutor.Create(Self) do begin
-    execScriptProc('gen_spells.script','genSpells()') ;
-    Free ;
-  end;
+  newway_idx:=-1 ;
 
   defaultcolor:=$ffdef7 ;
   ActiveSpell.len:=0 ;
-  goScene('scene4',0,0,0.0,-1) ;
+
+  if isSaveGameExist() then begin
+    LoadFromFile() ;
+    RestoreSceneFromWorld() ;
+  end
+  else begin
+    with TScriptExecutor.Create(Self) do begin
+      execScriptProc('gen_spells.script','genSpells()') ;
+      Free ;
+    end;
+    goScene('scene4',0,0,0.0,-1) ;
+  end;
 end;
 
 procedure TLogic.delActiveObject(code: string);
@@ -370,6 +383,11 @@ begin
   Result:=musicfile ;
 end;
 
+class function TLogic.getSaveGameFileName: string;
+begin
+  Result:=THomeDir.getFileNameInHome('NimeTravel','game.json') ;
+end;
+
 function TLogic.getDialogColor: Cardinal;
 begin
   Result:=dialogcolor ;
@@ -468,12 +486,20 @@ begin
   TWayPoint(rec^).isout:=store.ReadBoolean('isout') ;
 end;
 
+procedure TLogic.RestoreSceneFromWorld;
+begin
+  activeobjects:=TUniList<TGameObject>(world_activeobjects[activescene]) ;
+  way:=TUniList<TWayPoint>(world_way[activescene]) ;
+  links:=TUniList<TWayLink>(world_links[activescene]) ;
+  background:=world_backgrounds[activescene] ;
+end;
+
 procedure TLogic.EndWork();
 begin
   sect.Leave ;
 end;
 
-procedure TLogic.SaveToFile(const FileName: string);
+procedure TLogic.SaveToFile();
 var saver:TObjectSaver ;
     code:Integer ;
     scode:string ;
@@ -488,6 +514,7 @@ begin
     saver.WriteRecord<TSpell>(Format('spell_%d',[code]),spells[code],WriteSpell) ;
 
   saver.WriteArrayString('worlds',world_activeobjects.AllKeys) ;
+  saver.WriteStringDictionary('world_backgrounds',world_backgrounds) ;
   for scode in world_activeobjects.AllKeys do begin
     saver.WriteObjectList(Format('activeobjects_%s',[scode]),
       TUniList<TObject>(world_activeobjects[scode]),WriteGameObject) ;
@@ -497,11 +524,12 @@ begin
       TUniList<TWayLink>(world_links[scode]),WriteWayLink) ;
   end;
 
-  WriteAllText(FileName,saver.getData()) ;
+  THomeDir.createDirInHomeIfNeed('NimeTravel') ;
+  WriteAllText(getSaveGameFileName(),saver.getData()) ;
   saver.Free ;
 end;
 
-procedure TLogic.LoadFromFile(const FileName: string);
+procedure TLogic.LoadFromFile();
 var loader:TObjectLoader ;
     codes:TArray<Integer> ;
     code:Integer ;
@@ -512,7 +540,7 @@ var loader:TObjectLoader ;
     tmp_ways:TUniList<TWayPoint> ;
     tmp_links:TUniList<TWayLink> ;
 begin
-  loader:=TObjectLoader.Create(ReadAllText(FileName)) ;
+  loader:=TObjectLoader.Create(ReadAllText(getSaveGameFileName())) ;
   loader.ReadObject('vars',Self,ReadLogic) ;
   loader.ReadStringList('flags',flags) ;
 
@@ -527,6 +555,7 @@ begin
   world_way.Clear() ;
   world_links.Clear() ;
   loader.ReadArrayString('worlds',scodes) ;
+  loader.ReadStringDictionary('world_backgrounds',world_backgrounds) ;
   for scode in scodes do begin
     tmp_active_objects:=TUniList<TGameObject>.Create() ;
     loader.ReadObjectList(Format('activeobjects_%s',[scode]),
@@ -750,6 +779,11 @@ begin
   Result:=picturemode ;
 end;
 
+class function TLogic.isSaveGameExist: Boolean;
+begin
+  Result:=FileExists(getSaveGameFileName()) ;
+end;
+
 function TLogic.isWayOut(idx: Integer): Boolean;
 begin
   Result:=way[idx].isout ;
@@ -772,6 +806,11 @@ end;
 procedure TLogic.clearFlag(flagname: string);
 begin
   if isFlagSet(flagname) then flags.Delete(flags.IndexOf(LowerCase(flagname))) ;
+end;
+
+class procedure TLogic.clearSaveGame;
+begin
+  if isSaveGameExist() then DeleteFile(getSaveGameFileName()) ;
 end;
 
 procedure TLogic.setPlayerWayIdx(idx: Integer);
@@ -835,10 +874,7 @@ begin
   activescene:=newactivescene ;
 
   if world_activeobjects.ContainsKey(activescene) then begin
-    activeobjects:=TUniList<TGameObject>(world_activeobjects[activescene]) ;
-    way:=TUniList<TWayPoint>(world_way[activescene]) ;
-    links:=TUniList<TWayLink>(world_links[activescene]) ;
-    background:=world_backgrounds[activescene] ;
+    RestoreSceneFromWorld() ;
   end
   else begin
     activeobjects:=TUniList<TGameObject>.Create() ;

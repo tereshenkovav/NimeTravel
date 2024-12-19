@@ -7,6 +7,7 @@ help_caption=Help
 journal_caption=Known spells
 journal_caption_nospells=No spells found yet
 menu_newgame=New game
+menu_resumegame=Continue game
 menu_continue=Continue
 menu_fullscr_on=Fullscreen: on
 menu_fullscr_off=Fullscreen: off

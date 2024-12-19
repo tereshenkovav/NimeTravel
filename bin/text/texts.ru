@@ -7,6 +7,7 @@ help_caption=Справка
 journal_caption=Известные заклинания
 journal_caption_nospells=Заклинания еще не изучены
 menu_newgame=Новая игра
+menu_resumegame=Продолжить игру
 menu_continue=Продолжить
 menu_fullscr_on=Полный экран: вкл
 menu_fullscr_off=Полный экран: выкл

@@ -46,7 +46,7 @@ type
 
 implementation
 uses sfmlutils, ViewStatic, CommonProc, CommonData,
-  SfmlWindow, Math, SysUtils, StrUtils ;
+  SfmlWindow, Math, SysUtils, StrUtils, Logic, View ;
 
 const
   LANG_ITEM = 'lang' ;
@@ -129,6 +129,7 @@ end;
 function TMainMenu.FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ;
 var Event:TSfmlEventEx;
     i:Integer ;
+    lobj:TLogic ;
 begin
   Result:=TSceneResult.Normal ;
 
@@ -158,7 +159,13 @@ begin
               if (items[i]='continue') then begin
                 Exit(TSceneResult.ExitSubScene) ;
               end;
+              if (items[i]='resumegame') then begin
+                lobj:=TLogic.Create(logger);
+                nextscene:=TView.Create(lobj) ;
+                Exit(TSceneResult.Switch) ;
+              end;
               if (items[i]='newgame') then begin
+                TLogic.clearSaveGame() ;
                 nextscene:=TViewStatic.Create() ;
                 TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro1'),44) ;
                 TViewStatic(nextscene).AddTask(TCommonData.texts.getText('intro2'),32) ;
@@ -238,6 +245,8 @@ procedure TMainMenu.rebuildItems;
 begin
   items.Clear ;
   if ismainmenu then begin
+    if TLogic.isSaveGameExist() then
+      items.Add('resumegame') ;
     items.Add('newgame') ;
     items.Add(LANG_ITEM) ;
     items.Add(IfThen(profile.isFullScreen,'fullscr_on','fullscr_off')) ;

@@ -190,10 +190,6 @@ begin
   isgo:=False ;
   lobj.Start() ;
 
-  THomeDir.createDirInHomeIfNeed('NimeTravel') ;
-  if FileExists(THomeDir.getFileNameInHome('NimeTravel','game.json')) then
-    lobj.LoadFromFile(THomeDir.getFileNameInHome('NimeTravel','game.json')) ;
-
   DebugAllowed:=FileExists('developer') ;
 end;
 
@@ -399,8 +395,7 @@ begin
       if (event.Event.key.code = sfKeyF6)and DebugAllowed then lobj.executeScript('debug.script','runDebug2()') ;
       if (event.Event.key.code = sfKeyF7)and DebugAllowed then lobj.executeScript('debug.script','runDebug3()') ;
       if (event.Event.key.code = sfKeyEscape)or(event.Event.key.code = sfKeyF10) then begin
-        THomeDir.createDirInHomeIfNeed('NimeTravel') ;
-        lobj.SaveToFile(THomeDir.getFileNameInHome('NimeTravel','game.json')) ;
+        lobj.SaveToFile() ;
         subscene:=TMainMenu.CreateAsGameMenu(lobj.getActivatedSpells()) ;
         Galop.Pause;
         flag_entered_menu:=True ;
