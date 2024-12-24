@@ -173,17 +173,17 @@ begin
                   Exit(TSceneResult.Switch) ;
                 end;
               end;
-              if (items[i]='fullscr_on')or(items[i]='fullscr_off') then begin
+              if (items[i]='fullscr') then begin
                 profile.switchFullScreen() ;
                 nextscene:=TMainMenu.CreateAsMainMenu() ;
                 Exit(TSceneResult.RebuildWindow) ;
               end;
-              if (items[i]='sound_on')or(items[i]='sound_off') then begin
+              if (items[i]='sound') then begin
                 profile.switchSoundOn() ;
                 rebuildItems() ;
                 break ;
               end;
-              if (items[i]='music_on')or(items[i]='music_off') then begin
+              if (items[i]='music') then begin
                 profile.switchMusicOn() ;
                 TCommonData.updateMusicVolume() ;
                 rebuildItems() ;
@@ -250,17 +250,17 @@ begin
       items.Add('resumegame') ;
     items.Add('newgame') ;
     items.Add(LANG_ITEM) ;
-    items.Add(IfThen(profile.isFullScreen,'fullscr_on','fullscr_off')) ;
-    items.Add(IfThen(profile.isMusicOn,'music_on','music_off')) ;
-    items.Add(IfThen(profile.isSoundOn,'sound_on','sound_off')) ;
+    items.Add('fullscr') ;
+    items.Add('music') ;
+    items.Add('sound') ;
     items.Add('help') ;
     items.Add('credits') ;
     items.Add('exit') ;
   end
   else begin
     items.Add('continue') ;
-    items.Add(IfThen(profile.isMusicOn,'music_on','music_off')) ;
-    items.Add(IfThen(profile.isSoundOn,'sound_on','sound_off')) ;
+    items.Add('music') ;
+    items.Add('sound') ;
     items.Add('help') ;
     items.Add('journal') ;
     items.Add('mainmenu') ;
@@ -272,6 +272,7 @@ var
   i: Integer;
   shiftlang:Integer ;
   j: Integer;
+  str:string ;
 begin
   if back<>nil then begin
     if back is TSfmlSprite then window.Draw(TSfmlSprite(back)) ;
@@ -327,7 +328,14 @@ begin
       text.Color:=createSFMLColor($895722) ;
       text.Style:=0 ;
     end;
-    text.UnicodeString:=UTF8Decode(TCommonData.texts.getText('menu_'+items[i])) ;
+    str:=TCommonData.texts.getText('menu_'+items[i]) ;
+    if items[i]='fullscr' then str:=str+': '+IfThen(profile.isFullScreen(),
+      TCommonData.texts.getText('text_on'),TCommonData.texts.getText('text_off')) ;
+    if items[i]='sound' then str:=str+': '+IfThen(profile.isSoundOn(),
+      TCommonData.texts.getText('text_on'),TCommonData.texts.getText('text_off')) ;
+    if items[i]='music' then str:=str+': '+IfThen(profile.isMusicOn(),
+      TCommonData.texts.getText('text_on'),TCommonData.texts.getText('text_off')) ;
+    text.UnicodeString:=UTF8Decode(str) ;
 
     if items[i]=LANG_ITEM then shiftlang:=27+10 ;
 

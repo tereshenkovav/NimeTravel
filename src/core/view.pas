@@ -196,8 +196,8 @@ begin
   SetLength(texthelp,5) ;
   texthelp[0]:=TCommonData.texts.getText('menu_help') ;
   texthelp[1]:=TCommonData.texts.getText('menu_journal') ;
-  texthelp[2]:=TCommonData.texts.getText('menu_sound_on') ;
-  texthelp[3]:=TCommonData.texts.getText('menu_music_on') ;
+  texthelp[2]:=TCommonData.texts.getText('menu_sound') ;
+  texthelp[3]:=TCommonData.texts.getText('menu_music') ;
   texthelp[4]:=TCommonData.texts.getText('menu_exit') ;
 
   toprect:=TSfmlRectangleShape.Create() ;
