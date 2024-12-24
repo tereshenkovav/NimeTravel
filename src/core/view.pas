@@ -57,6 +57,9 @@ type
     flag_entered_menu:Boolean ;
     topicons:array of TSfmlSprite ;
     cross:TSfmlSprite ;
+    toprect:TSfmlRectangleShape ;
+    texticonhelp:TSfmlText ;
+    texthelp:array of string ;
 
     function loadSpriteOrAnimation(filename:string):TSfmlSprite ;
     function getSprite(prefix:string; ao:TGameObject):TSfmlSprite ;
@@ -184,10 +187,24 @@ begin
   topicons[3]:=LoadSprite('images'+PATH_SEP+'icon_music.png',[sloCentered]) ;
   topicons[4]:=LoadSprite('images'+PATH_SEP+'icon_exit.png',[sloCentered]) ;
   cross:=LoadSprite('images'+PATH_SEP+'cross.png',[sloCentered]) ;
+  texticonhelp:=createText(TCommonData.font,'',18,SfmlWhite) ;
 
   for i := 0 to Length(topicons)-1 do
     topicons[i].Position:=SfmlVector2f(
       100+i*(wwidth-200)/(Length(topicons)-1),wheight*0.075) ;
+
+  SetLength(texthelp,5) ;
+  texthelp[0]:=TCommonData.texts.getText('menu_help') ;
+  texthelp[1]:=TCommonData.texts.getText('menu_journal') ;
+  texthelp[2]:=TCommonData.texts.getText('menu_sound_on') ;
+  texthelp[3]:=TCommonData.texts.getText('menu_music_on') ;
+  texthelp[4]:=TCommonData.texts.getText('menu_exit') ;
+
+  toprect:=TSfmlRectangleShape.Create() ;
+  toprect.Position:=SfmlVector2f(0,0);
+  toprect.FillColor:=SfmlColorFromRGBA(0,0,0,128) ;
+  toprect.OutlineThickness:=0;
+  toprect.Size:=SfmlVector2f(wwidth,wheight*0.18) ;
 
   spellstack:=TUniList<Integer>.Create() ;
   playedspellstack:=TUniList<Integer>.Create() ;
@@ -242,6 +259,8 @@ begin
     topicons[i].Free ;
   SetLength(topicons,0) ;
   cross.Free ;
+  toprect.Free ;
+  texticonhelp.Free ;
 
   lobj.SendExit() ;
 end;
@@ -632,11 +651,15 @@ begin
       tmpws.Free ;
     end;
 
-    if mousey<wheight*0.15 then
+    if mousey<toprect.Size.Y then begin
+      window.Draw(toprect) ;
       for i := 0 to Length(topicons)-1 do begin
         if (Abs(topicons[i].Position.X-mousex)<64/2)and
-           (Abs(topicons[i].Position.Y-mousey)<64/2) then
+           (Abs(topicons[i].Position.Y-mousey)<64/2) then begin
+          texticonhelp.UnicodeString:=UTF8Decode(texthelp[i]) ;
+          DrawTextCentered(texticonhelp,topicons[i].Position.X,topicons[i].Position.Y+32+4) ;
           topicons[i].Color:=SfmlWhite
+        end
         else
           topicons[i].Color:=TCommonData.color_nobright ;
         window.Draw(topicons[i]) ;
@@ -645,6 +668,7 @@ begin
         if (i=3)and(not profile.isMusicOn()) then
           DrawSprite(cross,topicons[i].Position.X,topicons[i].Position.Y) ;
       end;
+    end;
 
     if usewalk then
       DrawSprite(CursorWalk,mousex,mousey)
