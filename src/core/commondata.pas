@@ -26,6 +26,9 @@ type
     class var intro:TSFMLSprite ;
     class var grayrect:TSfmlRectangleShape ;
     class var color_nobright:TSfmlColor ;
+    class var help_back:TSfmlSprite ;
+    class var Cursor:TSfmlSprite ;
+
     const INTRO_MUSIC = 'music_main.ogg' ;
     class function Init(window_w,window_h:Integer):Boolean ;
     class procedure reloadTexts() ;
@@ -50,6 +53,10 @@ begin
   reloadTexts() ;
   musiccode:='' ;
   intro:=LoadSprite('images'+PATH_SEP+'intro.png') ;
+  help_back:=LoadSprite('images'+PATH_SEP+'help_back.png') ;
+  help_back.Position:=SfmlVector2f(0,0) ;
+  Cursor:=loadSprite('images'+PATH_SEP+'cursor.png');
+  Cursor.Origin:=SfmlVector2f(0,10) ;
 
   grayrect:=TSfmlRectangleShape.Create() ;
   grayrect.Position:=SfmlVector2f(0,0);
@@ -104,9 +111,11 @@ class procedure TCommonData.UnInit() ;
 begin
   font.Free ;
   texts.Free ;
+  help_back.Free ;
   languages.Free ;
   intro.Free ;
   grayrect.Free ;
+  Cursor.Free ;
 end ;
 
 class procedure TCommonData.updateMusicVolume();

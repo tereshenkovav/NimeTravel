@@ -6,34 +6,22 @@ uses Classes,
   CommonClasses, helpers, Scene, SfmlAnimation, Spell ;
 
 type
-  TSubMode = (smNone,smHelp,smCredits,smJournal) ;
-
   TMainMenu = class(TScene)
   private
-    Cursor:TSfmlSprite ;
     menu_back: TSfmlSprite ;
-    icons:TUniDictionary<string,TSfmlSprite> ;
-    Marker:TSfmlAnimation ;
-    SpellIcons:array of TSfmlSprite ;
     text:TSfmlText ;
     items:TStringList ;
-    help_back:TSfmlSprite ;
-    submode:TSubMode ;
+    icons:TUniDictionary<string,TSfmlSprite> ;
     ismainmenu:Boolean ;
     shifty:Integer ;
-    texthelptitle:TSfmlText ;
-    textjournaltitle:TSfmlText ;
-    textcreditstitle:TSfmlText ;
-    texthelp:TSfmlText ;
     back:TSfmlTransformable ;
     logo:TSfmlSprite ;
-    markerseed:Single ;
     spells:TUniList<TSpell> ;
+    localsubscene:TScene ;
     function getButtonX(i:Integer):Integer ;
     function getButtonY(i:Integer):Integer ;
     function isMouseOver(i:Integer):Boolean ;
     procedure rebuildItems() ;
-    procedure setHelpText() ;
     procedure loadLogo() ;
   public
     constructor CreateAsMainMenu() ;
@@ -47,7 +35,7 @@ type
 implementation
 uses sfmlutils, ViewStatic, CommonProc, CommonData,
   SfmlWindow, Math, SysUtils, StrUtils, Logic, View,
-  SceneConfirmNewGame ;
+  SceneConfirmNewGame, SceneTextView, SceneJournalView ;
 
 const
   LANG_ITEM = 'lang' ;
@@ -74,44 +62,19 @@ begin
 end;
 
 procedure TMainMenu.UnInit;
-var i:Integer ;
 begin
   if logo<>nil then logo.Free ;
-  for i:=0 to Length(spellicons)-1 do
-    spellicons[i].Free ;
-  SetLength(spellicons,0) ;
   menu_back.Free ;
   icons.Free ;
-  Cursor.Free ;
 end;
 
 function TMainMenu.Init():Boolean;
 var lang:string ;
-    i:Integer ;
 begin
   menu_back:=LoadSprite('images'+PATH_SEP+'menu_back.png',[sloCentered]) ;
   menu_back.Position:=SfmlVector2f(wwidth/2,(wheight-100)/2+shifty) ;
-  help_back:=LoadSprite('images'+PATH_SEP+'help_back.png') ;
-  help_back.Position:=SfmlVector2f(0,0) ;
   text:=createText(TCommonData.font,'',22,SfmlWhite) ;
-  texthelptitle:=createText(TCommonData.font,'',28,createSFMLColor($493100)) ;
-  texthelp:=createText(TCommonData.font,'',20,createSFMLColor($493100)) ;
-  textjournaltitle:=createText(TCommonData.font,'',28,createSFMLColor($493100)) ;
-  textcreditstitle:=createText(TCommonData.font,'',28,createSFMLColor($493100)) ;
-  setHelpText() ;
   items:=TStringList.Create ;
-  submode:=smNone ;
-
-  Cursor:=loadSprite('images'+PATH_SEP+'cursor.png');
-  Cursor.Origin:=SfmlVector2f(0,10) ;
-
-  Marker:=TSfmlAnimation.Create('images'+PATH_SEP+'marker.png',30,34,16,20) ;
-  Marker.Origin:=SfmlVector2f(15,17) ;
-  markerseed:=0 ;
-
-  SetLength(spellicons,spells.Count) ;
-  for i:=0 to Length(spellicons)-1 do
-    spellicons[i]:=loadSprite(spells[i].iconfile,[sloCentered]);
 
   icons:=TUniDictionary<string,TSfmlSprite>.Create ;
   for lang in TCommonData.languages.getAll() do
@@ -120,6 +83,7 @@ begin
   if ismainmenu then TCommonData.LoadMusicIfNew(TCommonData.INTRO_MUSIC) ;
 
   rebuildItems() ;
+  localsubscene:=nil ;
 end;
 
 function TMainMenu.FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ;
@@ -129,13 +93,12 @@ var Event:TSfmlEventEx;
 begin
   Result:=TSceneResult.Normal ;
 
-  markerseed:=markerseed+5*dt ;
-
-  if submode<>smNone then begin
-      for Event in events do begin
-        if (Event.Event.EventType = sfEvtKeyPressed) then submode:=smNone ;
-        if (Event.Event.EventType = sfEvtMouseButtonPressed) then submode:=smNone ;
-      end;
+  if localsubscene<>nil then begin
+    localsubscene.setMousePos(mousex,mousey) ;
+    if localsubscene.FrameFunc(dt,events)=TSceneResult.ExitSubScene then begin
+      localsubscene.UnInit() ;
+      FreeAndNil(localsubscene) ;
+    end;
     Exit ;
   end;
 
@@ -192,14 +155,29 @@ begin
               if items[i]=LANG_ITEM then begin
                 TCommonData.languages.switchCurrent() ;
                 TCommonData.reloadTexts() ;
-                setHelpText() ;
                 newwindowtitle:=TCommonData.texts.getText('caption') ;
                 if logo<>nil then loadLogo() ;
                 Exit(TSceneResult.SetWindowTitle) ;
               end ;
-              if items[i]='help' then submode:=smHelp ;
-              if items[i]='credits' then submode:=smCredits ;
-              if items[i]='journal' then submode:=smJournal ;
+              if items[i]='help' then begin
+                localsubscene:=TSceneTextView.Create(
+                  TCommonData.texts.getText('help_caption'),
+                  TCommonData.texts.getText('help_text')) ;
+                localsubscene.setWindow(window,wwidth,wheight) ;
+                localsubscene.Init() ;
+              end;
+              if items[i]='credits' then begin
+                localsubscene:=TSceneTextView.Create(
+                  TCommonData.texts.getText('menu_credits'),
+                  TCommonData.credits) ;
+                localsubscene.setWindow(window,wwidth,wheight) ;
+                localsubscene.Init() ;
+              end;
+              if items[i]='journal' then begin
+                localsubscene:=TSceneJournalView.Create(spells) ;
+                localsubscene.setWindow(window,wwidth,wheight) ;
+                localsubscene.Init() ;
+              end;
               if items[i]='exit' then Exit(TSceneResult.Close) ;
               if items[i]='mainmenu' then begin
                 nextscene:=TMainMenu.CreateAsMainMenu() ;
@@ -224,16 +202,6 @@ function TMainMenu.isMouseOver(i: Integer): Boolean;
 begin
   Result:=(mousex>getButtonX(i))and(mousex<getButtonX(i)+200)and
     (mousey>getButtonY(i))and(mousey<getButtonY(i)+33) ;
-end;
-
-procedure TMainMenu.setHelpText;
-begin
-  texthelptitle.UnicodeString:=UTF8Decode(TCommonData.texts.getText('help_caption')) ;
-  if spells.Count>0 then
-    textjournaltitle.UnicodeString:=UTF8Decode(TCommonData.texts.getText('journal_caption'))
-  else
-    textjournaltitle.UnicodeString:=UTF8Decode(TCommonData.texts.getText('journal_caption_nospells')) ;
-  textcreditstitle.UnicodeString:=UTF8Decode(TCommonData.texts.getText('menu_credits')) ;
 end;
 
 procedure TMainMenu.loadLogo;
@@ -280,39 +248,9 @@ begin
   end ;
   if logo<>nil then window.Draw(logo) ;
 
-  if submode=smHelp then begin
-    window.Draw(help_back) ;
-    texthelptitle.Position := SfmlVector2f(wwidth/2-texthelptitle.LocalBounds.Width/2,60);
-    window.Draw(texthelptitle) ;
-    drawTextInBlockWidth(texthelp,TCommonData.texts.getText('help_text'),
-      50,100,wwidth-100,3) ;
-    DrawSprite(Cursor,mousex,mousey) ;
-    Exit ;
-  end;
-
-  if submode=smCredits then begin
-    window.Draw(help_back) ;
-    textcreditstitle.Position := SfmlVector2f(wwidth/2-textcreditstitle.LocalBounds.Width/2,60);
-    window.Draw(textcreditstitle) ;
-    drawTextInBlockWidth(texthelp,TCommonData.credits,
-      50,120,wwidth-100,3) ;
-    DrawSprite(Cursor,mousex,mousey) ;
-    Exit ;
-  end;
-
-  if submode=smJournal then begin
-    window.Draw(help_back) ;
-    textjournaltitle.Position := SfmlVector2f(wwidth/2-textjournaltitle.LocalBounds.Width/2,60);
-    window.Draw(textjournaltitle) ;
-    for i := 0 to spells.Count-1 do begin
-      DrawSprite(spellicons[i],100,135+i*70) ;
-      for j := 0 to spells[i].len-1 do begin
-        Marker.Color:=TCommonData.markercolors[spells[i].seq[j]] ;
-        Marker.SetFrame(3+(Round(markerseed)+i*10+j) mod 9) ;
-        DrawSprite(Marker,160+j*30,140+i*70) ;
-      end;
-    end;
-    DrawSprite(Cursor,mousex,mousey) ;
+  if localsubscene<>nil then begin
+    localsubscene.setMousePos(mousex,mousey) ;
+    localsubscene.RenderFunc() ;
     Exit ;
   end;
 
@@ -349,7 +287,7 @@ begin
     end;
   end;
 
-  DrawSprite(Cursor,mousex,mousey) ;
+  DrawSprite(TCommonData.Cursor,mousex,mousey) ;
 end;
 
 end.

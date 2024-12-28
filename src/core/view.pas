@@ -89,7 +89,7 @@ type
 
 implementation
 uses math,
-  sfmlutils, commonproc, CommonData, HomeDir ;
+  sfmlutils, commonproc, CommonData, HomeDir, SceneTextView, SceneJournalView ;
 
 const
   PREFIX_ACTIVEOBJECT='activeobject_' ;
@@ -453,6 +453,16 @@ begin
         for i := 0 to Length(topicons)-1 do begin
           if (Abs(topicons[i].Position.X-mousex)<64/2)and
              (Abs(topicons[i].Position.Y-mousey)<64/2) then begin
+            if i=0 then begin
+              subscene:=TSceneTextView.Create(
+                  TCommonData.texts.getText('help_caption'),
+                  TCommonData.texts.getText('help_text')) ;
+              Exit(TSceneResult.SetSubScene) ;
+            end;
+            if i=1 then begin
+              subscene:=TSceneJournalView.Create(lobj.getActivatedSpells()) ;
+              Exit(TSceneResult.SetSubScene) ;
+            end;
             if i=2 then begin
               profile.switchSoundOn() ;
               setUpMusicAndSoundVolumes() ;

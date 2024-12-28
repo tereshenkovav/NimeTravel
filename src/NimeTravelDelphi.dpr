@@ -19,7 +19,9 @@ uses
   commondata in 'core\commondata.pas',
   spell in 'core\spell.pas',
   sceneclosehandler in 'core\sceneclosehandler.pas',
-  sceneconfirmnewgame in 'core\sceneconfirmnewgame.pas';
+  sceneconfirmnewgame in 'core\sceneconfirmnewgame.pas',
+  scenetextview in 'core\scenetextview.pas',
+  scenejournalview in 'core\scenejournalview.pas';
 
 begin
   with TMain.Create() do begin
