@@ -13,7 +13,6 @@ type
 
   TSceneConfirmNewGame = class(TScene)
   private
-    Cursor:TSfmlSprite ;
     menu_back: TSfmlSprite ;
     text:TSfmlText ;
     items:TStringList ;
@@ -35,8 +34,6 @@ begin
   menu_back:=LoadSprite('images'+PATH_SEP+'menu_back.png',[sloCentered]) ;
   menu_back.Position:=SfmlVector2f(wwidth/2,(wheight-100)/2) ;
   text:=createText(TCommonData.font,'',24,SfmlWhite) ;
-  Cursor:=loadSprite('images'+PATH_SEP+'cursor.png');
-  Cursor.Origin:=SfmlVector2f(0,10) ;
   items:=TStringList.Create() ;
   items.Add('but_yes') ;
   items.Add('but_no') ;
@@ -112,13 +109,12 @@ begin
     window.Draw(text) ;
   end;
 
-  DrawSprite(Cursor,mousex,mousey) ;
+  DrawSprite(TCommonData.Cursor,mousex,mousey) ;
 end ;
 
 procedure TSceneConfirmNewGame.UnInit() ;
 begin
   menu_back.Free ;
-  Cursor.Free ;
   text.Free ;
   items.Free ;
 end ;
