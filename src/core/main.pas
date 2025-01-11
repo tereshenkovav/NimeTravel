@@ -15,7 +15,7 @@ type
 implementation
 uses SysUtils, StrUtils, Types, Math, Classes,
   SfmlSystem,
-  Game, CommonProc, CommonData, Spell, SceneCloseHandler, Logger,
+  Game, CommonProc, CommonData, Spell, SceneCloseHandler, Logger, ScreenSaver,
   view, viewstatic, logic, helpers, sfmlutils ;
 
 const WINDOW_W=800 ;
@@ -78,6 +78,9 @@ begin
   game.setCloseHandler(TSceneCloseHandler.Create()) ;
   game.setCustomLogger(TLoggerBasic) ;
   TCommonData.setProfile(game.getProfile()) ;
+
+  if FileExists('developer') then game.setCustomScreenSaver(
+    TScreenSaverStd.Create(game.getGameCode(),sfKeyF12,sfKeyF8,sfKeyF9)) ;
 
   game.Run(TMainMenu.CreateAsMainMenu()) ;
   game.Free ;
