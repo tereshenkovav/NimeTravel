@@ -60,6 +60,7 @@ type
     toprect:TSfmlRectangleShape ;
     texticonhelp:TSfmlText ;
     texthelp:array of string ;
+    starthighlight:Single ;
 
     function loadSpriteOrAnimation(filename:string):TSfmlSprite ;
     function getSprite(prefix:string; ao:TGameObject):TSfmlSprite ;
@@ -99,6 +100,7 @@ const
   MINDIST2 = 5*5 ;
   MARKERRADIUS2 = 8*8 ;
   SECS_BEFORE_DROPSPELL = 3 ;
+  HIGHLIGHTPERIOD = 1.5 ;
 
 { TView }
 
@@ -218,6 +220,7 @@ begin
 
   flag_entered_menu:=False ;
 
+  starthighlight:=-1.0 ;
   isgo:=False ;
   lobj.Start() ;
 
@@ -373,6 +376,18 @@ begin
   if isInDebugView() then
     dt:=dt*0.2;
 
+  if starthighlight>0 then begin
+    for ao in lobj.getActiveObjects() do
+      if ao.isactive then
+         getSprite(PREFIX_ACTIVEOBJECT,ao).Color:=convertSFMLColorBright(SfmlWhite,
+           0.8+0.2*Sin(PI/2+4*PI*starthighlight/HIGHLIGHTPERIOD)) ;
+    starthighlight:=starthighlight-dt ;
+  end
+  else
+    for ao in lobj.getActiveObjects() do
+      if ao.isactive then
+        getSprite(PREFIX_ACTIVEOBJECT,ao).Color:=SfmlWhite ;
+
   listzsprites.Clear() ;
   if lobj.getBackground()<>'' then
     listzsprites.Add(retAndPosSprite(getSpriteStatic(PREFIX_BACKGROUND,lobj.getBackground()),0,0,0),Single.MaxValue) ;
@@ -448,7 +463,10 @@ begin
         end;
       end;
     end;
-    if (Event.Event.EventType = sfEvtMouseButtonPressed) then
+    if (Event.Event.EventType = sfEvtMouseButtonPressed) then begin
+      if (event.Event.MouseButton.Button = sfMouseRight) then begin
+        starthighlight:=HIGHLIGHTPERIOD ;
+      end;
       if (event.Event.MouseButton.Button = sfMouseLeft) then begin
         for i := 0 to Length(topicons)-1 do begin
           if (Abs(topicons[i].Position.X-mousex)<64/2)and
@@ -500,6 +518,7 @@ begin
             if dist2(markerpos[i].X,mousex,markerpos[i].Y,mousey)<MARKERRADIUS2 then tryStartMarker(i) ;
       end;
     end;
+  end;
   end;
 
   if (spellstack.Count>0)and(not Marker.isPlayed()) then begin
@@ -758,7 +777,7 @@ end;
 function TView.retAndPosSprite(spr: TSfmlSprite; x, y: Integer; transp:Integer): TSfmlSprite;
 begin
   spr.Position:=SfmlVector2f(x,y) ;
-  spr.Color:=SfmlColorFromRGBA(252,255,255,Round(255*(100-transp)/100)) ;
+  spr.Color:=SfmlColorFromRGBA(spr.Color.R,spr.Color.G,spr.Color.B,Round(255*(100-transp)/100)) ;
   Result:=spr ;
 end;
 
