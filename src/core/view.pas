@@ -450,7 +450,7 @@ begin
       if (event.Event.key.code = sfKeyF7)and DebugAllowed then lobj.executeScript('debug.script','runDebug3()') ;
       if (event.Event.key.code = sfKeyEscape)or(event.Event.key.code = sfKeyF10) then begin
         lobj.SaveToFile() ;
-        subscene:=TMainMenu.CreateAsGameMenu(lobj.getActivatedSpells()) ;
+        subscene:=TGameMenu.Create(lobj.getActivatedSpells()) ;
         Galop.Pause;
         flag_entered_menu:=True ;
         Exit(TSceneResult.SetSubScene) ;
@@ -491,7 +491,7 @@ begin
             end;
             if i=4 then begin
               lobj.SaveToFile() ;
-              nextscene:=TMainMenu.CreateAsMainMenu() ;
+              nextscene:=TMainMenu.Create() ;
               Exit(TSceneResult.Switch) ;
             end;
           end;

@@ -6,30 +6,44 @@ uses Classes,
   CommonClasses, helpers, Scene, SfmlAnimation, Spell ;
 
 type
-  TMainMenu = class(TScene)
-  private
+  TCommonMenu = class(TScene)
+  protected
     menu_back: TSfmlSprite ;
     text:TSfmlText ;
     items:TStringList ;
     icons:TUniDictionary<string,TSfmlSprite> ;
-    ismainmenu:Boolean ;
     shifty:Integer ;
     back:TSfmlTransformable ;
     logo:TSfmlSprite ;
     spells:TUniList<TSpell> ;
     localsubscene:TScene ;
+    escaperesult:TSceneResult ;
     function getButtonX(i:Integer):Integer ;
     function getButtonY(i:Integer):Integer ;
     function isMouseOver(i:Integer):Boolean ;
-    procedure rebuildItems() ;
+    procedure rebuildItems() ; virtual ; abstract ;
+    procedure InitMenu() ; virtual ;
     procedure loadLogo() ;
   public
-    constructor CreateAsMainMenu() ;
-    constructor CreateAsGameMenu(Aspells:TUniList<TSpell>) ;
     function Init():Boolean ; override ;
     procedure UnInit() ; override ;
     procedure RenderFunc() ; override ;
     function FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ; override ;
+  end;
+
+  TMainMenu = class(TCommonMenu)
+  protected
+    procedure rebuildItems() ; override ;
+    procedure InitMenu() ; override ;
+  public
+    constructor Create() ;
+  end;
+
+  TGameMenu = class(TCommonMenu)
+  protected
+    procedure rebuildItems() ; override ;
+  public
+    constructor Create(Aspells:TUniList<TSpell>) ;
   end;
 
 implementation
@@ -42,33 +56,68 @@ const
 
 { TMainMenu }
 
-constructor TMainMenu.CreateAsMainMenu() ;
+constructor TMainMenu.Create() ;
 begin
-  ismainmenu:=True ;
   shifty:=110 ;
   spells:=TUniList<TSpell>.Create() ;
 
   back:=TCommonData.intro ;
   loadLogo() ;
+  escaperesult:=TSceneResult.Close ;
 end;
 
-constructor TMainMenu.CreateAsGameMenu(Aspells:TUniList<TSpell>) ;
+procedure TMainMenu.InitMenu;
 begin
-  ismainmenu:=False ;
+  TCommonData.LoadMusicIfNew(TCommonData.INTRO_MUSIC) ;
+end;
+
+procedure TMainMenu.rebuildItems;
+begin
+  items.Clear ;
+  if TLogic.isSaveGameExist() then
+    items.Add('resumegame') ;
+  items.Add('newgame') ;
+  items.Add(LANG_ITEM) ;
+  items.Add('fullscr') ;
+  items.Add('music') ;
+  items.Add('sound') ;
+  items.Add('help') ;
+  items.Add('credits') ;
+  items.Add('exit') ;
+end;
+
+{ TGameMenu }
+
+constructor TGameMenu.Create(Aspells:TUniList<TSpell>) ;
+begin
   spells:=Aspells ;
 
   back:=TCommonData.grayrect ;
   logo:=nil ;
+  escaperesult:=TSceneResult.ExitSubScene ;
 end;
 
-procedure TMainMenu.UnInit;
+procedure TGameMenu.rebuildItems;
+begin
+  items.Clear() ;
+  items.Add('continue') ;
+  items.Add('music') ;
+  items.Add('sound') ;
+  items.Add('help') ;
+  items.Add('journal') ;
+  items.Add('mainmenu') ;
+end;
+
+{ TCommonMenu }
+
+procedure TCommonMenu.UnInit;
 begin
   if logo<>nil then logo.Free ;
   menu_back.Free ;
   icons.Free ;
 end;
 
-function TMainMenu.Init():Boolean;
+function TCommonMenu.Init():Boolean;
 var lang:string ;
 begin
   menu_back:=LoadSprite('images'+PATH_SEP+'menu_back.png',[sloCentered]) ;
@@ -80,13 +129,13 @@ begin
   for lang in TCommonData.languages.getAll() do
     icons.Add(lang,LoadSprite('images'+PATH_SEP+'lang.'+lang+'.png')) ;
 
-  if ismainmenu then TCommonData.LoadMusicIfNew(TCommonData.INTRO_MUSIC) ;
-
   rebuildItems() ;
   localsubscene:=nil ;
+
+  InitMenu() ;
 end;
 
-function TMainMenu.FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ;
+function TCommonMenu.FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ;
 var Event:TSfmlEventEx;
     i:Integer ;
     lobj:TLogic ;
@@ -103,14 +152,8 @@ begin
   end;
 
   for Event in events do begin
-      if (Event.Event.EventType = sfEvtKeyPressed) then begin
-        if (event.Event.key.code = sfKeyEscape) then begin
-              if ismainmenu then
-                Exit(TSceneResult.Close)
-              else
-                Exit(TSceneResult.ExitSubScene) ;
-        end ;
-      end;
+      if (Event.Event.EventType = sfEvtKeyPressed) then
+        if (event.Event.key.code = sfKeyEscape) then Exit(escaperesult) ;
       if (Event.Event.EventType = sfEvtMouseButtonPressed) then
         if (event.Event.MouseButton.Button = sfMouseLeft) then begin
           for i :=0 to items.Count-1 do
@@ -138,7 +181,7 @@ begin
               end;
               if (items[i]='fullscr') then begin
                 profile.switchFullScreen() ;
-                nextscene:=TMainMenu.CreateAsMainMenu() ;
+                nextscene:=TMainMenu.Create() ;
                 Exit(TSceneResult.RebuildWindow) ;
               end;
               if (items[i]='sound') then begin
@@ -180,7 +223,7 @@ begin
               end;
               if items[i]='exit' then Exit(TSceneResult.Close) ;
               if items[i]='mainmenu' then begin
-                nextscene:=TMainMenu.CreateAsMainMenu() ;
+                nextscene:=TMainMenu.Create() ;
                 Exit(TSceneResult.Switch) ;
               end;
             end;
@@ -188,54 +231,34 @@ begin
     end ;
 end;
 
-function TMainMenu.getButtonX(i: Integer): Integer;
+function TCommonMenu.getButtonX(i: Integer): Integer;
 begin
   Result:=wwidth div 2-200 div 2+(i-2)*3 ;
 end;
 
-function TMainMenu.getButtonY(i: Integer): Integer;
+function TCommonMenu.getButtonY(i: Integer): Integer;
 begin
   Result:=124+i*33-40 div 2 +shifty ;
 end;
 
-function TMainMenu.isMouseOver(i: Integer): Boolean;
+function TCommonMenu.isMouseOver(i: Integer): Boolean;
 begin
   Result:=(mousex>getButtonX(i))and(mousex<getButtonX(i)+200)and
     (mousey>getButtonY(i))and(mousey<getButtonY(i)+33) ;
 end;
 
-procedure TMainMenu.loadLogo;
+procedure TCommonMenu.loadLogo;
 begin
   logo:=LoadSprite('images'+PATH_SEP+'logo.'+TCommonData.languages.getCurrent()+'.png') ;
   logo.Position:=SfmlVector2f(0,30) ;
 end;
 
-procedure TMainMenu.rebuildItems;
+procedure TCommonMenu.InitMenu;
 begin
-  items.Clear ;
-  if ismainmenu then begin
-    if TLogic.isSaveGameExist() then
-      items.Add('resumegame') ;
-    items.Add('newgame') ;
-    items.Add(LANG_ITEM) ;
-    items.Add('fullscr') ;
-    items.Add('music') ;
-    items.Add('sound') ;
-    items.Add('help') ;
-    items.Add('credits') ;
-    items.Add('exit') ;
-  end
-  else begin
-    items.Add('continue') ;
-    items.Add('music') ;
-    items.Add('sound') ;
-    items.Add('help') ;
-    items.Add('journal') ;
-    items.Add('mainmenu') ;
-  end;
+
 end;
 
-procedure TMainMenu.RenderFunc();
+procedure TCommonMenu.RenderFunc();
 var
   i: Integer;
   shiftlang:Integer ;

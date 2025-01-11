@@ -82,7 +82,7 @@ begin
   if FileExists('developer') then game.setCustomScreenSaver(
     TScreenSaverStd.Create(game.getGameCode(),sfKeyF12,sfKeyF8,sfKeyF9)) ;
 
-  game.Run(TMainMenu.CreateAsMainMenu()) ;
+  game.Run(TMainMenu.Create()) ;
   game.Free ;
   TCommonData.UnInit() ;
 end ;

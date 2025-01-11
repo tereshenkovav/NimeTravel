@@ -58,7 +58,7 @@ begin
                 Exit(TSceneResult.Switch) ;
               end;
               if (items[i]='but_no') then begin
-                nextscene:=TMainMenu.CreateAsMainMenu() ;
+                nextscene:=TMainMenu.Create() ;
                 Exit(TSceneResult.Switch) ;
               end;
             end;
