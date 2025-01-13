@@ -39,6 +39,13 @@ type
     constructor Create() ;
   end;
 
+  TOptionsMenu = class(TCommonMenu)
+  protected
+    procedure rebuildItems() ; override ;
+  public
+    constructor Create() ;
+  end;
+
   TGameMenu = class(TCommonMenu)
   protected
     procedure rebuildItems() ; override ;
@@ -78,9 +85,7 @@ begin
     items.Add('resumegame') ;
   items.Add('newgame') ;
   items.Add(LANG_ITEM) ;
-  items.Add('fullscr') ;
-  items.Add('music') ;
-  items.Add('sound') ;
+  items.Add('options') ;
   items.Add('help') ;
   items.Add('credits') ;
   items.Add('exit') ;
@@ -106,6 +111,27 @@ begin
   items.Add('help') ;
   items.Add('journal') ;
   items.Add('mainmenu') ;
+end;
+
+{ TOptionsMenu }
+
+constructor TOptionsMenu.Create;
+begin
+  shifty:=110 ;
+  spells:=TUniList<TSpell>.Create() ;
+
+  back:=TCommonData.intro ;
+  loadLogo() ;
+  escaperesult:=TSceneResult.Close ;
+end;
+
+procedure TOptionsMenu.rebuildItems;
+begin
+  items.Clear ;
+  items.Add('music') ;
+  items.Add('sound') ;
+  items.Add('fullscr') ;
+  items.Add('back') ;
 end;
 
 { TCommonMenu }
@@ -179,9 +205,13 @@ begin
                   Exit(TSceneResult.Switch) ;
                 end;
               end;
+              if (items[i]='options') then begin
+                nextscene:=TOptionsMenu.Create() ;
+                Exit(TSceneResult.Switch) ;
+              end;
               if (items[i]='fullscr') then begin
                 profile.switchFullScreen() ;
-                nextscene:=TMainMenu.Create() ;
+                nextscene:=TOptionsMenu.Create() ;
                 Exit(TSceneResult.RebuildWindow) ;
               end;
               if (items[i]='sound') then begin
@@ -222,7 +252,7 @@ begin
                 localsubscene.Init() ;
               end;
               if items[i]='exit' then Exit(TSceneResult.Close) ;
-              if items[i]='mainmenu' then begin
+              if (items[i]='mainmenu')or(items[i]='back') then begin
                 nextscene:=TMainMenu.Create() ;
                 Exit(TSceneResult.Switch) ;
               end;
@@ -238,7 +268,7 @@ end;
 
 function TCommonMenu.getButtonY(i: Integer): Integer;
 begin
-  Result:=124+i*33-40 div 2 +shifty ;
+  Result:=154+i*33-40 div 2 +shifty ;
 end;
 
 function TCommonMenu.isMouseOver(i: Integer): Boolean;
