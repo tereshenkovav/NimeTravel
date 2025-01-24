@@ -90,7 +90,8 @@ type
 
 implementation
 uses math,
-  sfmlutils, commonproc, CommonData, HomeDir, SceneTextView, SceneJournalView ;
+  sfmlutils, commonproc, CommonData, HomeDir, SceneTextView, SceneJournalView,
+    SceneDialogsView ;
 
 const
   PREFIX_ACTIVEOBJECT='activeobject_' ;
@@ -182,12 +183,13 @@ begin
   markerpos.Add(SfmlVector2f(167,500+30)) ;
   markerpos.Add(SfmlVector2f(192,500+20)) ;
 
-  SetLength(topicons,5) ;
+  SetLength(topicons,6) ;
   topicons[0]:=LoadSprite('images'+PATH_SEP+'icon_help.png',[sloCentered]) ;
-  topicons[1]:=LoadSprite('images'+PATH_SEP+'icon_journal.png',[sloCentered]) ;
-  topicons[2]:=LoadSprite('images'+PATH_SEP+'icon_sound.png',[sloCentered]) ;
-  topicons[3]:=LoadSprite('images'+PATH_SEP+'icon_music.png',[sloCentered]) ;
-  topicons[4]:=LoadSprite('images'+PATH_SEP+'icon_exit.png',[sloCentered]) ;
+  topicons[1]:=LoadSprite('images'+PATH_SEP+'icon_dialogs.png',[sloCentered]) ;
+  topicons[2]:=LoadSprite('images'+PATH_SEP+'icon_journal.png',[sloCentered]) ;
+  topicons[3]:=LoadSprite('images'+PATH_SEP+'icon_sound.png',[sloCentered]) ;
+  topicons[4]:=LoadSprite('images'+PATH_SEP+'icon_music.png',[sloCentered]) ;
+  topicons[5]:=LoadSprite('images'+PATH_SEP+'icon_exit.png',[sloCentered]) ;
   cross:=LoadSprite('images'+PATH_SEP+'cross.png',[sloCentered]) ;
   texticonhelp:=createText(TCommonData.font,'',18,SfmlWhite) ;
 
@@ -195,12 +197,13 @@ begin
     topicons[i].Position:=SfmlVector2f(
       100+i*(wwidth-200)/(Length(topicons)-1),wheight*0.075) ;
 
-  SetLength(texthelp,5) ;
+  SetLength(texthelp,6) ;
   texthelp[0]:=TCommonData.texts.getText('menu_help') ;
-  texthelp[1]:=TCommonData.texts.getText('menu_journal') ;
-  texthelp[2]:=TCommonData.texts.getText('menu_sound') ;
-  texthelp[3]:=TCommonData.texts.getText('menu_music') ;
-  texthelp[4]:=TCommonData.texts.getText('menu_exit') ;
+  texthelp[1]:=TCommonData.texts.getText('menu_dialogs') ;
+  texthelp[2]:=TCommonData.texts.getText('menu_journal') ;
+  texthelp[3]:=TCommonData.texts.getText('menu_sound') ;
+  texthelp[4]:=TCommonData.texts.getText('menu_music') ;
+  texthelp[5]:=TCommonData.texts.getText('menu_exit') ;
 
   toprect:=TSfmlRectangleShape.Create() ;
   toprect.Position:=SfmlVector2f(0,0);
@@ -479,18 +482,22 @@ begin
               Exit(TSceneResult.SetSubScene) ;
             end;
             if i=1 then begin
-              subscene:=TSceneJournalView.Create(lobj.getActivatedSpells()) ;
+              subscene:=TSceneDialogsView.Create(lobj.getDialogJournal()) ;
               Exit(TSceneResult.SetSubScene) ;
             end;
             if i=2 then begin
+              subscene:=TSceneJournalView.Create(lobj.getActivatedSpells()) ;
+              Exit(TSceneResult.SetSubScene) ;
+            end;
+            if i=3 then begin
               profile.switchSoundOn() ;
               setUpMusicAndSoundVolumes() ;
             end;
-            if i=3 then begin
+            if i=4 then begin
               profile.switchMusicOn() ;
               TCommonData.updateMusicVolume() ;
             end;
-            if i=4 then begin
+            if i=5 then begin
               lobj.SaveToFile() ;
               nextscene:=TMainMenu.Create() ;
               Exit(TSceneResult.Switch) ;
@@ -696,9 +703,9 @@ begin
         else
           topicons[i].Color:=TCommonData.color_nobright ;
         window.Draw(topicons[i]) ;
-        if (i=2)and(not profile.isSoundOn()) then
+        if (i=3)and(not profile.isSoundOn()) then
           DrawSprite(cross,topicons[i].Position.X,topicons[i].Position.Y) ;
-        if (i=3)and(not profile.isMusicOn()) then
+        if (i=4)and(not profile.isMusicOn()) then
           DrawSprite(cross,topicons[i].Position.X,topicons[i].Position.Y) ;
       end;
     end;
