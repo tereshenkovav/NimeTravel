@@ -21,7 +21,8 @@ uses
   sceneclosehandler in 'core\sceneclosehandler.pas',
   sceneconfirmnewgame in 'core\sceneconfirmnewgame.pas',
   scenetextview in 'core\scenetextview.pas',
-  scenejournalview in 'core\scenejournalview.pas';
+  scenejournalview in 'core\scenejournalview.pas',
+  scenedialogsview in 'core\scenedialogsview.pas';
 
 begin
   with TMain.Create() do begin

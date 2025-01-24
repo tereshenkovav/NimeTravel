@@ -124,6 +124,7 @@
         <DCCReference Include="core\sceneconfirmnewgame.pas"/>
         <DCCReference Include="core\scenetextview.pas"/>
         <DCCReference Include="core\scenejournalview.pas"/>
+        <DCCReference Include="core\scenedialogsview.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

@@ -450,7 +450,8 @@ begin
       if (event.Event.key.code = sfKeyF7)and DebugAllowed then lobj.executeScript('debug.script','runDebug3()') ;
       if (event.Event.key.code = sfKeyEscape)or(event.Event.key.code = sfKeyF10) then begin
         lobj.SaveToFile() ;
-        subscene:=TGameMenu.Create(lobj.getActivatedSpells()) ;
+        subscene:=TGameMenu.Create(lobj.getActivatedSpells(),
+          lobj.getDialogJournal()) ;
         Galop.Pause;
         flag_entered_menu:=True ;
         Exit(TSceneResult.SetSubScene) ;
@@ -613,6 +614,9 @@ begin
     if Galop.Status=sfPaused then Galop.Play ;
     flag_entered_menu:=False ;
   end;
+
+  if lobj.getDialogText()<>'' then
+    lobj.addDialogOnTopIfNew(getTextOrKey(lobj.getDialogText()),lobj.getDialogColor()) ;
 
   TCommonData.LoadMusicIfNew(lobj.getMusic()) ;
 

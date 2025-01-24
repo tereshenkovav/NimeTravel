@@ -15,9 +15,10 @@ type
     shifty:Integer ;
     back:TSfmlTransformable ;
     logo:TSfmlSprite ;
-    spells:TUniList<TSpell> ;
     localsubscene:TScene ;
     escaperesult:TSceneResult ;
+    spells:TUniList<TSpell> ;
+    dialogjournal:TUniList<TDialogText> ;
     function getButtonX(i:Integer):Integer ;
     function getButtonY(i:Integer):Integer ;
     function isMouseOver(i:Integer):Boolean ;
@@ -50,13 +51,15 @@ type
   protected
     procedure rebuildItems() ; override ;
   public
-    constructor Create(Aspells:TUniList<TSpell>) ;
+    constructor Create(Aspells:TUniList<TSpell>;
+      Adialogjournal:TUniList<TDialogText>) ;
   end;
 
 implementation
 uses sfmlutils, ViewStatic, CommonProc, CommonData,
   SfmlWindow, Math, SysUtils, StrUtils, Logic, View,
-  SceneConfirmNewGame, SceneTextView, SceneJournalView ;
+  SceneConfirmNewGame, SceneTextView, SceneJournalView,
+  SceneDialogsView ;
 
 const
   LANG_ITEM = 'lang' ;
@@ -66,8 +69,6 @@ const
 constructor TMainMenu.Create() ;
 begin
   shifty:=110 ;
-  spells:=TUniList<TSpell>.Create() ;
-
   back:=TCommonData.intro ;
   loadLogo() ;
   escaperesult:=TSceneResult.Close ;
@@ -93,10 +94,11 @@ end;
 
 { TGameMenu }
 
-constructor TGameMenu.Create(Aspells:TUniList<TSpell>) ;
+constructor TGameMenu.Create(Aspells:TUniList<TSpell>;
+  Adialogjournal:TUniList<TDialogText>) ;
 begin
   spells:=Aspells ;
-
+  dialogjournal:=Adialogjournal ;
   back:=TCommonData.grayrect ;
   logo:=nil ;
   escaperesult:=TSceneResult.ExitSubScene ;
@@ -110,6 +112,7 @@ begin
   items.Add('sound') ;
   items.Add('help') ;
   items.Add('journal') ;
+  items.Add('dialogs') ;
   items.Add('mainmenu') ;
 end;
 
@@ -118,8 +121,6 @@ end;
 constructor TOptionsMenu.Create;
 begin
   shifty:=110 ;
-  spells:=TUniList<TSpell>.Create() ;
-
   back:=TCommonData.intro ;
   loadLogo() ;
   escaperesult:=TSceneResult.Close ;
@@ -248,6 +249,12 @@ begin
               end;
               if items[i]='journal' then begin
                 localsubscene:=TSceneJournalView.Create(spells) ;
+                localsubscene.setWindow(window,wwidth,wheight) ;
+                localsubscene.Init() ;
+              end;
+              if items[i]='dialogs' then begin
+                localsubscene:=TSceneDialogsView.Create(
+                  dialogjournal) ;
                 localsubscene.setWindow(window,wwidth,wheight) ;
                 localsubscene.Init() ;
               end;

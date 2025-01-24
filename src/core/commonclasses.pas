@@ -29,6 +29,13 @@ type
     class operator Equal(a: TStaticTask; b: TStaticTask): Boolean;
   end;
 
+  TDialogText = record
+    text:string ;
+    color:Cardinal ;
+    constructor Create(Atext:string; Acolor:Cardinal) ;
+    class operator Equal(a: TDialogText; b: TDialogText): Boolean;
+  end;
+
   TSkipClick = (scPartial,scFull) ;
   TLookState = (lsLeft,lsRight,lsNone) ;
 
@@ -92,6 +99,19 @@ end;
 class operator TStaticTask.Equal(a, b: TStaticTask): Boolean;
 begin
   Result:=(a.text=b.text)and(a.textsize=b.textsize) ;
+end;
+
+{ TDialogText }
+
+constructor TDialogText.Create(Atext: string; Acolor: Cardinal);
+begin
+  text:=Atext ;
+  color:=Acolor ;
+end;
+
+class operator TDialogText.Equal(a, b: TDialogText): Boolean;
+begin
+  Result:=(a.text=b.text)and(a.color=b.color) ;
 end;
 
 end.

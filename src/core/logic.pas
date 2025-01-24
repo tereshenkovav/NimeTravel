@@ -19,6 +19,7 @@ type
     activeobjects:TUniList<TGameObject> ;
     way:TUniList<TWayPoint> ;
     links:TUniList<TWayLink> ;
+    dialogjournal:TUniList<TDialogText> ;
     world_activeobjects:TUniDictionary<string,TObject> ;
     world_way:TUniDictionary<string,TObject> ;
     world_links:TUniDictionary<string,TObject> ;
@@ -57,7 +58,8 @@ type
     function ReadWayPoint(rec:Pointer; store:TReaderAPI):Boolean ;
     function WriteWayLink(rec:Pointer; store:TWriterAPI):Boolean ;
     function ReadWayLink(rec:Pointer; store:TReaderAPI):Boolean ;
-
+    function WriteDialogText(rec:Pointer; store:TWriterAPI):Boolean ;
+    function ReadDialogText(rec:Pointer; store:TReaderAPI):Boolean ;
     procedure LoadFromFile() ;
     class function getSaveGameFileName():string ;
     procedure RestoreSceneFromWorld() ;
@@ -102,7 +104,9 @@ type
     function getActiveScene():string ;
     function getAllowerMarkerCount():Integer ;
     function getActivatedSpells():TUniList<TSpell> ;
+    function getDialogJournal():TUniList<TDialogText> ;
     function isInScript():Boolean ;
+    procedure addDialogOnTopIfNew(text:string; color:Cardinal) ;
     // Методы, публикуемые в скрипте
     procedure setBackground(filename:string) ;
     procedure setMusic(filename:string) ;
@@ -148,6 +152,7 @@ type
 
 implementation
 uses Math, StrUtils,
+  {$ifndef fpc}IOUtils,{$endif}
   commonproc, ScriptExecutor, waysearch, HomeDir ;
 
 function formatSpellIcon(icoscene,icofile:string):string ;
@@ -176,6 +181,7 @@ begin
   world_way:=TUniDictionary<string,TObject>.Create() ;
   world_links:=TUniDictionary<string,TObject>.Create() ;
   world_backgrounds:=TUniDictionary<string,string>.Create() ;
+  dialogjournal:=TUniList<TDialogText>.Create ;
 
   flags:=TStringList.Create() ;
   spells:=TUniDictionary<Integer,TSpell>.Create() ;
@@ -393,6 +399,11 @@ begin
   Result:=dialogcolor ;
 end;
 
+function TLogic.getDialogJournal: TUniList<TDialogText>;
+begin
+  Result:=dialogjournal ;
+end;
+
 function TLogic.getWayLink(i: Integer): TWayLink;
 begin
   Result:=links[i] ;
@@ -430,6 +441,12 @@ begin
     IsActiveSpellReverse:=reverse ;
     EndWork() ;
   end;
+end;
+
+function TLogic.ReadDialogText(rec: Pointer; store: TReaderAPI): Boolean;
+begin
+  TDialogText(rec^).text:=store.ReadString('text') ;
+  TDialogText(rec^).color:=store.ReadInteger('color') ;
 end;
 
 function TLogic.ReadGameObject(obj: TObject; store: TReaderAPI): Boolean;
@@ -503,6 +520,20 @@ procedure TLogic.SaveToFile();
 var saver:TObjectSaver ;
     code:Integer ;
     scode:string ;
+
+procedure WriteAllJSON(filename:string; const data:string) ;
+var f:textfile ;
+begin
+  {$ifdef fpc}
+  AssignFile(f,filename) ;
+  ReWrite(f) ;
+  Write(f,data) ;
+  CloseFile(f) ;
+  {$else}
+  TFile.WriteAllText(filename,data,TEncoding.UTF8) ;
+  {$endif}
+end ;
+
 begin
   saver:=TObjectSaver.Create() ;
   saver.SystemSection().WriteInteger('logic_version',LOGIC_VERSION) ;
@@ -524,8 +555,11 @@ begin
       TUniList<TWayLink>(world_links[scode]),WriteWayLink) ;
   end;
 
+  saver.WriteRecordList<TDialogText>('dialogjournal',
+    dialogjournal,WriteDialogText) ;
+
   THomeDir.createDirInHomeIfNeed('NimeTravel') ;
-  WriteAllText(getSaveGameFileName(),saver.getData()) ;
+  WriteAllJSON(getSaveGameFileName(),saver.getData()) ;
   saver.Free ;
 end;
 
@@ -539,8 +573,22 @@ var loader:TObjectLoader ;
     tmp_active_objects:TUniList<TGameObject> ;
     tmp_ways:TUniList<TWayPoint> ;
     tmp_links:TUniList<TWayLink> ;
+
+function ReadJSONText(filename:string):string ;
 begin
-  loader:=TObjectLoader.Create(ReadAllText(getSaveGameFileName())) ;
+  {$ifdef fpc}
+  with TStringList.Create do begin
+    LoadFromFile(FileName) ;
+    Result:=Text ;
+    Free ;
+  end ;
+  {$else}
+  Result:=TFile.ReadAllText(filename,TEncoding.UTF8) ;
+  {$endif}
+end;
+
+begin
+  loader:=TObjectLoader.Create(ReadJSONText(getSaveGameFileName())) ;
   loader.ReadObject('vars',Self,ReadLogic) ;
   loader.ReadStringList('flags',flags) ;
 
@@ -572,6 +620,10 @@ begin
       tmp_links,ReadWayLink) ;
     world_links.Add(scode,tmp_links) ;
   end;
+
+  dialogjournal.Clear() ;
+  loader.ReadRecordList<TDialogText>('dialogjournal',
+    dialogjournal,ReadDialogText) ;
 
   loader.Free ;
 end;
@@ -618,6 +670,17 @@ begin
   BeginWork() ;
   activeobjects.Add(ao) ;
   EndWork() ;
+end;
+
+procedure TLogic.addDialogOnTopIfNew(text: string; color: Cardinal);
+var rec:TDialogText ;
+begin
+  rec:=TDialogText.Create(text,color) ;
+  if dialogjournal.Count=0 then
+    dialogjournal.Add(rec)
+  else
+    if not(dialogjournal[dialogjournal.Count-1]=rec) then
+      dialogjournal.Add(rec) ;
 end;
 
 procedure TLogic.addPassiveObject(code, filename: string; x, y: Integer; z:Single);
@@ -925,6 +988,12 @@ begin
     end;
   end;
   end;
+end;
+
+function TLogic.WriteDialogText(rec: Pointer; store: TWriterAPI): Boolean;
+begin
+  store.WriteString('text',TDialogText(rec^).text) ;
+  store.WriteInteger('color',TDialogText(rec^).color) ;
 end;
 
 function TLogic.WriteGameObject(obj: TObject; store: TWriterAPI): Boolean;
