@@ -35,6 +35,8 @@ implementation
 uses CommonData, SfmlUtils ;
 
 const DIALOG_FONT_SIZE = 20 ;
+      ARROW_UP_Y = 120 ;
+      ARROW_DOWN_Y = 540 ;
 
 function TSceneDialogsView.genTextBlocks
   (str:string; width:Integer; redlinewidth:Integer; color:Cardinal):TUniList<TSfmlText>;
@@ -93,25 +95,35 @@ end;
 
 function TSceneDialogsView.FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ;
 var event:TSfmlEventEx ;
+
+procedure TryRollUp() ;
+begin
+  if canscrollup then begin
+    Dec(last_idx) ;
+    RebuildTexts() ;
+   end;
+end;
+
+procedure TryRollDown() ;
+begin
+  if last_idx<dialogjournal.Count-1 then begin
+    Inc(last_idx) ;
+    RebuildTexts() ;
+  end;
+end;
+
 begin
   Result:=Normal ;
   for Event in events do begin
     if (Event.Event.EventType = sfEvtKeyPressed) then begin
-      if (Event.Event.Key.Code = sfKeyUp) then begin
-        if canscrollup then begin
-          Dec(last_idx) ;
-          RebuildTexts() ;
-        end;
-      end;
-      if (Event.Event.Key.Code = sfKeyDown) then begin
-        if last_idx<dialogjournal.Count-1 then begin
-          Inc(last_idx) ;
-          RebuildTexts() ;
-        end;
-      end;
+      if (Event.Event.Key.Code = sfKeyUp) then TryRollUp() ;
+      if (Event.Event.Key.Code = sfKeyDown) then TryRollDown() ;
       if (Event.Event.Key.Code in [sfKeyEscape,sfKeySpace]) then Result:=TSceneResult.ExitSubScene ;
     end;
-    if (Event.Event.EventType = sfEvtMouseButtonPressed) then Result:=TSceneResult.ExitSubScene ;
+    if (Event.Event.EventType = sfEvtMouseButtonPressed) then begin
+      if isMouseOverSprite(arrow,wwidth/2,ARROW_UP_Y) then TryRollUp() ;
+      if isMouseOverSprite(arrow,wwidth/2,ARROW_DOWN_Y) then TryRollDown() ;
+    end;
   end;
 end ;
 
@@ -141,8 +153,8 @@ begin
   for i := blocks.Count-1 downto 0 do
     drawText(blocks[blocks.Count-1-i],50,140+vertsize*i) ;
 
-  if canscrollup then drawSpriteMirr(arrow,wwidth/2,120,[MirrorVert]) ;
-  if last_idx<dialogjournal.Count-1 then drawSpriteMirr(arrow,wwidth/2,540,[]) ;
+  if canscrollup then drawSpriteMirr(arrow,wwidth/2,ARROW_UP_Y,[MirrorVert]) ;
+  if last_idx<dialogjournal.Count-1 then drawSpriteMirr(arrow,wwidth/2,ARROW_DOWN_Y,[]) ;
 
   DrawSprite(TCommonData.Cursor,mousex,mousey) ;
 end ;
