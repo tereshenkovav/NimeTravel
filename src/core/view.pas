@@ -61,6 +61,7 @@ type
     texticonhelp:TSfmlText ;
     texthelp:array of string ;
     starthighlight:Single ;
+    brshader:TSfmlShader ;
 
     function loadSpriteOrAnimation(filename:string):TSfmlSprite ;
     function getSprite(prefix:string; ao:TGameObject):TSfmlSprite ;
@@ -103,6 +104,8 @@ const
   SECS_BEFORE_DROPSPELL = 3 ;
   HIGHLIGHTPERIOD = 1.5 ;
 
+  TAG_ACTIVEOBJECT = 1 ;
+
 { TView }
 
 constructor TView.Create(obj:TLogic);
@@ -115,6 +118,9 @@ var i:Integer ;
 begin
   sprites:=TUniDictionary<string,TSfmlSprite>.Create() ;
   listzsprites:=TListZOrders.Create ;
+
+  brshader:=TSfmlShader.CreateFromFile('','','shaders'+PATH_SEP+'bright.frag') ;
+  brshader.SetFloatUniform('bright',1.0) ;
 
   Cursor:=loadSprite('images'+PATH_SEP+'cursor.png');
   Cursor.Origin:=SfmlVector2f(0,10) ;
@@ -380,16 +386,10 @@ begin
     dt:=dt*0.2;
 
   if starthighlight>0 then begin
-    for ao in lobj.getActiveObjects() do
-      if ao.isactive then
-         getSprite(PREFIX_ACTIVEOBJECT,ao).Color:=convertSFMLColorBright(SfmlWhite,
-           0.8+0.2*Sin(PI/2+4*PI*starthighlight/HIGHLIGHTPERIOD)) ;
+    brshader.SetFloatUniform('bright',
+       1.25+0.25*Sin(-PI/2+4*PI*starthighlight/HIGHLIGHTPERIOD)) ;
     starthighlight:=starthighlight-dt ;
-  end
-  else
-    for ao in lobj.getActiveObjects() do
-      if ao.isactive then
-        getSprite(PREFIX_ACTIVEOBJECT,ao).Color:=SfmlWhite ;
+  end ;
 
   listzsprites.Clear() ;
   if lobj.getBackground()<>'' then
@@ -397,7 +397,8 @@ begin
 
   if not lobj.isPictureMode() then begin
     for ao in lobj.getActiveObjects() do
-      listzsprites.Add(retAndPosSprite(getSprite(PREFIX_ACTIVEOBJECT,ao),ao.x,ao.y,ao.transp),ao.z) ;
+      listzsprites.Add(retAndPosSprite(getSprite(PREFIX_ACTIVEOBJECT,ao),ao.x,ao.y,ao.transp),ao.z,
+        IfThen(ao.isactive,TAG_ACTIVEOBJECT,0)) ;
     HeroWalk.ScaleFactor:=getScaleVector() ;
     HeroAction.ScaleFactor:=getScaleVector() ;
     HeroWait.ScaleFactor:=getScaleVector() ;
@@ -637,8 +638,16 @@ var spr:TSfmlSprite ;
     i:Integer ;
     tmpws:TUniList<Integer> ;
     usewalk:Boolean ;
+    zs:TZSprite ;
 begin
-  listzsprites.Render(window) ;
+  for zs in listzsprites.getSortedZSprites() do
+    if (zs.tag=TAG_ACTIVEOBJECT)and(starthighlight>0) then begin
+      brshader.Bind() ;
+      window.Draw(zs.spr) ;
+      SfmlShaderBind(nil) ;
+    end
+    else
+      window.Draw(zs.spr) ;
 
   if lobj.getDialogText()<>'' then begin
     TextDialog.Color:=createSFMLColor(lobj.getDialogColor()) ;
