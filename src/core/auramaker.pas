@@ -34,7 +34,7 @@ var tex:TSfmlTexture ;
     spr:TSfmlSprite ;
     i,j:Integer ;
     rcount,dcount:Integer ;
-    rads:array of Integer ;
+    rads,newrads:array of Integer ;
     r,rlast:Integer ;
     aura:TSfmlImage ;
     x,y,cx,cy:Integer ;
@@ -44,16 +44,18 @@ var tex:TSfmlTexture ;
     minx,miny,maxx,maxy,dx,dy,neww,newh:Integer ;
     frame,fcount:Integer ;
     freqanim,freqr:Integer ;
+    i1:Integer ;
 begin
   Result:=TUniList<TSfmlSprite>.Create() ;
 
   fcount:=12 ; // Число фреймов анимации
   rcount:=48 ; // Число лучей для трассировки
-  dcount:=6 ;  // Число отрезков между лучами
+  dcount:=12 ;  // Число отрезков между лучами
   freqanim:=6 ; // Скорость сдвига между фреймами
   freqr:=3 ; // Половина размера колебаний радиуса луча
 
   SetLength(rads,rcount) ;
+  SetLength(newrads,rcount) ;
   cx:=img.Size.X div 2 ;
   cy:=img.Size.Y div 2 ;
 
@@ -79,6 +81,21 @@ begin
     if rlast=-1 then rlast:=r ;
     rads[i]:=rlast ;
   end;
+
+  for i := 0 to rcount-1 do
+    newrads[i]:=rads[i] ;
+
+  for i := 0 to rcount-1 do begin
+    i1:=i-1 ;
+    if i1<0 then i1:=rcount-1 ;
+    if rads[i1]>rads[i] then newrads[i]:=rads[i]+Round(0.5*(rads[i1]-rads[i])) ;
+    i1:=i+1 ;
+    if i1>=rcount then i1:=0 ;
+    if rads[i1]>rads[i] then newrads[i]:=rads[i]+Round(0.5*(rads[i1]-rads[i])) ;
+  end;
+
+  for i := 0 to rcount-1 do
+    rads[i]:=newrads[i] ;
 
   for frame := 0 to fcount-1 do begin
 
