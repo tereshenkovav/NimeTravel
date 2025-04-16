@@ -31,7 +31,7 @@ function TSceneMagicRender.Init():Boolean ;
 begin
   sprites:=TUniList<TSfmlSprite>.Create() ;
   auras:=TUniList<TUniList<TSfmlSprite>>.Create() ;
-  LoadSpriteAndAura('scenes\scene1\bush.png',150,100,9) ;
+  LoadSpriteAndAura('scenes\scene1\bush.png',150,100,12) ;
   LoadSpriteAndAura('scenes\scene1\grave_clover.png',350,100,6) ;
   LoadSpriteAndAura('scenes\scene4\book.png',500,100,6) ;
   LoadSpriteAndAura('scenes\scene6\fire_ico.png',600,100,3) ;

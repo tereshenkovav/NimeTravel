@@ -16,6 +16,7 @@ type
   private
     img:TSfmlImage ;
     function Pixel(x,y:Integer; c:TSfmlColor):TPixel ;
+    procedure DrawLine(pixels:TUniList<TPixel>;x1,y1,x2,y2:Integer) ;
   public
     constructor Create(Aimg:TSfmlImage) ;
     function GenAura(freqanim:Integer):TUniList<TSfmlSprite> ;
@@ -28,6 +29,38 @@ constructor TAuraMaker.Create(Aimg:TSfmlImage) ;
 begin
   img:=Aimg ;
 end ;
+
+procedure TAuraMaker.DrawLine(pixels: TUniList<TPixel>; x1, y1, x2, y2: Integer);
+var delta:Single ;
+    x,y:Single ;
+    c:TSfmlColor ;
+begin
+  c:=SfmlColorFromRGBA(255,255,255,255) ;
+  if (x1=x2)and(y1=y2) then begin
+    pixels.Add(Pixel(x1,y1,c)) ;
+    Exit ;
+  end;
+
+  x:=x1 ;
+  y:=y1 ;
+  if Abs(x2-x1)>Abs(y2-y1) then begin
+    delta:=(y2-y1)/Abs(x2-x1) ;
+    repeat
+      pixels.Add(Pixel(Round(x),Round(y),c)) ;
+      x:=x+Sign(x2-x1) ;
+      y:=y+delta ;
+    until x=x2;
+  end
+  else begin
+    delta:=(x2-x1)/Abs(y2-y1) ;
+    repeat
+      pixels.Add(Pixel(Round(x),Round(y),c)) ;
+      x:=x+delta ;
+      y:=y+Sign(y2-y1) ;
+    until y=y2;
+  end;
+  pixels.Add(Pixel(x2,y2,c)) ;
+end;
 
 function TAuraMaker.GenAura(freqanim:Integer):TUniList<TSfmlSprite> ;
 var tex:TSfmlTexture ;
@@ -45,6 +78,7 @@ var tex:TSfmlTexture ;
     frame,fcount:Integer ;
     freqr:Integer ;
     i1,i2,maxr:Integer ;
+    xold,yold:Integer ;
 begin
   Result:=TUniList<TSfmlSprite>.Create() ;
 
@@ -114,7 +148,9 @@ begin
     a:=2*PI*i/rcount+ (2*PI/rcount)*(j/dcount) ;
     x:=cx+Round(r*Cos(a)) ;
     y:=cy+Round(r*Sin(a)) ;
-    pixels.Add(Pixel(x,y,SfmlColorFromRGBA(255,255,255,255))) ;
+    if j>0 then DrawLine(pixels,xold,yold,x,y) ;
+    xold:=x ;
+    yold:=y ;
     end;
   end;
 
