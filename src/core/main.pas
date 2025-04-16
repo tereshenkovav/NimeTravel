@@ -16,7 +16,7 @@ implementation
 uses SysUtils, StrUtils, Types, Math, Classes,
   SfmlSystem,
   Game, CommonProc, CommonData, Spell, SceneCloseHandler, Logger, ScreenSaver,
-  view, viewstatic, logic, helpers, sfmlutils ;
+  view, viewstatic, logic, helpers, sfmlutils, SceneMagicRender ;
 
 const WINDOW_W=800 ;
       WINDOW_H=600 ;
@@ -82,7 +82,7 @@ begin
   if FileExists('developer') then game.setCustomScreenSaver(
     TScreenSaverStd.Create(game.getGameCode(),sfKeyF12,sfKeyF8,sfKeyF9)) ;
 
-  game.Run(TMainMenu.Create()) ;
+  game.Run(TSceneMagicRender.Create()) ;
   game.Free ;
   TCommonData.UnInit() ;
 end ;

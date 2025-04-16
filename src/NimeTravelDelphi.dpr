@@ -22,7 +22,9 @@ uses
   sceneconfirmnewgame in 'core\sceneconfirmnewgame.pas',
   scenetextview in 'core\scenetextview.pas',
   scenejournalview in 'core\scenejournalview.pas',
-  scenedialogsview in 'core\scenedialogsview.pas';
+  scenedialogsview in 'core\scenedialogsview.pas',
+  scenemagicrender in 'core\scenemagicrender.pas',
+  auramaker in 'core\auramaker.pas';
 
 begin
   with TMain.Create() do begin

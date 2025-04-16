@@ -125,6 +125,8 @@
         <DCCReference Include="core\scenetextview.pas"/>
         <DCCReference Include="core\scenejournalview.pas"/>
         <DCCReference Include="core\scenedialogsview.pas"/>
+        <DCCReference Include="core\scenemagicrender.pas"/>
+        <DCCReference Include="core\auramaker.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
