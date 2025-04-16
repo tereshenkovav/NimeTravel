@@ -85,7 +85,7 @@ begin
     for j := 0 to dcount-1 do begin
     k:=1.15+0.15*Sin(q) ;
     r:=Round(k*(rads[i]+(rads[(i+1) mod rcount]-rads[i])*(j/(dcount-1)))) ;
-    q:=q+0.1 ;
+    q:=q+(rcount/4)*2*PI/(rcount*dcount) ;
     a:=2*PI*i/rcount+ (2*PI/rcount)*(j/dcount) ;
     x:=cx+Round(r*Cos(a)) ;
     y:=cy+Round(r*Sin(a)) ;
