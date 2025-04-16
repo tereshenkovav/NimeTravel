@@ -38,10 +38,11 @@ var tex:TSfmlTexture ;
     r,rlast:Integer ;
     aura:TSfmlImage ;
     x,y,cx,cy:Integer ;
-    a:Single ;
+    a,q,k:Single ;
     pixels:TUniList<TPixel> ;
     p:TPixel ;
     minx,miny,maxx,maxy,dx,dy,neww,newh:Integer ;
+    frame,fcount:Integer ;
 begin
   Result:=TUniList<TSfmlSprite>.Create() ;
 
@@ -73,12 +74,18 @@ begin
     rads[i]:=rlast ;
   end;
 
+  fcount:=12 ;
+  for frame := 0 to fcount-1 do begin
+
   pixels:=TUniList<TPixel>.Create ;
 
   dcount:=12 ;
+  q:=2*PI*(frame/fcount) ;
   for i := 0 to rcount-1 do begin
     for j := 0 to dcount-1 do begin
-    r:=Round(rads[i]+(rads[(i+1) mod rcount]-rads[i])*(j/(dcount-1))) ;
+    k:=1.15+0.15*Sin(q) ;
+    r:=Round(k*(rads[i]+(rads[(i+1) mod rcount]-rads[i])*(j/(dcount-1)))) ;
+    q:=q+0.1 ;
     a:=2*PI*i/rcount+ (2*PI/rcount)*(j/dcount) ;
     x:=cx+Round(r*Cos(a)) ;
     y:=cy+Round(r*Sin(a)) ;
@@ -114,6 +121,7 @@ begin
   spr:=TSfmlSprite.Create(tex) ;
   spr.Origin:=SfmlVector2f(img.Size.X/2+dx,img.Size.Y/2+dy) ;
   Result.Add(spr) ;
+  end;
 end ;
 
 function TAuraMaker.Pixel(x, y: Integer; c: TSfmlColor): TPixel;

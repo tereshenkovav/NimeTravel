@@ -71,11 +71,10 @@ end ;
 
 procedure TSceneMagicRender.RenderFunc() ;
 var i,idx:Integer ;
-const FREQ = 4 ;
 begin
   for i:=0 to sprites.Count-1 do begin
     window.Draw(sprites[i]) ;
-    idx:=Round(FREQ*t) mod auras[i].Count ;
+    idx:=Round(auras[i].Count*t) mod auras[i].Count ;
     DrawSprite(auras[i][idx],sprites[i].Position.X,sprites[i].Position.Y) ;
   end;
 end ;
