@@ -43,10 +43,15 @@ var tex:TSfmlTexture ;
     p:TPixel ;
     minx,miny,maxx,maxy,dx,dy,neww,newh:Integer ;
     frame,fcount:Integer ;
+    freqanim:Integer ;
 begin
   Result:=TUniList<TSfmlSprite>.Create() ;
 
-  rcount:=24;
+  fcount:=12 ; // Число фреймов анимации
+  rcount:=48 ; // Число лучей для трассировки
+  dcount:=6 ;  // Число отрезков между лучами
+  freqanim:=6 ; // Скорость сдвига между фреймами
+
   SetLength(rads,rcount) ;
   cx:=img.Size.X div 2 ;
   cy:=img.Size.Y div 2 ;
@@ -74,18 +79,16 @@ begin
     rads[i]:=rlast ;
   end;
 
-  fcount:=12 ;
   for frame := 0 to fcount-1 do begin
 
   pixels:=TUniList<TPixel>.Create ;
 
-  dcount:=12 ;
   q:=2*PI*(frame/fcount) ;
   for i := 0 to rcount-1 do begin
     for j := 0 to dcount-1 do begin
     k:=1.15+0.15*Sin(q) ;
     r:=Round(k*(rads[i]+(rads[(i+1) mod rcount]-rads[i])*(j/(dcount-1)))) ;
-    q:=q+(rcount/4)*2*PI/(rcount*dcount) ;
+    q:=q+freqanim*2*PI/(rcount*dcount) ;
     a:=2*PI*i/rcount+ (2*PI/rcount)*(j/dcount) ;
     x:=cx+Round(r*Cos(a)) ;
     y:=cy+Round(r*Sin(a)) ;
