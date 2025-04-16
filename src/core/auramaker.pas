@@ -16,7 +16,7 @@ type
   private
     img:TSfmlImage ;
     function Pixel(x,y:Integer; c:TSfmlColor):TPixel ;
-    procedure DrawLine(pixels:TUniList<TPixel>;x1,y1,x2,y2:Integer) ;
+    procedure DrawLine(pixels:TUniList<TPixel>;x1,y1,x2,y2:Integer; c:TSfmlColor) ;
   public
     constructor Create(Aimg:TSfmlImage) ;
     function GenAura(freqanim:Integer):TUniList<TSfmlSprite> ;
@@ -30,12 +30,11 @@ begin
   img:=Aimg ;
 end ;
 
-procedure TAuraMaker.DrawLine(pixels: TUniList<TPixel>; x1, y1, x2, y2: Integer);
+procedure TAuraMaker.DrawLine(pixels: TUniList<TPixel>; x1, y1, x2, y2: Integer;
+  c:TSfmlColor);
 var delta:Single ;
     x,y:Single ;
-    c:TSfmlColor ;
 begin
-  c:=SfmlColorFromRGBA(255,255,255,255) ;
   if (x1=x2)and(y1=y2) then begin
     pixels.Add(Pixel(x1,y1,c)) ;
     Exit ;
@@ -72,15 +71,24 @@ var tex:TSfmlTexture ;
     aura:TSfmlImage ;
     x,y,cx,cy:Integer ;
     a,q,k:Single ;
-    pixels:TUniList<TPixel> ;
+    pixels,newpixels:TUniList<TPixel> ;
     p:TPixel ;
     minx,miny,maxx,maxy,dx,dy,neww,newh:Integer ;
     frame,fcount:Integer ;
     freqr:Integer ;
     i1,i2,maxr:Integer ;
-    xold,yold:Integer ;
+    xold,yold,xfirst,yfirst:Integer ;
+    cborder,cfill:TSfmlColor ;
+
+function isEqual(c1,c2:TSfmlColor):Boolean ;
+begin
+  Result:=(c1.r=c2.r)and(c1.g=c2.g)and(c1.b=c2.b)and(c1.a=c2.a) ;
+end;
+
 begin
   Result:=TUniList<TSfmlSprite>.Create() ;
+  cborder:=SfmlColorFromRGBA(255,255,255,255) ;
+  cfill:=SfmlColorFromRGBA(176,0,96,128) ;
 
   fcount:=12 ; // Число фреймов анимации
   rcount:=48 ; // Число лучей для трассировки
@@ -144,15 +152,21 @@ begin
     for j := 0 to dcount-1 do begin
     r:=Round((rads[i]+(rads[(i+1) mod rcount]-rads[i])*(j/(dcount-1)))) ;
     r:=r+Round(freqr+freqr*Sin(q)) ;
-    q:=q+freqanim*2*PI/(rcount*dcount) ;
+    q:=q-freqanim*2*PI/(rcount*dcount) ;
     a:=2*PI*i/rcount+ (2*PI/rcount)*(j/dcount) ;
     x:=cx+Round(r*Cos(a)) ;
     y:=cy+Round(r*Sin(a)) ;
-    if j>0 then DrawLine(pixels,xold,yold,x,y) ;
+    if not((i=0)and(j=0)) then
+      DrawLine(pixels,xold,yold,x,y,cborder)
+    else begin
+      xfirst:=x ;
+      yfirst:=y ;
+    end ;
     xold:=x ;
     yold:=y ;
     end;
   end;
+  DrawLine(pixels,xold,yold,xfirst,yfirst,cborder) ;
 
   minx:=pixels[0].x ;
   maxx:=pixels[0].x ;
@@ -175,6 +189,47 @@ begin
   for p in pixels do
     aura.Pixel[p.x+dx,p.y+dy]:=p.c ;
   pixels.Free ;
+
+  pixels:=TUniList<TPixel>.Create ;
+  newpixels:=TUniList<TPixel>.Create ;
+  pixels.Add(Pixel(cx,cy,cfill)) ;
+  aura.Pixel[cx,cy]:=cfill ;
+  while True do begin
+    for p in pixels do begin
+       if p.x<1 then continue ;
+       if p.y<1 then continue ;
+       if p.x>neww-2 then continue ;
+       if p.y>newh-2 then continue ;
+       if aura.Pixel[p.x-1,p.y].a=0 then begin
+          newpixels.Add(Pixel(p.x-1,p.y,cfill)) ;
+          aura.Pixel[p.x-1,p.y]:=cfill ;
+       end ;
+       if aura.Pixel[p.x+1,p.y].a=0 then begin
+          newpixels.Add(Pixel(p.x+1,p.y,cfill)) ;
+          aura.Pixel[p.x+1,p.y]:=cfill ;
+       end ;
+       if aura.Pixel[p.x,p.y-1].a=0 then begin
+          newpixels.Add(Pixel(p.x,p.y-1,cfill)) ;
+          aura.Pixel[p.x,p.y-1]:=cfill ;
+       end ;
+       if aura.Pixel[p.x,p.y+1].a=0 then begin
+          newpixels.Add(Pixel(p.x,p.y+1,cfill)) ;
+          aura.Pixel[p.x,p.y+1]:=cfill ;
+       end ;
+    end ;
+    if newpixels.Count=0 then Break ;
+    pixels.Clear() ;
+    for p in newpixels do
+      pixels.Add(p) ;
+    newpixels.Clear() ;
+  end;
+  pixels.Free ;
+  newpixels.Free ;
+
+  for x := 0 to neww-1 do
+    for y := 0 to newh-1 do
+      if isEqual(aura.Pixel[x,y],cborder) then
+        aura.Pixel[x,y]:=SfmlColorFromRGBA(0,0,0,0) ;
 
   tex:=TSfmlTexture.Create(aura.Handle) ;
   aura.Free ;
