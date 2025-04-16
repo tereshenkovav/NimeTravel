@@ -16,7 +16,7 @@ type
     sprites:TUniList<TSfmlSprite> ;
     auras:TUniList<TUniList<TSfmlSprite>> ;
     t:Single ;
-    procedure LoadSpriteAndAura(const filename:string; x,y:Integer) ;
+    procedure LoadSpriteAndAura(const filename:string; x,y:Integer; freqanim:Integer) ;
   public
     function Init():Boolean ; override ;
     function FrameFunc(dt:Single; events:TUniList<TSfmlEventEx>):TSceneResult ; override ;
@@ -31,18 +31,18 @@ function TSceneMagicRender.Init():Boolean ;
 begin
   sprites:=TUniList<TSfmlSprite>.Create() ;
   auras:=TUniList<TUniList<TSfmlSprite>>.Create() ;
-  LoadSpriteAndAura('scenes\scene1\bush.png',150,100) ;
-  LoadSpriteAndAura('scenes\scene1\grave_clover.png',350,100) ;
-  LoadSpriteAndAura('scenes\scene4\book.png',500,100) ;
-  LoadSpriteAndAura('scenes\scene6\fire_ico.png',600,100) ;
-  LoadSpriteAndAura('scenes\scene5\colb.png',700,100) ;
-  LoadSpriteAndAura('scenes\scene4\pony.png',210,400) ;
-  LoadSpriteAndAura('scenes\scene5\pony.png',510,400) ;
-  LoadSpriteAndAura('scenes\scene6\pony.png',700,400) ;
+  LoadSpriteAndAura('scenes\scene1\bush.png',150,100,9) ;
+  LoadSpriteAndAura('scenes\scene1\grave_clover.png',350,100,6) ;
+  LoadSpriteAndAura('scenes\scene4\book.png',500,100,6) ;
+  LoadSpriteAndAura('scenes\scene6\fire_ico.png',600,100,3) ;
+  LoadSpriteAndAura('scenes\scene5\colb.png',700,100,3) ;
+  LoadSpriteAndAura('scenes\scene4\pony.png',210,400,24) ;
+  LoadSpriteAndAura('scenes\scene5\pony.png',510,400,24) ;
+  LoadSpriteAndAura('scenes\scene6\pony.png',700,400,24) ;
   t:=0 ;
 end ;
 
-procedure TSceneMagicRender.LoadSpriteAndAura(const filename: string; x,y:Integer);
+procedure TSceneMagicRender.LoadSpriteAndAura(const filename: string; x,y:Integer; freqanim:Integer);
 var spr:TSfmlSprite ;
     img:TSfmlImage ;
 begin
@@ -52,7 +52,7 @@ begin
 
   img:=TSfmlImage.Create(filename) ;
   with TAuraMaker.Create(img) do begin
-    auras.Add(GenAura()) ;
+    auras.Add(GenAura(freqanim)) ;
     Free ;
   end ;
   img.Free ;

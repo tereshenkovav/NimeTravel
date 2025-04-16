@@ -18,7 +18,7 @@ type
     function Pixel(x,y:Integer; c:TSfmlColor):TPixel ;
   public
     constructor Create(Aimg:TSfmlImage) ;
-    function GenAura():TUniList<TSfmlSprite> ;
+    function GenAura(freqanim:Integer):TUniList<TSfmlSprite> ;
   end ;
 
 implementation
@@ -29,7 +29,7 @@ begin
   img:=Aimg ;
 end ;
 
-function TAuraMaker.GenAura():TUniList<TSfmlSprite> ;
+function TAuraMaker.GenAura(freqanim:Integer):TUniList<TSfmlSprite> ;
 var tex:TSfmlTexture ;
     spr:TSfmlSprite ;
     i,j:Integer ;
@@ -43,16 +43,15 @@ var tex:TSfmlTexture ;
     p:TPixel ;
     minx,miny,maxx,maxy,dx,dy,neww,newh:Integer ;
     frame,fcount:Integer ;
-    freqanim,freqr:Integer ;
-    i1:Integer ;
+    freqr:Integer ;
+    i1,i2,maxr:Integer ;
 begin
   Result:=TUniList<TSfmlSprite>.Create() ;
 
   fcount:=12 ; // Число фреймов анимации
   rcount:=48 ; // Число лучей для трассировки
   dcount:=12 ;  // Число отрезков между лучами
-  freqanim:=6 ; // Скорость сдвига между фреймами
-  freqr:=3 ; // Половина размера колебаний радиуса луча
+  freqr:=2 ; // Половина размера колебаний радиуса луча
 
   SetLength(rads,rcount) ;
   SetLength(newrads,rcount) ;
@@ -85,17 +84,22 @@ begin
   for i := 0 to rcount-1 do
     newrads[i]:=rads[i] ;
 
+  for j := 0 to 3 do begin
+
   for i := 0 to rcount-1 do begin
     i1:=i-1 ;
     if i1<0 then i1:=rcount-1 ;
-    if rads[i1]>rads[i] then newrads[i]:=rads[i]+Round(0.5*(rads[i1]-rads[i])) ;
-    i1:=i+1 ;
-    if i1>=rcount then i1:=0 ;
-    if rads[i1]>rads[i] then newrads[i]:=rads[i]+Round(0.5*(rads[i1]-rads[i])) ;
+    i2:=i+1 ;
+    if i2>=rcount then i2:=0 ;
+    maxr:=Max(rads[i1],rads[i2]) ;
+    if maxr>rads[i] then newrads[i]:=rads[i]+Round(0.5*(maxr-rads[i])) ;
   end;
 
   for i := 0 to rcount-1 do
     rads[i]:=newrads[i] ;
+
+  end;
+
 
   for frame := 0 to fcount-1 do begin
 
