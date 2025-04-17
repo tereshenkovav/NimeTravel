@@ -5,6 +5,12 @@ uses SfmlSystem, SfmlGraphics,
   Helpers ;
 
 type
+  TImageShifted = record
+    originx:Integer ;
+    originy:Integer ;
+    img:TSfmlImage ;
+  end;
+
   TAuraMaker = class
   private
     type
@@ -16,10 +22,13 @@ type
   private
     img:TSfmlImage ;
     function Pixel(x,y:Integer; c:TSfmlColor):TPixel ;
+    function ImageShifted(originx,originy:Integer; img:TSfmlImage):TImageShifted ;
     procedure DrawLine(pixels:TUniList<TPixel>;x1,y1,x2,y2:Integer; c:TSfmlColor) ;
   public
     constructor Create(Aimg:TSfmlImage) ;
-    function GenAura(freqanim,magicborder:Integer):TUniList<TSfmlSprite> ;
+    function GenAuraImages(freqanim,magicborder:Integer):TUniList<TImageShifted> ;
+    class function ImagesToSprites(images:TUniList<TImageShifted>):TUniList<TSfmlSprite> ;
+    class function ImagesToSolidImage(images:TUniList<TImageShifted>):TSfmlImage ;
   end ;
 
 implementation
@@ -29,6 +38,33 @@ constructor TAuraMaker.Create(Aimg:TSfmlImage) ;
 begin
   img:=Aimg ;
 end ;
+
+class function TAuraMaker.ImagesToSprites(images:TUniList<TImageShifted>):TUniList<TSfmlSprite> ;
+var img:TImageShifted ;
+    tex:TSfmlTexture ;
+    spr:TSfmlSprite ;
+begin
+  Result:=TUniList<TSfmlSprite>.Create() ;
+  for img in images do begin
+    tex:=TSfmlTexture.Create(img.img.Handle) ;
+    spr:=TSfmlSprite.Create(tex) ;
+    spr.Origin:=SfmlVector2f(img.originx,img.originy) ;
+    Result.Add(spr) ;
+  end;
+end;
+
+function TAuraMaker.ImageShifted(originx, originy: Integer;
+  img: TSfmlImage): TImageShifted;
+begin
+  Result.originx:=originx ;
+  Result.originy:=originy ;
+  Result.img:=img ;
+end;
+
+class function TAuraMaker.ImagesToSolidImage(images:TUniList<TImageShifted>):TSfmlImage ;
+begin
+
+end;
 
 procedure TAuraMaker.DrawLine(pixels: TUniList<TPixel>; x1, y1, x2, y2: Integer;
   c:TSfmlColor);
@@ -61,10 +97,8 @@ begin
   pixels.Add(Pixel(x2,y2,c)) ;
 end;
 
-function TAuraMaker.GenAura(freqanim,magicborder:Integer):TUniList<TSfmlSprite> ;
-var tex:TSfmlTexture ;
-    spr:TSfmlSprite ;
-    i,j:Integer ;
+function TAuraMaker.GenAuraImages(freqanim,magicborder:Integer):TUniList<TImageShifted> ;
+var i,j:Integer ;
     rcount,dcount:Integer ;
     rads,newrads:array of Integer ;
     r,rlast:Integer ;
@@ -91,7 +125,7 @@ begin
 end;
 
 begin
-  Result:=TUniList<TSfmlSprite>.Create() ;
+  Result:=TUniList<TImageShifted>.Create() ;
   cborder:=SfmlColorFromRGBA(255,255,255,255) ;
   cfill:=SfmlColorFromRGBA(176,0,96,128) ;
 
@@ -295,12 +329,7 @@ begin
 
   border.Free ;
 
-  tex:=TSfmlTexture.Create(aura.Handle) ;
-  aura.Free ;
-
-  spr:=TSfmlSprite.Create(tex) ;
-  spr.Origin:=SfmlVector2f(img.Size.X/2+dx,img.Size.Y/2+dy) ;
-  Result.Add(spr) ;
+  Result.Add(ImageShifted(img.Size.X div 2+dx,img.Size.Y div 2+dy,aura)) ;
   end;
 end ;
 

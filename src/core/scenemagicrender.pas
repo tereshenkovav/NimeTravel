@@ -46,6 +46,7 @@ procedure TSceneMagicRender.LoadSpriteAndAura(const filename: string; x,y:Intege
   freqanim,magicborder:Integer);
 var spr:TSfmlSprite ;
     img:TSfmlImage ;
+    list:TUniList<TImageShifted> ;
 begin
   spr:=loadSprite(filename,[sloCentered]) ;
   spr.Position:=SfmlVector2f(x,y) ;
@@ -53,7 +54,9 @@ begin
 
   img:=TSfmlImage.Create(filename) ;
   with TAuraMaker.Create(img) do begin
-    auras.Add(GenAura(freqanim,magicborder)) ;
+    list:=GenAuraImages(freqanim,magicborder) ;
+    auras.Add(TAuraMaker.ImagesToSprites(list)) ;
+    list.Free ;
     Free ;
   end ;
   img.Free ;
