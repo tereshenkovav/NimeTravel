@@ -19,7 +19,7 @@ type
     procedure DrawLine(pixels:TUniList<TPixel>;x1,y1,x2,y2:Integer; c:TSfmlColor) ;
   public
     constructor Create(Aimg:TSfmlImage) ;
-    function GenAura(freqanim:Integer):TUniList<TSfmlSprite> ;
+    function GenAura(freqanim,magicborder:Integer):TUniList<TSfmlSprite> ;
   end ;
 
 implementation
@@ -61,7 +61,7 @@ begin
   pixels.Add(Pixel(x2,y2,c)) ;
 end;
 
-function TAuraMaker.GenAura(freqanim:Integer):TUniList<TSfmlSprite> ;
+function TAuraMaker.GenAura(freqanim,magicborder:Integer):TUniList<TSfmlSprite> ;
 var tex:TSfmlTexture ;
     spr:TSfmlSprite ;
     i,j:Integer ;
@@ -258,9 +258,9 @@ begin
           dist:=(p.x+dx-x)*(p.x+dx-x)+(p.y+dy-y)*(p.y+dy-y) ;
           if (dist<mindist)or(mindist=-1) then mindist:=dist ;
         end ;
-        if (mindist<100) then
+        if (mindist<magicborder*magicborder) then
           aura.Pixel[x,y]:=SfmlColorFromRGBA(cfill.R,cfill.G,cfill.B,
-            Round(mindist*(cfill.A-255)/100+255))
+            Round(mindist*(cfill.A-255)/(magicborder*magicborder)+255))
       end ;
 
   pixels:=TUniList<TPixel>.Create() ;
