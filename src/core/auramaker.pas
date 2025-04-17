@@ -71,7 +71,7 @@ var tex:TSfmlTexture ;
     aura:TSfmlImage ;
     x,y,cx,cy:Integer ;
     a,q,k:Single ;
-    pixels,newpixels:TUniList<TPixel> ;
+    border,pixels,newpixels:TUniList<TPixel> ;
     p:TPixel ;
     minx,miny,maxx,maxy,dx,dy,neww,newh:Integer ;
     frame,fcount:Integer ;
@@ -79,6 +79,7 @@ var tex:TSfmlTexture ;
     i1,i2,maxr:Integer ;
     xold,yold,xfirst,yfirst:Integer ;
     cborder,cfill:TSfmlColor ;
+    dist,mindist:Single ;
 
 function isEqual(c1,c2:TSfmlColor):Boolean ;
 begin
@@ -145,7 +146,7 @@ begin
 
   for frame := 0 to fcount-1 do begin
 
-  pixels:=TUniList<TPixel>.Create ;
+  border:=TUniList<TPixel>.Create ;
 
   q:=2*PI*(frame/fcount) ;
   for i := 0 to rcount-1 do begin
@@ -157,7 +158,7 @@ begin
     x:=cx+Round(r*Cos(a)) ;
     y:=cy+Round(r*Sin(a)) ;
     if not((i=0)and(j=0)) then
-      DrawLine(pixels,xold,yold,x,y,cborder)
+      DrawLine(border,xold,yold,x,y,cborder)
     else begin
       xfirst:=x ;
       yfirst:=y ;
@@ -166,17 +167,17 @@ begin
     yold:=y ;
     end;
   end;
-  DrawLine(pixels,xold,yold,xfirst,yfirst,cborder) ;
+  DrawLine(border,xold,yold,xfirst,yfirst,cborder) ;
 
-  minx:=pixels[0].x ;
-  maxx:=pixels[0].x ;
-  miny:=pixels[0].y ;
-  maxy:=pixels[0].y ;
-  for i:=1 to pixels.Count-1 do begin
-    if minx>pixels[i].x then minx:=pixels[i].x ;
-    if maxx<pixels[i].x then maxx:=pixels[i].x ;
-    if miny>pixels[i].y then miny:=pixels[i].y ;
-    if maxy<pixels[i].y then maxy:=pixels[i].y ;
+  minx:=border[0].x ;
+  maxx:=border[0].x ;
+  miny:=border[0].y ;
+  maxy:=border[0].y ;
+  for i:=1 to border.Count-1 do begin
+    if minx>border[i].x then minx:=border[i].x ;
+    if maxx<border[i].x then maxx:=border[i].x ;
+    if miny>border[i].y then miny:=border[i].y ;
+    if maxy<border[i].y then maxy:=border[i].y ;
   end;
 
   if minx<0 then dx:=-minx else dx:=0 ;
@@ -186,9 +187,8 @@ begin
   newh:=Max(img.Size.Y,maxy+1)+dy ;
 
   aura:=TSfmlImage.Create(neww,newh,SfmlColorFromRGBA(0,0,0,0)) ;
-  for p in pixels do
+  for p in border do
     aura.Pixel[p.x+dx,p.y+dy]:=p.c ;
-  pixels.Free ;
 
   pixels:=TUniList<TPixel>.Create ;
   newpixels:=TUniList<TPixel>.Create ;
@@ -229,7 +229,20 @@ begin
   for x := 0 to neww-1 do
     for y := 0 to newh-1 do
       if isEqual(aura.Pixel[x,y],cborder) then
-        aura.Pixel[x,y]:=SfmlColorFromRGBA(0,0,0,0) ;
+        aura.Pixel[x,y]:=SfmlColorFromRGBA(0,0,0,255)
+      else
+      if isEqual(aura.Pixel[x,y],cfill) then begin
+        mindist:=-1 ;
+        for p in border do begin
+          dist:=(p.x+dx-x)*(p.x+dx-x)+(p.y+dy-y)*(p.y+dy-y) ;
+          if (dist<mindist)or(mindist=-1) then mindist:=dist ;
+        end ;
+        if mindist<100 then
+          aura.Pixel[x,y]:=SfmlColorFromRGBA(cfill.R,cfill.G,cfill.B,
+            Round(mindist*(cfill.A-255)/100+255)) ;
+      end ;
+
+  border.Free ;
 
   tex:=TSfmlTexture.Create(aura.Handle) ;
   aura.Free ;
