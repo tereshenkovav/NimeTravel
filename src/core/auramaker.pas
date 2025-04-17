@@ -80,6 +80,10 @@ var tex:TSfmlTexture ;
     xold,yold,xfirst,yfirst:Integer ;
     cborder,cfill:TSfmlColor ;
     dist,mindist:Single ;
+    sr,sg,sb,sa:Single ;
+    x1,y1:Integer ;
+    gaussmatrix:array of array of Single ;
+    v,sum:Single ;
 
 function isEqual(c1,c2:TSfmlColor):Boolean ;
 begin
@@ -90,6 +94,21 @@ begin
   Result:=TUniList<TSfmlSprite>.Create() ;
   cborder:=SfmlColorFromRGBA(255,255,255,255) ;
   cfill:=SfmlColorFromRGBA(176,0,96,128) ;
+
+  // Заполнение матрицы Гаусса
+  SetLength(gaussmatrix,3) ;
+  sum:=0 ;
+  for i:= 0 to 2 do begin
+    SetLength(gaussmatrix[i],3) ;
+    for j:= 0 to 2 do begin
+      v := Exp(-((i-1)*(i-1)+(j-1)*(j-1))/(2.0*1.5*1.5));
+      gaussmatrix[i,j]:=v ;
+			sum:=sum+v ;
+    end ;
+  end ;
+  for i:= 0 to 2 do
+    for j:= 0 to 2 do
+      gaussmatrix[i,j]:=gaussmatrix[i,j]/sum ;
 
   fcount:=12 ; // Число фреймов анимации
   rcount:=48 ; // Число лучей для трассировки
@@ -229,18 +248,50 @@ begin
   for x := 0 to neww-1 do
     for y := 0 to newh-1 do
       if isEqual(aura.Pixel[x,y],cborder) then
-        aura.Pixel[x,y]:=SfmlColorFromRGBA(0,0,0,255)
-      else
+        aura.Pixel[x,y]:=SfmlColorFromRGBA(0,0,0,0) ;
+
+  for x := 0 to neww-1 do
+    for y := 0 to newh-1 do
       if isEqual(aura.Pixel[x,y],cfill) then begin
         mindist:=-1 ;
         for p in border do begin
           dist:=(p.x+dx-x)*(p.x+dx-x)+(p.y+dy-y)*(p.y+dy-y) ;
           if (dist<mindist)or(mindist=-1) then mindist:=dist ;
         end ;
-        if mindist<100 then
+        if (mindist<100) then
           aura.Pixel[x,y]:=SfmlColorFromRGBA(cfill.R,cfill.G,cfill.B,
-            Round(mindist*(cfill.A-255)/100+255)) ;
+            Round(mindist*(cfill.A-255)/100+255))
       end ;
+
+  pixels:=TUniList<TPixel>.Create() ;
+  for x := 0 to neww-1 do
+    for y := 0 to newh-1 do begin
+      mindist:=-1 ;
+      for p in border do begin
+        dist:=(p.x+dx-x)*(p.x+dx-x)+(p.y+dy-y)*(p.y+dy-y) ;
+        if (dist<mindist)or(mindist=-1) then mindist:=dist ;
+      end ;
+      if mindist<=9 then begin
+        sr:=0 ; sg:=0 ; sb:=0 ; sa:=0 ;
+        for x1 := x-1 to x+1 do
+          for y1 := y-1 to y+1 do begin
+            if x1<0 then continue ;
+            if x1>=neww then continue ;
+            if y1<0 then continue ;
+            if y1>=newh then continue ;
+            sr:=sr+gaussmatrix[x1-x+1,y1-y+1]*aura.Pixel[x1,y1].r ;
+            sg:=sg+gaussmatrix[x1-x+1,y1-y+1]*aura.Pixel[x1,y1].g ;
+            sb:=sb+gaussmatrix[x1-x+1,y1-y+1]*aura.Pixel[x1,y1].b ;
+            sa:=sa+gaussmatrix[x1-x+1,y1-y+1]*aura.Pixel[x1,y1].a ;
+          end ;
+        pixels.Add(Pixel(x,y,SfmlColorFromRGBA(Round(sr),Round(sg),Round(sb),Round(sa)))) ;
+      end ;
+    end ;
+
+  for p in pixels do
+    aura.Pixel[p.x,p.y]:=p.c ;
+
+  pixels.Free ;
 
   border.Free ;
 
