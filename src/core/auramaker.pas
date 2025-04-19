@@ -24,15 +24,25 @@ type
     function Pixel(x,y:Integer; c:TSfmlColor):TPixel ;
     function ImageShifted(originx,originy:Integer; img:TSfmlImage):TImageShifted ;
     procedure DrawLine(pixels:TUniList<TPixel>;x1,y1,x2,y2:Integer; c:TSfmlColor) ;
+    class procedure CopyImageToImage(dst,src:TSfmlImage; x,y:Integer) ;
   public
     constructor Create(Aimg:TSfmlImage) ;
     function GenAuraImages(freqanim,magicborder:Integer):TUniList<TImageShifted> ;
     class function ImagesToSprites(images:TUniList<TImageShifted>):TUniList<TSfmlSprite> ;
-    class function ImagesToSolidImage(images:TUniList<TImageShifted>):TSfmlImage ;
+    class function ImagesToSolidImage(images:TUniList<TImageShifted>):TImageShifted ;
   end ;
 
 implementation
 uses Math ;
+
+class procedure TAuraMaker.CopyImageToImage(dst, src: TSfmlImage; x,
+  y: Integer);
+var i,j:Integer ;
+begin
+  for i := 0 to src.Size.X-1 do
+   for j := 0 to src.Size.Y-1 do
+     dst.Pixel[x+i,y+j]:=src.Pixel[i,j] ;
+end;
 
 constructor TAuraMaker.Create(Aimg:TSfmlImage) ;
 begin
@@ -61,9 +71,29 @@ begin
   Result.img:=img ;
 end;
 
-class function TAuraMaker.ImagesToSolidImage(images:TUniList<TImageShifted>):TSfmlImage ;
+class function TAuraMaker.ImagesToSolidImage(images:TUniList<TImageShifted>):TImageShifted ;
+var img:TImageShifted ;
+    maxl,maxr,maxt,maxb,maxw,maxh:Integer ;
+    i:Integer;
 begin
-
+  maxl:=0 ;
+  maxr:=0 ;
+  maxt:=0 ;
+  maxb:=0 ;
+  for img in images do begin
+    if maxl<img.originx then maxl:=img.originx ;
+    if maxr<img.img.Size.X-img.originx then maxr:=img.img.Size.X-img.originx ;
+    if maxt<img.originy then maxt:=img.originy ;
+    if maxb<img.img.Size.Y-img.originy then maxb:=img.img.Size.Y-img.originy ;
+  end;
+  maxw:=maxl+maxr+2 ;
+  maxh:=maxt+maxb+2 ;
+  Result.img:=TSfmlImage.Create(images.Count*maxw,maxh) ;
+  Result.originx:=maxl+1 ;
+  Result.originy:=maxt+1 ;
+  for i := 0 to images.Count-1 do
+    CopyImageToImage(Result.img,images[i].img,
+      i*maxw+maxl-images[i].originx+1,maxt-images[i].originy+1) ;
 end;
 
 procedure TAuraMaker.DrawLine(pixels: TUniList<TPixel>; x1, y1, x2, y2: Integer;
