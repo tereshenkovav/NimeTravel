@@ -653,6 +653,8 @@ end;
 procedure TLogic.addActiveObject(code, filename, icofile, caption: string;
   x, y: Integer; callbackinfo, callbackspell: string; way_idx: Integer);
 var ao:TGameObject ;
+    s:string ;
+    tmp:TArray<string> ;
 begin
   ao:=TGameObject.Create() ;
   ao.code:=code ;
@@ -667,6 +669,19 @@ begin
   ao.callbackspell:=callbackspell ;
   ao.way_idx:=way_idx ;
   ao.transp:=0 ;
+
+  ao.aurafilename:='' ;
+  ao.auraposx:=0 ;
+  ao.auraposy:=0 ;
+  for s in Helpers.getAllFiles(getActiveScenePath()) do begin
+    if s.StartsWith(ao.filename.Replace('.png','')+'.aura.') then begin
+      tmp:=s.Split(['.']) ;
+      ao.auraposx:=StrToInt(tmp[2]) ;
+      ao.auraposy:=StrToInt(tmp[3]) ;
+      ao.aurafilename:=s ;
+      break ;
+    end;
+  end;
   BeginWork() ;
   activeobjects.Add(ao) ;
   EndWork() ;

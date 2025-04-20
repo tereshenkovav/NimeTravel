@@ -23,9 +23,9 @@ type
     TextInfo:TSfmlText ;
     TextDialog:TSfmlText ;
     Marker:TSfmlAnimation ;
-    MagicAura:TSfmlAnimation ;
     Galop:TSfmlSound ;
     Magic:TUniList<TSfmlSound> ;
+    MagicAuras:TUniDictionary<string,TSfmlAnimation> ;
     clock:TSfmlClock ;
     Cursor:TSfmlSprite ;
     CursorQuest:TSfmlSprite ;
@@ -66,6 +66,7 @@ type
     function loadSpriteOrAnimation(filename:string):TSfmlSprite ;
     function getSprite(prefix:string; ao:TGameObject):TSfmlSprite ;
     function getSpriteStatic(prefix:string; filename:string):TSfmlSprite ;
+    function getMagicAura(ao:TGameObject): TSfmlAnimation;
     function retAndPosSprite(spr:TSfmlSprite; x,y:Integer; transp:Integer):TSfmlSprite ;
     function isReachTarget():Boolean ;
     function isInDebugView():Boolean ;
@@ -163,15 +164,13 @@ begin
   Magic.Add(TSfmlSound.Create(TSfmlSoundBuffer.Create('sounds'+PATH_SEP+'magic.ogg')));
   Magic.Add(TSfmlSound.Create(TSfmlSoundBuffer.Create('sounds'+PATH_SEP+'magic.ogg')));
 
+  MagicAuras:=TUniDictionary<string,TSfmlAnimation>.Create() ;
+
   TextInfo:=createText(TCommonData.font,'',18,SfmlWhite) ;
   TextDialog:=createText(TCommonData.font,'',20,SfmlWhite) ;
 
   Marker:=TSfmlAnimation.Create('images'+PATH_SEP+'marker.png',30,34,16,20) ;
   Marker.Origin:=SfmlVector2f(15,17) ;
-
-  MagicAura:=TSfmlAnimation.Create('images'+PATH_SEP+'magic.png',100,100,18,9) ;
-  MagicAura.Origin:=SfmlVector2f(50,50) ;
-  MagicAura.Play() ;
 
   wayrenderer:=TWayRenderer.Create(Window) ;
 
@@ -610,11 +609,12 @@ begin
 
   HeroWalk.Update(dt);
   marker.Update(dt);
-  MagicAura.Update(dt);
 
-  for ao in lobj.getActiveObjects() do
+  for ao in lobj.getActiveObjects() do begin
     if getSprite(PREFIX_ACTIVEOBJECT,ao) is TSfmlAnimation then
       TSfmlAnimation(getSprite(PREFIX_ACTIVEOBJECT,ao)).Update(dt);
+    if ao.isactive then getMagicAura(ao).Update(dt) ;
+  end;
 
   // Возобновление после паузы при входе в меню
   if flag_entered_menu then begin
@@ -639,6 +639,7 @@ var spr:TSfmlSprite ;
     tmpws:TUniList<Integer> ;
     usewalk:Boolean ;
     zs:TZSprite ;
+    aura:TSfmlAnimation ;
 begin
   for zs in listzsprites.getSortedZSprites() do
     if (zs.tag=TAG_ACTIVEOBJECT)and(starthighlight>0) then begin
@@ -666,13 +667,11 @@ begin
   if (marker.isPlayed()) then Window.Draw(marker);
 
   if playedspellstack.Count>0 then begin
-    MagicAura.Position:=SfmlVector2f(
-      selectedobject.x+getSprite(PREFIX_ACTIVEOBJECT,selectedobject).LocalBounds.Width/2,
-      selectedobject.y+getSprite(PREFIX_ACTIVEOBJECT,selectedobject).LocalBounds.Height/2) ;
-    MagicAura.ScaleFactor:=SfmlVector2f(
-      getSprite(PREFIX_ACTIVEOBJECT,selectedobject).LocalBounds.Width/80,
-      getSprite(PREFIX_ACTIVEOBJECT,selectedobject).LocalBounds.Height/80) ;
-    Window.Draw(MagicAura);
+    aura:=getMagicAura(selectedobject) ;
+    aura.Position:=SfmlVector2f(
+      selectedobject.x+getSprite(PREFIX_ACTIVEOBJECT,selectedobject).LocalBounds.Width/2-selectedobject.auraposx,
+      selectedobject.y+getSprite(PREFIX_ACTIVEOBJECT,selectedobject).LocalBounds.Height/2-selectedobject.auraposy) ;
+    Window.Draw(aura);
   end;
 
   if (overobject<>nil)and(selectedobject<>nil) then begin
@@ -744,6 +743,17 @@ begin
   if not sprites.ContainsKey(prefix+ao.code+ao.filename) then
     sprites.Add(prefix+ao.code+ao.filename,loadSpriteOrAnimation(ao.filename));
   Result:=sprites[prefix+ao.code+ao.filename] ;
+end;
+
+function TView.getMagicAura(ao:TGameObject): TSfmlAnimation;
+var anim:TSfmlAnimation ;
+begin
+  if not magicauras.ContainsKey(ao.aurafilename) then begin
+    anim:=TSfmlAnimation.Create(ao.aurafilename,12,12) ;
+    anim.Play() ;
+    magicauras.Add(ao.aurafilename,anim);
+  end;
+  Result:=magicauras[ao.aurafilename] ;
 end;
 
 function TView.getSpriteStatic(prefix: string; filename:string): TSfmlSprite;

@@ -7,6 +7,9 @@ type
   public
     code:string ;
     filename:string ;
+    aurafilename:string ;
+    auraposx:Integer ;
+    auraposy:Integer ;
     icofile:string ;
     caption:string ;
     x,y:Integer ;
