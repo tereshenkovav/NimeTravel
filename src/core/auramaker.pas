@@ -90,7 +90,13 @@ begin
     if maxb<img.img.Size.Y-img.originy then maxb:=img.img.Size.Y-img.originy ;
   end;
 
+  maxl:=Max(maxl,maxr) ;
+  maxr:=maxl ;
+
   maxw:=maxl+maxr+2 ;
+
+  maxt:=Max(maxt,maxb) ;
+  maxb:=maxt ;
 
   maxh:=maxt+maxb+2 ;
 
