@@ -76,23 +76,33 @@ var img:TImageShifted ;
     maxl,maxr,maxt,maxb,maxw,maxh:Integer ;
     i:Integer;
 begin
-  maxl:=0 ;
+
+  maxl:=0 ;
   maxr:=0 ;
   maxt:=0 ;
   maxb:=0 ;
   for img in images do begin
     if maxl<img.originx then maxl:=img.originx ;
-    if maxr<img.img.Size.X-img.originx then maxr:=img.img.Size.X-img.originx ;
+
+    if maxr<img.img.Size.X-img.originx then maxr:=img.img.Size.X-img.originx ;
     if maxt<img.originy then maxt:=img.originy ;
-    if maxb<img.img.Size.Y-img.originy then maxb:=img.img.Size.Y-img.originy ;
+
+    if maxb<img.img.Size.Y-img.originy then maxb:=img.img.Size.Y-img.originy ;
   end;
-  maxw:=maxl+maxr+2 ;
-  maxh:=maxt+maxb+2 ;
-  Result.img:=TSfmlImage.Create(images.Count*maxw,maxh) ;
-  Result.originx:=maxl+1 ;
-  Result.originy:=maxt+1 ;
-  for i := 0 to images.Count-1 do
-    CopyImageToImage(Result.img,images[i].img,
+
+  maxw:=maxl+maxr+2 ;
+
+  maxh:=maxt+maxb+2 ;
+
+  Result.img:=TSfmlImage.Create(images.Count*maxw,maxh,SfmlColorFromRGBA(0,0,0,0)) ;
+
+  Result.originx:=maxl+1 ;
+
+  Result.originy:=maxt+1 ;
+
+  for i := 0 to images.Count-1 do
+
+    CopyImageToImage(Result.img,images[i].img,
       i*maxw+maxl-images[i].originx+1,maxt-images[i].originy+1) ;
 end;
 

@@ -13,21 +13,25 @@ var img:TSfmlImage ;
     imgout:TImageShifted ;
     list:TUniList<TImageShifted> ;
     i:Integer ;
-    outfile:string ;
+    outbase,outfile:string ;
 begin
   if ParamCount<3 then begin
-    Writeln('Arguments: sourcefile freq bordersize') ;
-    Writeln('Example: scene1\book.png 12 5') ;
+    Writeln('Arguments: sourcefile freq bordersize [outfile]') ;
+    Writeln('Example: scene1\book.png 12 5 scene1\customfilename') ;
+    Writeln('If outfile empty, uses sourcefile without ".png"') ;
     Exit ;
   end ;
+
+  if ParamCount>3 then outbase:=ParamStr(4) else outbase:=ParamStr(1).Replace('.png','') ;
 
   try
     img:=TSfmlImage.Create(ParamStr(1)) ;
     with TAuraMaker.Create(img) do begin
       list:=GenAuraImages(StrToInt(ParamStr(2)),StrToInt(ParamStr(3))) ;
       imgout:=TAuraMaker.ImagesToSolidImage(list) ;
+
       outfile:=Format('%s.aura.%d.%d.png',
-        [ParamStr(1).Replace('.png',''),imgout.originx,imgout.originy]) ;
+        [outbase,imgout.originx,imgout.originy]) ;
       imgout.img.SaveToFile(outfile) ;
       imgout.img.Free ;
       for i := 0 to list.Count-1 do
