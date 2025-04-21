@@ -62,7 +62,7 @@ type
     texthelp:array of string ;
     starthighlight:Single ;
     brshader:TSfmlShader ;
-
+    auradef:TSfmlAnimation ;
     function loadSpriteOrAnimation(filename:string):TSfmlSprite ;
     function getSprite(prefix:string; ao:TGameObject):TSfmlSprite ;
     function getSpriteStatic(prefix:string; filename:string):TSfmlSprite ;
@@ -165,6 +165,9 @@ begin
   Magic.Add(TSfmlSound.Create(TSfmlSoundBuffer.Create('sounds'+PATH_SEP+'magic.ogg')));
 
   MagicAuras:=TUniDictionary<string,TSfmlAnimation>.Create() ;
+
+  auradef:=TSfmlAnimation.Create('images'+PATH_SEP+'aura-default.png',12,12) ;
+  auradef.Play() ;
 
   TextInfo:=createText(TCommonData.font,'',18,SfmlWhite) ;
   TextDialog:=createText(TCommonData.font,'',20,SfmlWhite) ;
@@ -376,6 +379,7 @@ var ao:TGameObject ;
     reverse:Boolean ;
     way_id:Integer ;
     dtleft,ddt,speedupk:Single ;
+    key:string ;
 begin
   Result:=TSceneResult.Normal ;
 
@@ -613,8 +617,11 @@ begin
   for ao in lobj.getActiveObjects() do begin
     if getSprite(PREFIX_ACTIVEOBJECT,ao) is TSfmlAnimation then
       TSfmlAnimation(getSprite(PREFIX_ACTIVEOBJECT,ao)).Update(dt);
-    if ao.isactive then getMagicAura(ao).Update(dt) ;
   end;
+
+  for key in magicauras.AllKeys do
+    magicauras[key].Update(dt) ;
+  auradef.Update(dt) ;
 
   // Возобновление после паузы при входе в меню
   if flag_entered_menu then begin
@@ -669,8 +676,8 @@ begin
   if playedspellstack.Count>0 then begin
     aura:=getMagicAura(selectedobject) ;
     aura.Position:=SfmlVector2f(
-      selectedobject.x+getSprite(PREFIX_ACTIVEOBJECT,selectedobject).LocalBounds.Width/2-selectedobject.auraposx,
-      selectedobject.y+getSprite(PREFIX_ACTIVEOBJECT,selectedobject).LocalBounds.Height/2-selectedobject.auraposy) ;
+      selectedobject.x+getSprite(PREFIX_ACTIVEOBJECT,selectedobject).LocalBounds.Width/2-aura.getWidth()/2,
+      selectedobject.y+getSprite(PREFIX_ACTIVEOBJECT,selectedobject).LocalBounds.Height/2-aura.getHeight()/2) ;
     Window.Draw(aura);
   end;
 
@@ -748,12 +755,16 @@ end;
 function TView.getMagicAura(ao:TGameObject): TSfmlAnimation;
 var anim:TSfmlAnimation ;
 begin
-  if not magicauras.ContainsKey(ao.aurafilename) then begin
-    anim:=TSfmlAnimation.Create(ao.aurafilename,12,12) ;
-    anim.Play() ;
-    magicauras.Add(ao.aurafilename,anim);
-  end;
-  Result:=magicauras[ao.aurafilename] ;
+  if FileExists(ao.getAuraFileName()) then begin
+    if not magicauras.ContainsKey(ao.getAuraFileName()) then begin
+      anim:=TSfmlAnimation.Create(ao.getAuraFileName(),12,12) ;
+      anim.Play() ;
+      magicauras.Add(ao.getAuraFileName(),anim);
+    end;
+    Result:=magicauras[ao.getAuraFileName()] ;
+  end
+  else
+    Result:=auradef ;
 end;
 
 function TView.getSpriteStatic(prefix: string; filename:string): TSfmlSprite;

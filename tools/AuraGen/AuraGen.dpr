@@ -30,8 +30,7 @@ begin
       list:=GenAuraImages(StrToInt(ParamStr(2)),StrToInt(ParamStr(3))) ;
       imgout:=TAuraMaker.ImagesToSolidImage(list) ;
 
-      outfile:=Format('%s.aura.%d.%d.png',
-        [outbase,imgout.originx,imgout.originy]) ;
+      outfile:=outbase+'.aura.png' ;
       imgout.img.SaveToFile(outfile) ;
       imgout.img.Free ;
       for i := 0 to list.Count-1 do

@@ -7,9 +7,6 @@ type
   public
     code:string ;
     filename:string ;
-    aurafilename:string ;
-    auraposx:Integer ;
-    auraposy:Integer ;
     icofile:string ;
     caption:string ;
     x,y:Integer ;
@@ -19,8 +16,17 @@ type
     callbackspell:string ;
     way_idx:Integer ;
     transp:Integer ;
+    function getAuraFileName():string ;
   end;
 
 implementation
+uses SysUtils ;
+
+{ TGameObject }
+
+function TGameObject.getAuraFileName: string;
+begin
+  Result:=filename.Replace('.png','')+'.aura.png' ;
+end;
 
 end.
