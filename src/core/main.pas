@@ -16,7 +16,7 @@ implementation
 uses SysUtils, StrUtils, Types, Math, Classes,
   SfmlSystem,
   Game, CommonProc, CommonData, Spell, SceneCloseHandler, Logger, ScreenSaver,
-  view, viewstatic, logic, helpers, sfmlutils, SceneMagicRender ;
+  view, viewstatic, logic, helpers, sfmlutils ;
 
 const WINDOW_W=800 ;
       WINDOW_H=600 ;
