@@ -7,6 +7,7 @@ program AuraGen;
 uses
   System.SysUtils,
   SfmlGraphics,
+  TypeConverters,
   Helpers, AuraMaker ;
 
 var img:TSfmlImage ;
@@ -14,20 +15,24 @@ var img:TSfmlImage ;
     list:TUniList<TImageShifted> ;
     i:Integer ;
     outbase,outfile:string ;
+    c:TSfmlColor ;
 begin
-  if ParamCount<3 then begin
-    Writeln('Arguments: sourcefile freq bordersize [outfile]') ;
-    Writeln('Example: scene1\book.png 12 5 scene1\customfilename') ;
+  if ParamCount<4 then begin
+    Writeln('Arguments: sourcefile freq bordersize auracolor [outfile]') ;
+    Writeln('Example: scene1\book.png 12 5 scene1\customfilename $B0006080') ;
     Writeln('If outfile empty, uses sourcefile without ".png"') ;
     Exit ;
   end ;
 
-  if ParamCount>3 then outbase:=ParamStr(4) else outbase:=ParamStr(1).Replace('.png','') ;
+  if ParamCount>4 then outbase:=ParamStr(5) else outbase:=ParamStr(1).Replace('.png','') ;
 
   try
     img:=TSfmlImage.Create(ParamStr(1)) ;
+
     with TAuraMaker.Create(img) do begin
-      list:=GenAuraImages(StrToInt(ParamStr(2)),StrToInt(ParamStr(3))) ;
+      with TypeConverters.String2RGBA(ParamStr(4)) do
+        c:=SFMLColorFromRGBA(R,G,B,A) ;
+      list:=GenAuraImages(StrToInt(ParamStr(2)),StrToInt(ParamStr(3)),c) ;
       imgout:=TAuraMaker.ImagesToSolidImage(list) ;
 
       outfile:=outbase+'.aura.png' ;

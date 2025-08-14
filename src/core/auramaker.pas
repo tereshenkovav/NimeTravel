@@ -27,7 +27,7 @@ type
     class procedure CopyImageToImage(dst,src:TSfmlImage; x,y:Integer) ;
   public
     constructor Create(Aimg:TSfmlImage) ;
-    function GenAuraImages(freqanim,magicborder:Integer):TUniList<TImageShifted> ;
+    function GenAuraImages(freqanim,magicborder:Integer; cfill:TSfmlColor):TUniList<TImageShifted> ;
     class function ImagesToSprites(images:TUniList<TImageShifted>):TUniList<TSfmlSprite> ;
     class function ImagesToSolidImage(images:TUniList<TImageShifted>):TImageShifted ;
   end ;
@@ -143,7 +143,7 @@ begin
   pixels.Add(Pixel(x2,y2,c)) ;
 end;
 
-function TAuraMaker.GenAuraImages(freqanim,magicborder:Integer):TUniList<TImageShifted> ;
+function TAuraMaker.GenAuraImages(freqanim,magicborder:Integer;cfill:TSfmlColor):TUniList<TImageShifted> ;
 var i,j:Integer ;
     rcount,dcount:Integer ;
     rads,newrads:array of Integer ;
@@ -158,7 +158,7 @@ var i,j:Integer ;
     freqr:Integer ;
     i1,i2,maxr:Integer ;
     xold,yold,xfirst,yfirst:Integer ;
-    cborder,cfill:TSfmlColor ;
+    cborder:TSfmlColor ;
     dist,mindist:Single ;
     sr,sg,sb,sa:Single ;
     x1,y1:Integer ;
@@ -173,7 +173,6 @@ end;
 begin
   Result:=TUniList<TImageShifted>.Create() ;
   cborder:=SfmlColorFromRGBA(255,255,255,255) ;
-  cfill:=SfmlColorFromRGBA(176,0,96,128) ;
 
   // Заполнение матрицы Гаусса
   SetLength(gaussmatrix,3) ;
