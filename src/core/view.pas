@@ -593,6 +593,7 @@ begin
              lobj.getWayPoint(targetobject.way_idx).y,lobj.getHeroY())<MINDIST2 then begin
       ismirr:=targetobject.x+getSprite(PREFIX_ACTIVEOBJECT,targetobject).LocalBounds.Width/2<lobj.getHeroX ;
       selectedobject:=targetobject ;
+      playedspellstack.Clear() ; // Нужно, чтобы аура сбросилась при переключении объекта
       targetobject:=nil ;
     end ;
   if (selectedobject<>nil) then begin
