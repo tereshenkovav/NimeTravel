@@ -55,7 +55,7 @@ begin
 
   img:=TSfmlImage.Create(filename) ;
   with TAuraMaker.Create(img) do begin
-    list:=GenAuraImages(freqanim,magicborder) ;
+    list:=GenAuraImages(freqanim,magicborder,SfmlColorFromRGBA(176,0,96,128)) ;
     auras.Add(TAuraMaker.ImagesToSprites(list)) ;
     imgout:=TAuraMaker.ImagesToSolidImage(list) ;
     imgout.img.SaveToFile(Format('%s_%d_%d.png',[outfile,imgout.originx,imgout.originy])) ;
