@@ -571,7 +571,7 @@ begin
     while dtleft>0 do begin
       lobj.moveHeroXYZ(vx*speedupk*ddt,vy*speedupk*ddt,vz*speedupk*ddt) ;
       if isReachTarget() then begin
-        lobj.setHeroZ(targetz) ;
+        lobj.setHeroXYZ(targetx,targety,targetz) ;
         if waystack.Count>0 then begin
           goTargetIdx(waystack[0]) ;
           waystack.Delete(0);

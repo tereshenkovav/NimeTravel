@@ -75,7 +75,7 @@ type
     function getDialogText():string ;
     function getDialogColor():Cardinal ;
     procedure moveHeroXYZ(dx,dy,dz:Single) ;
-    procedure setHeroZ(z:Single) ;
+    procedure setHeroXYZ(x,y,z:Single) ;
     function getWayPointCount():Integer ;
     function getWayLinkCount():Integer ;
     function getWayPoint(i:Integer):TWayPoint ;
@@ -633,8 +633,10 @@ begin
   isfinished:=True ;
 end;
 
-procedure TLogic.setHeroZ(z: Single);
+procedure TLogic.setHeroXYZ(x,y,z: Single);
 begin
+  herox:=x ;
+  heroy:=y ;
   heroz:=z ;
 end;
 
