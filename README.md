@@ -9,7 +9,7 @@ The current version of the game contains only prologue of the story.
 Герой получает от окружающего мира заклинания, запоминает их и применяет на
 других объектах для продвижения по сюжету игры.
 
-![NimeTravel](screen1.jpg) ![NimeTravel](screen2.jpg)
+![NimeTravel](screen3.jpg) ![NimeTravel](screen4.jpg)
 
 **В настоящее время, игра находится в разработке.** Выпущен и доступен к загрузке завершенный пролог игры.
 В нём создано 6 локаций, 2 заклинания и завязка сюжета.
