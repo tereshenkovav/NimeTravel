@@ -1,4 +1,4 @@
-SetCompressor LZMA
+SetCompressor Deflate
 SetCompressionLevel 9
 ZipFile NimeTravel-$LANGH$-%VERSION%-Win32.zip
 
